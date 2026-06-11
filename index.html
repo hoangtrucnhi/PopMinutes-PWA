@@ -11,8 +11,7 @@
 <link rel="icon" type="image/png" href="./launchericon-192x192.png">
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
-/* ========== GIỮ NGUYÊN TOÀN BỘ STYLE (KHÔNG THAY ĐỔI) ========== */
-/* Tôi đã giữ nguyên từ file của bạn để tránh lỗi hiển thị */
+/* ========== TOÀN BỘ STYLE (GIỮ NGUYÊN TỪ FILE CŨ) ========== */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
 --navy: #1B2B7A;
@@ -143,8 +142,8 @@ audio { width: 100%; margin-top: 20px; border-radius: 12px; height: 44px; outlin
 .close-history { background: none; border: none; font-size: 24px; cursor: pointer; }
 </style>
 
-<!-- PWA CONFIGURATION -->
-<link rel="manifest" href="/PopMinutes-PWA/manifest.json">
+<!-- PWA CONFIGURATION (THAY ĐƯỜNG DẪN TĨNH BẰNG THAM SỐ ĐỘNG) -->
+<link rel="manifest" href="?type=manifest">
 <link rel="apple-touch-icon" sizes="192x192" href="https://raw.githubusercontent.com/hoangtrucnhi/PopMinutes-PWA/main/launchericon-192x192.png">
 <link rel="apple-touch-icon" sizes="512x512" href="https://raw.githubusercontent.com/hoangtrucnhi/PopMinutes-PWA/main/launchericon-512x512.png">
 <meta name="mobile-web-app-capable" content="yes">
@@ -296,7 +295,7 @@ audio { width: 100%; margin-top: 20px; border-radius: 12px; height: 44px; outlin
 </div>
 
 <script>
-// ========== CÁC HÀM TIỆN ÍCH CŨ (GIỮ NGUYÊN) ==========
+// ========== CÁC HÀM TIỆN ÍCH CŨ ==========
 function updateClock() {
 const t = new Date();
 const s = t.getHours().toString().padStart(2,'0') + ':' + t.getMinutes().toString().padStart(2,'0');
@@ -381,7 +380,7 @@ document.getElementById('salesNameDisplay').value = currentSalesName || "Tài kh
 document.getElementById('salesEmailDisplay').value = currentEmail || "";
 }
 
-// LOGIC UPLOAD (bỏ chức năng ghi âm) – giữ nguyên từ file cũ
+// LOGIC UPLOAD (bỏ chức năng ghi âm)
 let mediaRecorder, audioChunks = [], isRecording = false;
 let audioBlob = null, selectedFileBlob = null;
 let recordStartTime = 0, timerInterval = null;
@@ -631,55 +630,236 @@ return true;
 }
 window.addEventListener('DOMContentLoaded', async () => { await tryAutoLogin(); });
 
-// ========== CÁC HÀM MỚI CHO LỊCH SỬ (showToast, loadHistory, requestExpedite) ==========
-// ... (giữ nguyên từ file cũ, tôi đã copy nhưng để ngắn gọn, bạn giữ nguyên phần này)
-function showToast(message, isSuccess = true) { /* ... */ }
-async function loadHistory() { /* ... */ }
-async function requestExpedite(recordId) { /* ... */ }
-function escapeHtml(str) { /* ... */ }
-document.getElementById('historyBtn').addEventListener('click', () => { /* ... */ });
-document.getElementById('closeHistoryBtn').addEventListener('click', () => { /* ... */ });
-window.addEventListener('click', (e) => { /* ... */ });
-document.getElementById('qrCheckinBtn').addEventListener('click', () => alert("Tính năng đang phát triển."));
+// ========== CÁC HÀM MỚI CHO LỊCH SỬ ==========
+// Thêm hàm showToast thay thế alert
+// Hàm showToast cải tiến (đẹp, mượt, có thể bỏ icon)
+function showToast(message, isSuccess = true) {
+  // Xóa toast cũ nếu tồn tại
+  let oldToast = document.getElementById('customToast');
+  if (oldToast) oldToast.remove();
 
-// ========== ĐĂNG KÝ SERVICE WORKER (ĐƯỜNG DẪN TUYỆT ĐỐI) ==========
+  const toast = document.createElement('div');
+  toast.id = 'customToast';
+  toast.style.cssText = `
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background-color: ${isSuccess ? '#1B2B7A' : '#EF4444'};
+    color: white;
+    padding: 12px 24px;
+    border-radius: 60px;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    backdrop-filter: blur(8px);
+    background-color: ${isSuccess ? 'rgba(27, 43, 122, 0.95)' : 'rgba(239, 68, 68, 0.95)'};
+    border: 1px solid rgba(255,255,255,0.2);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    opacity: 0;
+    pointer-events: none;
+    white-space: nowrap;
+    max-width: 90vw;
+    white-space: normal;
+    text-align: center;
+    line-height: 1.4;
+  `;
+
+  // Thêm icon (có thể bỏ nếu muốn, comment 3 dòng này)
+  const icon = document.createElement('i');
+  icon.className = isSuccess ? 'fa-regular fa-circle-check' : 'fa-regular fa-circle-xmark';
+  icon.style.fontSize = '18px';
+  icon.style.marginRight = '4px';
+
+  const textSpan = document.createElement('span');
+  textSpan.textContent = message;
+
+  toast.appendChild(icon);
+  toast.appendChild(textSpan);
+  document.body.appendChild(toast);
+
+  // Hiệu ứng xuất hiện
+  setTimeout(() => {
+    toast.style.opacity = '1';
+    toast.style.transform = 'translateX(-50%) translateY(0)';
+  }, 10);
+
+  // Tự động ẩn sau 3.5 giây
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateX(-50%) translateY(20px)';
+    setTimeout(() => {
+      if (toast.parentNode) toast.parentNode.removeChild(toast);
+    }, 300);
+  }, 3500);
+}
+
+async function loadHistory() {
+    const historyListDiv = document.getElementById('historyList');
+    historyListDiv.innerHTML = '<p>Đang tải...</p>';
+    try {
+        const response = await fetch(API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({
+                action: "getUserHistory",
+                salesEmail: currentEmail
+            })
+        });
+        const history = await response.json();
+        if (!history.length) {
+            historyListDiv.innerHTML = '<p>Chưa có bản ghi nào.</p>';
+            return;
+        }
+        let html = '';
+        history.forEach(record => {
+            let statusClass = '';
+            if (record.status === 'Done') statusClass = 'status-Done';
+            else if (record.status === 'Processing') statusClass = 'status-Processing';
+            else statusClass = 'status-Uploaded';
+            
+            html += `
+                <div class="history-item">
+                    <div class="history-info">
+                        <strong>${escapeHtml(record.clientName || 'Khách hàng')}</strong> - ${record.createdAt || 'N/A'}
+                    </div>
+                    <div class="history-actions">
+                        <span class="status-badge ${statusClass}">${record.status || 'Chưa rõ'}</span>
+                        ${record.canExpedite ? `<button class="expedite-btn" data-record-id="${escapeHtml(record.recordId)}">Xử lý gấp</button>` : ''}
+                    </div>
+                </div>
+            `;
+        });
+        historyListDiv.innerHTML = html;
+        document.querySelectorAll('.expedite-btn').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                const recordId = btn.getAttribute('data-record-id');
+                await requestExpedite(recordId);
+            });
+        });
+    } catch (err) {
+        console.error(err);
+        historyListDiv.innerHTML = '<p>Lỗi tải lịch sử.</p>';
+    }
+}
+
+// Sửa lại requestExpedite: bỏ confirm, tự động đóng modal, dùng toast
+async function requestExpedite(recordId) {
+    // Đóng modal ngay lập tức
+    const modal = document.getElementById('historyModal');
+    modal.classList.remove('active');
+    
+    try {
+        const response = await fetch(API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({
+                action: "expedite",
+                recordId: recordId,
+                salesEmail: currentEmail
+            })
+        });
+        const result = await response.json();
+        if (result.status === 200) {
+            showToast('Đã gửi yêu cầu xử lý gấp!', true);
+        } else {
+            showToast('⚠️ ' + (result.message || 'Không thể gửi yêu cầu'), false);
+        }
+    } catch (err) {
+        console.error(err);
+        showToast('❌ Lỗi kết nối: ' + err.message, false);
+    }
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/[&<>]/g, function(m) {
+        if (m === '&') return '&amp;';
+        if (m === '<') return '&lt;';
+        if (m === '>') return '&gt;';
+        return m;
+    });
+}
+
+// Gắn sự kiện cho nút "Biên bản"
+document.getElementById('historyBtn').addEventListener('click', () => {
+    if (!currentEmail) {
+        alert("Vui lòng đăng nhập.");
+        return;
+    }
+    loadHistory();
+    document.getElementById('historyModal').classList.add('active');
+});
+document.getElementById('closeHistoryBtn').addEventListener('click', () => {
+    document.getElementById('historyModal').classList.remove('active');
+});
+window.addEventListener('click', (e) => {
+    const modal = document.getElementById('historyModal');
+    if (e.target === modal) modal.classList.remove('active');
+});
+// Tạm thời cho nút QR Check-in
+document.getElementById('qrCheckinBtn').addEventListener('click', () => {
+    alert("Tính năng đang phát triển.");
+});
+
+// ========== ĐĂNG KÝ SERVICE WORKER (ĐƯỜNG DẪN ĐỘNG) ==========
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/PopMinutes-PWA/sw.js')
+        navigator.serviceWorker.register('?type=sw')
             .then(reg => console.log('PopMinutes PWA đã kích hoạt thành công tại: ', reg.scope))
             .catch(err => console.log('Kích hoạt PWA thất bại: ', err));
     });
 }
-
-// ========== NÚT CÀI ĐẶT THỦ CÔNG (DUY NHẤT MỘT NÚT) ==========
 let deferredPrompt;
-const installBtn = document.getElementById('installAppBtn');
+const btnInstall = document.getElementById('btnInstall');
 
+// Bắt sự kiện trình duyệt đã sẵn sàng cho phép cài đặt PWA
 window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    if (installBtn) installBtn.style.display = 'block';
+  // Ngăn trình duyệt hiện banner tự động cũ kỹ
+  e.preventDefault();
+  // Lưu sự kiện lại để kích hoạt khi người dùng bấm nút
+  deferredPrompt = e;
+  
+  // Hiển thị nút "Cài đặt" của cậu lên
+  if (btnInstall) {
+    btnInstall.style.display = 'block';
+  }
 });
 
-if (installBtn) {
-    installBtn.addEventListener('click', async () => {
-        if (!deferredPrompt) return;
-        deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
-        console.log(`User response: ${outcome}`);
-        deferredPrompt = null;
-        installBtn.style.display = 'none';
-    });
+// Xử lý khi người dùng bấm vào nút Cài đặt của cậu
+if (btnInstall) {
+  btnInstall.addEventListener('click', async () => {
+    if (!deferredPrompt) return;
+    
+    // Hiển thị hộp thoại cài đặt của hệ điều hành
+    deferredPrompt.prompt();
+    
+    // Chờ người dùng phản hồi (Đồng ý hoặc Từ chối)
+    const { outcome } = await deferredPrompt.userChoice;
+    console.log(`User response to the install prompt: ${outcome}`);
+    
+    // Xóa prompt cũ đi vì nó chỉ dùng được 1 lần
+    deferredPrompt = null;
+    // Ẩn nút cài đặt đi sau khi họ đã tương tác
+    btnInstall.style.display = 'none';
+  });
 }
 
+// Ẩn nút đi nếu ứng dụng đã được cài đặt thành công rồi (Appmode)
 window.addEventListener('appinstalled', () => {
-    console.log('PopMinutes PWA đã được cài đặt!');
-    if (installBtn) installBtn.style.display = 'none';
+  console.log('PopMinutes PWA đã được cài đặt thành công vào máy!');
+  if (btnInstall) {
+    btnInstall.style.display = 'none';
+  }
 });
 </script>
-
-<!-- NÚT CÀI ĐẶT ỨNG DỤNG (CHỈ MỘT NÚT, ẨN MẶC ĐỊNH) -->
-<button id="installAppBtn" style="display: none; position: fixed; bottom: 20px; right: 20px; background-color: #1B2B7A; color: white; border: none; border-radius: 40px; padding: 12px 20px; font-size: 14px; font-weight: bold; box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 1000;">📲 Cài đặt ứng dụng</button>
-
+<button id="btnInstall" style="display: none; background-color: #28a745;">
+  📥 Cài đặt Ứng dụng PopMinutes
+</button>
 </body>
 </html>
