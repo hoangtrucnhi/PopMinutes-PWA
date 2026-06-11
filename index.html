@@ -858,8 +858,27 @@ window.addEventListener('appinstalled', () => {
   }
 });
 </script>
-<button id="btnInstall" style="display: none; background-color: #28a745;">
-  📥 Cài đặt Ứng dụng PopMinutes
-</button>
+<button id="installAppBtn" style="display: none;">📲 Cài đặt ứng dụng</button>
+
+<script>
+    let deferredPrompt;
+    const installBtn = document.getElementById('installAppBtn');
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        installBtn.style.display = 'block';
+    });
+
+    installBtn.addEventListener('click', async () => {
+        if (deferredPrompt) {
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            console.log(`User response to the install prompt: ${outcome}`);
+            deferredPrompt = null;
+            installBtn.style.display = 'none';
+        }
+    });
+</script>
 </body>
 </html>
