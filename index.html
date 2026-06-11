@@ -10,8 +10,7 @@
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
-/* ========== GIỮ NGUYÊN TOÀN BỘ STYLE NHƯ FILE CỦA BẠN ========== */
-/* Tôi đã copy từ file bạn gửi, không thay đổi gì ngoại trừ thêm một vài style cho toast nếu cần, nhưng thực tế toast được tạo bằng JS nên không cần thêm CSS. */
+/* ========== TOÀN BỘ STYLE (GIỮ NGUYÊN TỪ FILE CŨ) ========== */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
 --navy: #1B2B7A;
@@ -141,10 +140,11 @@ audio { width: 100%; margin-top: 20px; border-radius: 12px; height: 44px; outlin
 .history-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
 .close-history { background: none; border: none; font-size: 24px; cursor: pointer; }
 </style>
-<link rel="manifest" href="./manifest.json">
 
-<link rel="apple-touch-icon" sizes="192x192" href="./launchericon-192x192.png">
-<link rel="apple-touch-icon" sizes="512x512" href="./launchericon-512x512.png">
+<!-- PWA CONFIGURATION (THAY ĐƯỜNG DẪN TĨNH BẰNG THAM SỐ ĐỘNG) -->
+<link rel="manifest" href="?type=manifest">
+<link rel="apple-touch-icon" sizes="192x192" href="https://raw.githubusercontent.com/hoangtrucnhi/PopMinutes-PWA/main/launchericon-192x192.png">
+<link rel="apple-touch-icon" sizes="512x512" href="https://raw.githubusercontent.com/hoangtrucnhi/PopMinutes-PWA/main/launchericon-512x512.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="#1B2B7A">
 </head>
@@ -805,13 +805,15 @@ window.addEventListener('click', (e) => {
 document.getElementById('qrCheckinBtn').addEventListener('click', () => {
     alert("Tính năng đang phát triển.");
 });
-  if ('serviceWorker' in navigator) {
+
+// ========== ĐĂNG KÝ SERVICE WORKER (ĐƯỜNG DẪN ĐỘNG) ==========
+if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./sw.js')
-        .then(reg => console.log('PopMinutes PWA đã kích hoạt thành công tại: ', reg.scope))
-        .catch(err => console.log('Kích hoạt PWA thất bại: ', err));
+        navigator.serviceWorker.register('?type=sw')
+            .then(reg => console.log('PopMinutes PWA đã kích hoạt thành công tại: ', reg.scope))
+            .catch(err => console.log('Kích hoạt PWA thất bại: ', err));
     });
-  }
+}
 </script>
 </body>
 </html>
