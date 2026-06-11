@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>PopMinutes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+/* ========== GIỮ NGUYÊN TOÀN BỘ STYLE NHƯ FILE CỦA BẠN ========== */
+/* Tôi đã copy từ file bạn gửi, không thay đổi gì ngoại trừ thêm một vài style cho toast nếu cần, nhưng thực tế toast được tạo bằng JS nên không cần thêm CSS. */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+--navy: #1B2B7A;
+--navy-deep: #131F5C;
+--navy-mid: #243086;
+--navy-light: #2D3FA6;
+--navy-pale: #F0F3FF;
+--white: #FFFFFF;
+--surface: #F8FAFC;
+--border: #E2E8F0;
+--text: #0F172A;
+--muted: #64748B;
+--success: #10B981;
+--danger: #EF4444;
+--danger-pale:#FEF2F2;
+--radius-sm: 12px;
+--radius-md: 16px;
+--radius-lg: 24px;
+--radius-xl: 32px;
+--shadow-sm: 0 2px 8px rgba(15,23,42,0.04);
+--shadow-md: 0 8px 24px rgba(27,43,122,0.08);
+--shadow-lg: 0 20px 48px rgba(27,43,122,0.16);
+--shadow-float: 0 12px 32px rgba(239,68,68,0.24);
+}
+body { font-family: 'Plus Jakarta Sans', sans-serif; background: #E2E8F0; display: flex; justify-content: center; }
+.app { width: 100%; max-width: 1200px; min-height: 100vh; background: var(--surface); position: relative; overflow-x: hidden; box-shadow: var(--shadow-lg); margin: 0 auto; }
+.status-bar { background: var(--navy-deep); padding: 14px 24px 10px; display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.9); letter-spacing: 0.2px; z-index: 10; position: relative; }
+.status-bar-icons { display: flex; gap: 7px; align-items: center; font-size: 12px; }
+.loader { width: 20px; height: 20px; border: 2.5px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.8s linear infinite; display: none; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.screen { position: relative; z-index: 1; min-height: 100vh; display: flex; flex-direction: column; background: var(--surface); }
+.login-hero { background: var(--navy); padding: 56px 32px 72px; position: relative; overflow: hidden; }
+.login-hero::before { content: ''; position: absolute; width: 320px; height: 320px; background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0)); border-radius: 50%; top: -100px; right: -80px; }
+.login-logo { width: 56px; height: 56px; background: rgba(255,255,255,0.1); backdrop-filter: blur(8px); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-size: 24px; color: #fff; margin-bottom: 24px; border: 1px solid rgba(255,255,255,0.2); }
+.login-hero h1 { font-size: 32px; font-weight: 800; color: var(--white); line-height: 1.15; margin-bottom: 12px; letter-spacing: -0.5px; }
+.login-hero p { font-size: 14px; color: rgba(255,255,255,0.7); font-weight: 500; line-height: 1.5; }
+.login-body { flex: 1; background: var(--surface); border-radius: 32px 32px 0 0; margin-top: -32px; padding: 40px 28px 48px; position: relative; z-index: 1; box-shadow: 0 -8px 24px rgba(19,31,92,0.08); }
+.login-body h2 { font-size: 22px; font-weight: 800; color: var(--text); margin-bottom: 6px; letter-spacing: -0.3px; }
+.login-body > p { font-size: 14px; color: var(--muted); margin-bottom: 32px; font-weight: 500; }
+.field-label { font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px; display: block; }
+.input-wrap { position: relative; margin-bottom: 24px; }
+.input-wrap i { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 15px; }
+.modal-input { width: 100%; padding: 15px 18px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-family: inherit; font-size: 14.5px; font-weight: 500; color: var(--text); background: var(--white); outline: none; transition: all 0.2s ease; box-shadow: var(--shadow-sm); }
+.modal-input:focus { border-color: var(--navy-light); box-shadow: 0 0 0 4px rgba(45,63,166,0.1); }
+.modal-input:disabled { background: #F1F5F9; color: #94A3B8; cursor: not-allowed; border-color: transparent; box-shadow: none; }
+.modal-input::placeholder { color: #94A3B8; }
+.btn-primary { width: 100%; padding: 16px 20px; background: var(--navy); color: var(--white); border: none; border-radius: var(--radius-md); font-family: inherit; font-size: 15.5px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: all 0.2s ease; box-shadow: 0 6px 24px rgba(27,43,122,0.25); }
+.btn-primary:hover { background: var(--navy-deep); transform: translateY(-1px); box-shadow: 0 8px 32px rgba(27,43,122,0.3); }
+.btn-primary:active { transform: translateY(1px) scale(0.98); box-shadow: 0 2px 12px rgba(27,43,122,0.2); }
+.btn-primary:disabled { background: #CBD5E1; color: #F8FAFC; cursor: not-allowed; box-shadow: none; transform: none; }
+.dash-header { background: var(--navy); padding: 24px 28px 80px; position: relative; overflow: hidden; }
+.dash-topbar { display: flex; justify-content: space-between; align-items: center; position: relative; z-index: 1; gap: 10px; }
+.dash-greeting p { font-size: 13px; color: rgba(255,255,255,0.7); font-weight: 500; margin-bottom: 2px; }
+.dash-greeting h2 { font-size: 22px; font-weight: 800; color: var(--white); letter-spacing: -0.3px; }
+.avatar-btn { width: 44px; height: 44px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15); backdrop-filter: blur(4px); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 15px; cursor: pointer; }
+.avatar-btn:active { background: rgba(255,255,255,0.2); transform: scale(0.95); }
+.hero-card { background: var(--white); border-radius: var(--radius-xl); margin: -50px 24px 0; padding: 28px 24px 24px; box-shadow: var(--shadow-md); position: relative; z-index: 2; border: 1px solid rgba(226,232,240,0.8); }
+.hero-card-company { font-size: 15px; font-weight: 800; color: var(--text); margin-bottom: 12px; }
+.hours-row { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-bottom: 12px; }
+.hours-number { font-size: 56px; font-weight: 800; color: var(--navy); line-height: 1; letter-spacing: -2px; }
+.hours-unit { font-size: 16px; font-weight: 700; color: var(--muted); }
+.hours-meta { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); font-weight: 600; }
+.hours-bar-track { width: 100%; height: 6px; background: var(--navy-pale); border-radius: 99px; margin-top: 20px; overflow: hidden; }
+.hours-bar-fill { height: 100%; background: linear-gradient(90deg, var(--navy-light), var(--navy)); border-radius: 99px; width: 65%; transition: width 1s ease-out; }
+.dash-section { padding: 32px 24px 24px; }
+.section-title { font-size: 17px; font-weight: 800; color: var(--text); margin-bottom: 16px; letter-spacing: -0.2px; }
+.feature-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.feature-card { background: var(--white); border-radius: var(--radius-lg); padding: 24px 20px; display: flex; flex-direction: column; align-items: flex-start; gap: 16px; border: 1px solid var(--border); cursor: pointer; transition: all 0.2s ease; text-align: left; width: 100%; box-shadow: var(--shadow-sm); }
+.feature-card:active { border-color: var(--navy-pale); transform: translateY(2px) scale(0.98); background: #F8FAFC; }
+.feature-icon { width: 48px; height: 48px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-size: 20px; }
+.feature-icon.navy { background: var(--navy-pale); color: var(--navy); }
+.feature-icon.dark { background: var(--navy); color: var(--white); box-shadow: 0 4px 12px rgba(27,43,122,0.2); }
+.feature-label { font-size: 14.5px; font-weight: 800; color: var(--text); margin-bottom: 2px; }
+.feature-sub { font-size: 12.5px; color: var(--muted); font-weight: 500; }
+#recorderModal { position: fixed; inset: 0; background: rgba(15,23,42,0.65); backdrop-filter: blur(8px); display: none; align-items: flex-end; justify-content: center; z-index: 100; }
+#recorderModal.flex { display: flex; animation: fadeIn 0.2s ease-out; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.modal-sheet { background: var(--surface); border-radius: 32px 32px 0 0; width: 100%; max-width: 100%; max-height: 92vh; overflow-y: auto; padding: 0 0 calc(36px + env(safe-area-inset-bottom)); animation: slideUp 0.35s cubic-bezier(0.2,0.8,0.2,1); box-shadow: 0 -12px 48px rgba(0,0,0,0.15); }
+@media (min-width: 640px) { .modal-sheet { max-width: 500px; border-radius: 32px; margin: 0 auto; } }
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.modal-handle { display: flex; justify-content: center; padding: 12px 0 8px; position: sticky; top: 0; background: var(--surface); z-index: 10; border-radius: 32px 32px 0 0; }
+.modal-handle-bar { width: 48px; height: 5px; background: #CBD5E1; border-radius: 99px; }
+.modal-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 28px 24px; border-bottom: 1px solid var(--border); position: sticky; top: 25px; background: var(--surface); z-index: 9; }
+.modal-title { font-size: 18px; font-weight: 800; color: var(--text); letter-spacing: -0.3px; }
+.modal-close { width: 36px; height: 36px; background: #F1F5F9; border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; color: var(--muted); cursor: pointer; }
+.modal-close:active { transform: scale(0.9); background: #E2E8F0; }
+.modal-body { padding: 28px 28px 0; }
+.fields-stack { display: flex; flex-direction: column; gap: 20px; margin-bottom: 28px; }
+.record-panel { background: var(--white); border-radius: var(--radius-lg); padding: 24px; border: 1px solid var(--border); box-shadow: var(--shadow-sm); }
+.record-panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.record-panel-title { font-size: 14px; font-weight: 800; color: var(--text); display: flex; align-items: center; gap: 8px; }
+.timer-badge { font-size: 15px; font-weight: 800; font-variant-numeric: tabular-nums; color: var(--navy); background: var(--navy-pale); padding: 6px 14px; border-radius: 99px; }
+canvas { display: block; background: #F8FAFC; border-radius: var(--radius-sm); width: 100%; height: 64px; margin-bottom: 28px; border: 1px solid var(--border); }
+.dual-controls { display: flex; align-items: center; justify-content: center; gap: 48px; width: 100%; padding-bottom: 8px; }
+.control-wrapper { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.circle-btn { width: 72px; height: 72px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.25s cubic-bezier(0.2,0.8,0.2,1); cursor: pointer; border: 2.5px solid transparent; }
+.circle-btn.record-idle { background: var(--danger-pale); border-color: #FCA5A5; color: var(--danger); box-shadow: 0 8px 24px rgba(239,68,68,0.15); }
+.circle-btn.record-active { background: var(--danger); border-color: var(--danger); color: var(--white); box-shadow: var(--shadow-float); animation: pulseBtn 1.5s infinite; }
+.circle-btn.file-pick-btn { background: var(--navy-pale); border-color: #BFDBFE; color: var(--navy); box-shadow: 0 8px 24px rgba(27,43,122,0.1); }
+.circle-btn:active { transform: scale(0.92); box-shadow: none; }
+.circle-btn i { font-size: 26px; }
+@keyframes pulseBtn { 0%,100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.4); } 70% { box-shadow: 0 0 0 16px rgba(239,68,68,0); } }
+.control-label { font-size: 13.5px; font-weight: 700; color: var(--text); text-align: center; }
+.error-pill { background: #FEF2F2; border: 1px solid #FECACA; color: var(--danger); border-radius: var(--radius-sm); padding: 12px 16px; font-size: 13.5px; font-weight: 600; text-align: center; margin-top: 20px; }
+.warning-pill { background: #FFFBEB; border: 1px solid #FDE68A; color: #B45309; border-radius: var(--radius-sm); padding: 12px 16px; font-size: 13px; font-weight: 600; text-align: center; margin-top: 16px; line-height: 1.5; }
+.info-box { background: #EFF6FF; color: #1D4ED8; padding: 12px 16px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 600; text-align: center; margin-top: 16px; line-height: 1.5; }
+.input-tip { font-size: 12px; color: #D97706; font-weight: 600; margin-top: 8px; display: flex; gap: 6px; align-items: flex-start; line-height: 1.5; }
+.footer-tip { font-size: 12.5px; color: var(--muted); text-align: center; margin-top: 20px; line-height: 1.6; }
+.hidden { display: none !important; }
+audio { width: 100%; margin-top: 20px; border-radius: 12px; height: 44px; outline: none; }
+#recordStatus { margin-top: 24px; text-align: center; font-size: 14px; line-height: 1.5; }
+#fileStatus { font-size: 13px; font-weight: 700; text-align: center; margin-top: 16px; color: var(--success); }
+@media (max-width: 640px) { .app { max-width: 100%; } .hero-card { margin-left: 16px; margin-right: 16px; } .dash-section { padding-left: 16px; padding-right: 16px; } }
+.history-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 200; }
+.history-modal.active { display: flex; }
+.history-container { background: white; width: 90%; max-width: 500px; max-height: 80vh; border-radius: 24px; overflow-y: auto; padding: 20px; position: relative; }
+.history-item { border-bottom: 1px solid #eee; padding: 12px 0; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.history-item:last-child { border-bottom: none; }
+.history-info { flex: 2; font-size: 14px; font-weight: 500; }
+.history-actions { display: flex; gap: 8px; align-items: center; }
+.status-badge { display: inline-block; padding: 4px 8px; border-radius: 20px; font-size: 12px; font-weight: bold; white-space: nowrap; }
+.status-Done { background: #10B981; color: white; }
+.status-Processing { background: #F59E0B; color: white; }
+.status-Uploaded { background: #3B82F6; color: white; }
+.expedite-btn { background: #EF4444; color: white; border: none; padding: 6px 12px; border-radius: 20px; font-size: 12px; cursor: pointer; white-space: nowrap; }
+.expedite-btn:disabled { background: #ccc; cursor: not-allowed; }
+.history-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.close-history { background: none; border: none; font-size: 24px; cursor: pointer; }
+</style>
+<link rel="manifest" href="./manifest.json">
+
+<link rel="apple-touch-icon" sizes="192x192" href="./launchericon-192x192.png">
+<link rel="apple-touch-icon" sizes="512x512" href="./launchericon-512x512.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#1B2B7A">
+</head>
+<body>
+<div class="app">
+
+<!-- LOGIN SCREEN -->
+<div id="login-screen" class="screen">
+<div class="login-hero">
+<div class="login-logo"><i class="fa-solid fa-microphone-lines"></i></div>
+<h1>Smart Meeting<br>Minutes AI</h1>
+<p>Hệ thống xử lý biên bản cuộc họp tối giản dành cho chuyên viên Sales</p>
+</div>
+<div class="login-body">
+<h2>Đăng nhập</h2>
+<p>Nhập Email và User ID gửi trong email xác thực</p>
+<label class="field-label">Email</label>
+<div class="input-wrap">
+<i class="fa-regular fa-envelope"></i>
+<input type="email" id="emailInput" class="modal-input pl-11" placeholder="sales@congty.com" onkeydown="if(event.key==='Enter') handleLogin()" style="padding-left: 44px;">
+</div>
+<label class="field-label">User ID</label>
+<div class="input-wrap">
+<i class="fa-regular fa-id-card"></i>
+<input type="text" id="userIdInput" class="modal-input pl-11" placeholder="S-PM-APP-000" style="padding-left: 44px;">
+</div>
+<button class="btn-primary" onclick="handleLogin()">
+<span id="login-text">Tiếp tục</span>
+<div id="login-loader" class="loader"></div>
+</button>
+<div id="error-message" class="error-pill hidden"></div>
+<div id="https-warning" class="warning-pill hidden"></div>
+</div>
+</div>
+
+<!-- DASHBOARD SCREEN -->
+<div id="dashboard-screen" class="hidden screen">
+<div class="dash-header">
+<div class="dash-topbar">
+<div class="dash-greeting">
+<p>Xin chào,</p>
+<h2 id="user-name-display">Sales Name</h2>
+</div>
+<button class="avatar-btn" onclick="handleLogout()" title="Đăng xuất">
+<i class="fa-solid fa-arrow-right-from-bracket"></i>
+</button>
+</div>
+</div>
+<div class="hero-card">
+<div class="field-label" style="margin-bottom: 6px;">Khách Hàng</div>
+<div class="hero-card-company" id="company-name-display">Tên Công Ty</div>
+<div class="hours-row">
+<div class="hours-number" id="remaining-hours-display">--</div>
+<div class="hours-unit"></div>
+</div>
+<div class="hours-meta" style="margin-top: 4px;">
+<i class="fa-solid fa-coffee" style="color: var(--navy-light)"></i>
+<span>Giờ sử dụng tại quán cafe</span>
+</div>
+<div class="grid grid-cols-2 gap-2 mt-3 text-sm">
+<div><div class="text-xs text-muted uppercase tracking-wide">Gói dịch vụ</div><div class="font-semibold" id="package-display">--</div></div>
+<div><div class="text-xs text-muted uppercase tracking-wide">Hạn sử dụng</div><div class="font-semibold" id="expiry-display">--</div></div>
+</div>
+<div class="hours-bar-track"><div class="hours-bar-fill"></div></div>
+</div>
+<div class="dash-section">
+<div class="section-title">Tiện ích</div>
+<div class="feature-grid">
+<button class="feature-card" id="checkinBtn">
+<div class="feature-icon navy"><i class="fa-solid fa-location-dot"></i></div>
+<div><div class="feature-label">Quán cafe</div><div class="feature-sub">Đặt chỗ hẹn</div></div>
+</button>
+<button class="feature-card" id="openRecorderBtn">
+<div class="feature-icon navy"><i class="fa-solid fa-microphone"></i></div>
+<div><div class="feature-label">PopMinutes AI</div><div class="feature-sub">Xử lý biên bản họp</div></div>
+</button>
+</div>
+</div>
+
+<!-- PHẦN MỚI: LỊCH SỬ -->
+<div class="dash-section">
+<div class="section-title">Lịch sử</div>
+<div class="feature-grid">
+<button class="feature-card" id="qrCheckinBtn">
+<div class="feature-icon navy"><i class="fa-solid fa-qrcode"></i></div>
+<div><div class="feature-label">Check-in</div><div class="feature-sub">Địa điểm sử dụng</div></div>
+</button>
+<button class="feature-card" id="historyBtn">
+<div class="feature-icon navy"><i class="fa-solid fa-clock-rotate-left"></i></div>
+<div><div class="feature-label">Biên bản</div><div class="feature-sub">Lịch sử xử lý</div></div>
+</button>
+</div>
+</div>
+</div>
+
+<!-- RECORDER MODAL -->
+<div id="recorderModal">
+<div class="modal-sheet">
+<div class="modal-handle"><div class="modal-handle-bar"></div></div>
+<div class="modal-header">
+<span class="modal-title">Khởi tạo biên bản họp AI</span>
+<button class="modal-close" id="closeModalBtn"><i class="fa-solid fa-xmark"></i></button>
+</div>
+<div class="modal-body">
+<div class="fields-stack">
+<div><label class="field-label">Người tạo</label><input type="text" id="salesNameDisplay" disabled class="modal-input"></div>
+<div><label class="field-label" style="color: var(--text)">Đối tác / Khách của bạn <span class="text-red-500">*</span></label><input type="text" id="clientNameInput" placeholder="Ví dụ: Anh Hoàng - Công ty ABC" class="modal-input"><span class="input-tip"><i class="fas fa-info-circle" style="margin-top: 2px;"></i> <span>Điền tên của đối tác / khách hàng bạn gặp.</span></span></div>
+<div><label class="field-label">Email nhận biên bản</label><input type="email" id="salesEmailDisplay" disabled class="modal-input"></div>
+<div><button id="toggleCcBtn" type="button" style="color: var(--navy-light); font-size: 13px; font-weight: 700; background: none; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; padding: 4px 0;"><i class="fa-solid fa-circle-plus"></i> Thêm người nhận</button><div id="ccFields" class="hidden flex flex-col gap-3 mt-3"><input type="email" id="ccEmail1" placeholder="abc@congty.com (tùy chọn)" class="modal-input"><input type="email" id="ccEmail2" placeholder="abc@congty.com (tùy chọn)" class="modal-input"></div></div>
+</div>
+<div class="record-panel">
+<div class="record-panel-header"><div class="record-panel-title"><i class="fa-solid fa-wave-square" style="color: var(--navy)"></i> Tiến trình âm thanh</div><div class="timer-badge" id="recordTimer">00:00</div></div>
+<canvas id="waveformCanvas" width="400" height="64"></canvas>
+<div class="dual-controls">
+<div class="control-wrapper">
+<button type="button" id="recordToggleBtn" class="circle-btn record-idle">
+<i id="recordIcon" class="fa-solid fa-microphone"></i>
+</button>
+<span id="recordLabel" class="control-label">Ghi âm</span>
+</div>
+<div class="control-wrapper"><label for="fileInput" class="circle-btn file-pick-btn"><i class="fa-solid fa-folder-open"></i></label><input type="file" id="fileInput" accept="audio/*" class="hidden"><span id="fileStatusLabel" class="control-label">Tải lên</span></div>
+</div>
+<div id="fileStatus"></div>
+<p class="footer-tip">Hỗ trợ: <strong class="text-slate-700">mp3, m4a, wav,...</strong>.<br>File tối đa: <strong class="text-slate-700">35MB </strong>  (hơn 35MB, nén tại <a href="https://freecompress.com/vi/compress-mp3" target="_blank" style="color:var(--navy); text-decoration:underline;">đây</a>)</p>
+</div>
+<audio id="audioPlayback" controls class="hidden"></audio>
+<button id="uploadRecordBtn" class="btn-primary" style="margin-top: 28px; height: 56px;" disabled><i class="fa-solid fa-paper-plane"></i> Gửi về hệ thống xử lý AI</button>
+<div id="recordStatus"></div>
+<div id="httpsHelp" class="info-box hidden"></div>
+</div>
+</div>
+</div>
+
+<!-- HISTORY MODAL -->
+<div id="historyModal" class="history-modal">
+    <div class="history-container">
+        <div class="history-header">
+            <h3>Lịch sử xử lý</h3>
+            <button class="close-history" id="closeHistoryBtn">&times;</button>
+        </div>
+        <div id="historyList">
+            <p>Đang tải...</p>
+        </div>
+    </div>
+</div>
+
+</div>
+
+<script>
+// ========== CÁC HÀM TIỆN ÍCH CŨ ==========
+function updateClock() {
+const t = new Date();
+const s = t.getHours().toString().padStart(2,'0') + ':' + t.getMinutes().toString().padStart(2,'0');
+const cl = document.getElementById('clock-login');
+const cd = document.getElementById('clock-dash');
+if (cl) cl.textContent = s;
+if (cd) cd.textContent = s;
+}
+updateClock(); setInterval(updateClock, 30000);
+
+const API_URL = "https://script.google.com/macros/s/AKfycbxQ8HeKwVuV4g1yMDFgAkkStAOW2nuN0VwSk2WJiZ75FcXGXvlayQmHeH8O0Bq2ZH42/exec";
+let currentEmail = "", currentSalesName = "", currentCompanyName = "";
+
+const MAX_FILE_SIZE_MB = 35;
+const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
+
+const isSecure = location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+if (!isSecure) {
+const warn = document.getElementById('https-warning');
+if (warn) { warn.innerHTML = '⚠️ <b>Chế độ HTTP:</b> Trình duyệt chặn quyền Micro. Vui lòng sử dụng tính năng "Tải lên".'; warn.classList.remove('hidden'); }
+const help = document.getElementById('httpsHelp');
+if (help) { help.innerHTML = '💡 Mẹo: Bạn có thể ghi âm cuộc họp bằng ứng dụng ghi âm mặc định của điện thoại, sau đó chọn tải lên đây.'; help.classList.remove('hidden'); }
+}
+
+// XỬ LÝ ĐĂNG NHẬP
+async function handleLogin() {
+const emailInput = document.getElementById('emailInput').value.trim();
+const userIdInput = document.getElementById('userIdInput').value.trim();
+const errorMsg = document.getElementById('error-message');
+if (!emailInput || !userIdInput) {
+errorMsg.textContent = "Vui lòng nhập đầy đủ Email và User ID!";
+errorMsg.classList.remove('hidden');
+return;
+}
+document.getElementById('login-text').style.display = 'none';
+document.getElementById('login-loader').style.display = 'block';
+errorMsg.classList.add('hidden');
+try {
+const loginUrl = `${API_URL}?action=authenticateSales&email=${encodeURIComponent(emailInput)}&userId=${encodeURIComponent(userIdInput)}`;
+const response = await fetch(loginUrl);
+const result = await response.json();
+if (result.status === 200 && result.authenticated) {
+currentEmail = emailInput;
+currentSalesName = result.sales.name;
+currentCompanyName = result.enterprise.name;
+saveAuthInfo(result);
+document.getElementById('login-screen').classList.add('hidden');
+document.getElementById('dashboard-screen').classList.remove('hidden');
+document.getElementById('user-name-display').textContent = currentSalesName;
+document.getElementById('company-name-display').textContent = currentCompanyName;
+document.getElementById('remaining-hours-display').textContent = result.enterprise.remainingHours;
+document.getElementById('package-display').textContent = result.enterprise.packageId || "Chưa xác định";
+document.getElementById('expiry-display').textContent = result.enterprise.expiryDate || "--";
+} else {
+errorMsg.textContent = result.message || "Email hoặc User ID không đúng!";
+errorMsg.classList.remove('hidden');
+}
+} catch (e) {
+errorMsg.innerHTML = "<i class='fa-solid fa-triangle-exclamation'></i> Không thể kết nối tới máy chủ.";
+errorMsg.classList.remove('hidden');
+} finally {
+document.getElementById('login-text').style.display = '';
+document.getElementById('login-loader').style.display = 'none';
+}
+}
+function handleLogout() {
+localStorage.removeItem(AUTH_STORAGE_KEY);
+currentEmail = ""; currentSalesName = ""; currentCompanyName = "";
+document.getElementById('emailInput').value = "";
+document.getElementById('userIdInput').value = "";
+document.getElementById('user-name-display').textContent = "";
+document.getElementById('company-name-display').textContent = "";
+document.getElementById('remaining-hours-display').textContent = "--";
+document.getElementById('package-display').textContent = "--";
+document.getElementById('expiry-display').textContent = "--";
+document.getElementById('dashboard-screen').classList.add('hidden');
+document.getElementById('login-screen').classList.remove('hidden');
+closeModal();
+}
+function updateModalSalesInfo() {
+document.getElementById('salesNameDisplay').value = currentSalesName || "Tài khoản Dùng thử";
+document.getElementById('salesEmailDisplay').value = currentEmail || "";
+}
+
+// LOGIC UPLOAD (bỏ chức năng ghi âm)
+let mediaRecorder, audioChunks = [], isRecording = false;
+let audioBlob = null, selectedFileBlob = null;
+let recordStartTime = 0, timerInterval = null;
+let audioContext = null, source = null, analyser = null, animationId = null;
+
+const modal = document.getElementById('recorderModal');
+const openBtn = document.getElementById('openRecorderBtn');
+const recordToggleBtn = document.getElementById('recordToggleBtn');
+const recordIcon = document.getElementById('recordIcon');
+const recordLabel = document.getElementById('recordLabel');
+const uploadBtn = document.getElementById('uploadRecordBtn');
+const closeModalBtn = document.getElementById('closeModalBtn');
+const audioPlayback = document.getElementById('audioPlayback');
+const recordStatusDiv = document.getElementById('recordStatus');
+const fileInput = document.getElementById('fileInput');
+const fileStatusLabel = document.getElementById('fileStatusLabel');
+const recordTimer = document.getElementById('recordTimer');
+const canvas = document.getElementById('waveformCanvas');
+const canvasCtx = canvas.getContext('2d');
+
+openBtn.addEventListener('click', () => {
+if (!currentEmail) { alert("Vui lòng đăng nhập hệ thống trước."); return; }
+updateModalSalesInfo();
+modal.classList.add('flex');
+resetRecorder();
+recordToggleBtn.disabled = false;
+recordLabel.innerText = "Ghi âm (nâng cấp)";
+});
+function closeModal() {
+modal.classList.remove('flex');
+if (mediaRecorder && (mediaRecorder.state === 'recording' || mediaRecorder.state === 'paused')) {
+mediaRecorder.stop();
+if (mediaRecorder.stream) mediaRecorder.stream.getTracks().forEach(t => t.stop());
+}
+resetRecorder();
+}
+closeModalBtn.addEventListener('click', closeModal);
+
+function drawWaveform(dataArray) {
+canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
+canvasCtx.fillStyle = '#F8FAFC';
+canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
+}
+function startRecording() {}
+function stopRecording() {}
+recordToggleBtn.onclick = () => {
+recordStatusDiv.innerHTML = '<span style="color:var(--danger);">🔒 Tính năng ghi âm yêu cầu nâng cấp lên gói Cao cấp 1 năm. Vui lòng liên hệ quản trị viên để được hỗ trợ.</span>';
+};
+
+fileInput.addEventListener('change', e => {
+if (e.target.files.length > 0) {
+selectedFileBlob = e.target.files[0]; audioBlob = null;
+audioPlayback.src = URL.createObjectURL(selectedFileBlob);
+audioPlayback.classList.remove('hidden');
+uploadBtn.disabled = false;
+recordStatusDiv.innerText = '';
+const shortName = selectedFileBlob.name.length > 25 ? selectedFileBlob.name.substring(0,22)+'...' : selectedFileBlob.name;
+document.getElementById('fileStatus').innerHTML = `<i class="fa-solid fa-file-audio"></i> ${shortName} (${(selectedFileBlob.size / (1024*1024)).toFixed(2)}MB)`;
+fileStatusLabel.innerText = "Đổi tệp khác";
+} else {
+selectedFileBlob = null;
+audioPlayback.classList.add('hidden');
+uploadBtn.disabled = true;
+document.getElementById('fileStatus').innerHTML = '';
+fileStatusLabel.innerText = "Tải lên";
+}
+});
+
+function blobToBase64(blob) {
+return new Promise((resolve, reject) => {
+const reader = new FileReader();
+reader.onload = (e) => {
+const result = String(e.target.result || "");
+const base64 = result.includes(',') ? result.split(',')[1] : result;
+resolve(base64);
+};
+reader.onerror = reject;
+reader.readAsDataURL(blob);
+});
+}
+
+let isUploading = false;
+let currentAbortController = null;
+async function uploadAudio() {
+if (isUploading) {
+recordStatusDiv.innerHTML = '<span style="color:orange">⚠️ Đang xử lý, vui lòng chờ...</span>';
+return;
+}
+let blobToUpload = audioBlob || selectedFileBlob;
+if (!blobToUpload) { recordStatusDiv.innerHTML = '<span style="color:var(--danger)">Chưa có file.</span>'; return; }
+if (blobToUpload.size > MAX_FILE_SIZE_BYTES) {
+const fileSizeMB = (blobToUpload.size / (1024*1024)).toFixed(2);
+recordStatusDiv.innerHTML = `<span style="color:var(--danger)">❌ File vượt quá ${MAX_FILE_SIZE_MB}MB (dung lượng ${fileSizeMB}MB). Vui lòng nén file trước khi upload tại <a href="https://freecompress.com/vi/compress-mp3" target="_blank" style="color:var(--navy); text-decoration:underline;">freecompress.com/vi/compress-mp3</a></span>`;
+return;
+}
+const clientName = document.getElementById('clientNameInput').value.trim();
+const ccEmail1 = document.getElementById('ccEmail1')?.value.trim() || '';
+const ccEmail2 = document.getElementById('ccEmail2')?.value.trim() || '';
+if (!clientName) { recordStatusDiv.innerHTML = '<span style="color:var(--danger)">Vui lòng điền tên đối tác.</span>'; return; }
+isUploading = true;
+uploadBtn.disabled = true;
+recordStatusDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang gửi (có thể mất vài phút)...';
+if (currentAbortController) currentAbortController.abort();
+const controller = new AbortController();
+currentAbortController = controller;
+const timeoutId = setTimeout(() => controller.abort(), 300000);
+try {
+const audioBase64 = await blobToBase64(blobToUpload);
+const payload = {
+action: "uploadAudio",
+salesEmail: currentEmail,
+salesName: currentSalesName,
+companyName: currentCompanyName,
+clientName: clientName,
+clientEmail: ccEmail1,
+managerEmail: ccEmail2,
+audioBase64: audioBase64,
+filename: blobToUpload.name || `recording_${Date.now()}.webm`,
+mimeType: blobToUpload.type || 'audio/webm'
+};
+const response = await fetch(API_URL, {
+method: 'POST',
+headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+body: JSON.stringify(payload),
+signal: controller.signal
+});
+clearTimeout(timeoutId);
+if (!response.ok) throw new Error(`HTTP ${response.status}`);
+const result = await response.json();
+if (result.status === 200) {
+recordStatusDiv.innerHTML = '<div style="background:#ECFDF5; padding:16px; border-radius:12px;">✅ Đã nhận thành công! AI sẽ xử lý biên bản.</div>';
+setTimeout(() => closeModal(), 5000);
+} else if (result.status === 403) {
+recordStatusDiv.innerHTML = '<div style="background:#FEF2F2; padding:16px; border-radius:12px;">❌ Gói dịch vụ đã hết hạn.</div>';
+uploadBtn.disabled = false;
+} else {
+throw new Error(result.message || "Lỗi không xác định");
+}
+} catch (err) {
+clearTimeout(timeoutId);
+console.error("Upload error:", err);
+let errorMsg = err.message;
+if (err.name === 'AbortError') {
+errorMsg = "Quá thời gian chờ (5 phút). Kiểm tra lại sheet sau vài phút, nếu chưa có dòng mới hãy thử lại.";
+} else if (err.message.includes('Failed to fetch')) {
+errorMsg = "Mất kết nối máy chủ. Hãy kiểm tra mạng và thử lại nếu chưa nhận được biên bản sau 10 phút.";
+}
+recordStatusDiv.innerHTML = `<span style="color:var(--danger)">❌ ${errorMsg}</span>`;
+uploadBtn.disabled = false;
+} finally {
+isUploading = false;
+currentAbortController = null;
+}
+}
+uploadBtn.onclick = uploadAudio;
+
+function resetRecorder() {
+if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+mediaRecorder.stop();
+if (mediaRecorder.stream) mediaRecorder.stream.getTracks().forEach(t => t.stop());
+}
+audioChunks = []; audioBlob = null; selectedFileBlob = null;
+audioPlayback.classList.add('hidden');
+uploadBtn.disabled = true;
+recordToggleBtn.disabled = false;
+recordToggleBtn.className = "circle-btn record-idle";
+recordIcon.className = "fa-solid fa-microphone text-2xl";
+recordLabel.innerText = "Ghi âm (nâng cấp)";
+recordStatusDiv.innerHTML = '';
+fileInput.value = '';
+fileStatusLabel.innerText = "Tải lên";
+document.getElementById('fileStatus').innerHTML = '';
+document.getElementById('clientNameInput').value = '';
+if (ccFields && !ccFields.classList.contains('hidden')) {
+ccFields.classList.add('hidden');
+if (toggleCcBtn) toggleCcBtn.innerHTML = '<i class="fa-solid fa-circle-plus"></i> Thêm người nhận';
+}
+if (document.getElementById('ccEmail1')) document.getElementById('ccEmail1').value = '';
+if (document.getElementById('ccEmail2')) document.getElementById('ccEmail2').value = '';
+clearInterval(timerInterval);
+recordTimer.innerText = '00:00';
+canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
+canvasCtx.fillStyle = '#F8FAFC';
+canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
+cancelAnimationFrame(animationId);
+if (audioContext) audioContext.close();
+audioContext = null; analyser = null; source = null;
+}
+
+const toggleCcBtn = document.getElementById('toggleCcBtn');
+const ccFields = document.getElementById('ccFields');
+if (toggleCcBtn && ccFields) {
+toggleCcBtn.addEventListener('click', () => {
+const isHidden = ccFields.classList.contains('hidden');
+if (isHidden) {
+ccFields.classList.remove('hidden');
+toggleCcBtn.innerHTML = '<i class="fa-solid fa-circle-minus"></i> Ẩn';
+} else {
+ccFields.classList.add('hidden');
+toggleCcBtn.innerHTML = '<i class="fa-solid fa-circle-plus"></i> Thêm người nhận';
+}
+});
+}
+document.getElementById('checkinBtn').addEventListener('click', () => alert("Nâng cấp gói để sử dụng tính năng."));
+
+const AUTH_STORAGE_KEY = "popminutes_auth";
+const SESSION_DAYS = 90;
+function saveAuthInfo(data) {
+const authData = {
+email: currentEmail,
+salesId: data.sales.id,
+salesName: data.sales.name,
+companyName: data.enterprise.name,
+remainingHours: data.enterprise.remainingHours,
+packageId: data.enterprise.packageId,
+expiryDate: data.enterprise.expiryDate,
+timestamp: Date.now()
+};
+localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(authData));
+}
+async function tryAutoLogin() {
+const stored = localStorage.getItem(AUTH_STORAGE_KEY);
+if (!stored) return false;
+try {
+const auth = JSON.parse(stored);
+const age = Date.now() - auth.timestamp;
+const maxAge = SESSION_DAYS * 24 * 60 * 60 * 1000;
+if (age > maxAge) { localStorage.removeItem(AUTH_STORAGE_KEY); return false; }
+const loginUrl = `${API_URL}?action=authenticateSales&email=${encodeURIComponent(auth.email)}&userId=${encodeURIComponent(auth.salesId)}`;
+const response = await fetch(loginUrl);
+const result = await response.json();
+if (result.status === 200 && result.authenticated) {
+currentEmail = auth.email;
+currentSalesName = result.sales.name;
+currentCompanyName = result.enterprise.name;
+document.getElementById('login-screen').classList.add('hidden');
+document.getElementById('dashboard-screen').classList.remove('hidden');
+document.getElementById('user-name-display').textContent = currentSalesName;
+document.getElementById('company-name-display').textContent = currentCompanyName;
+document.getElementById('remaining-hours-display').textContent = result.enterprise.remainingHours;
+document.getElementById('package-display').textContent = result.enterprise.packageId || "Chưa xác định";
+document.getElementById('expiry-display').textContent = result.enterprise.expiryDate || "--";
+saveAuthInfo(result);
+return true;
+} else { localStorage.removeItem(AUTH_STORAGE_KEY); return false; }
+} catch (e) { console.error(e); localStorage.removeItem(AUTH_STORAGE_KEY); return false; }
+}
+window.addEventListener('DOMContentLoaded', async () => { await tryAutoLogin(); });
+
+// ========== CÁC HÀM MỚI CHO LỊCH SỬ ==========
+// Thêm hàm showToast thay thế alert
+// Hàm showToast cải tiến (đẹp, mượt, có thể bỏ icon)
+function showToast(message, isSuccess = true) {
+  // Xóa toast cũ nếu tồn tại
+  let oldToast = document.getElementById('customToast');
+  if (oldToast) oldToast.remove();
+
+  const toast = document.createElement('div');
+  toast.id = 'customToast';
+  toast.style.cssText = `
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background-color: ${isSuccess ? '#1B2B7A' : '#EF4444'};
+    color: white;
+    padding: 12px 24px;
+    border-radius: 60px;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    backdrop-filter: blur(8px);
+    background-color: ${isSuccess ? 'rgba(27, 43, 122, 0.95)' : 'rgba(239, 68, 68, 0.95)'};
+    border: 1px solid rgba(255,255,255,0.2);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    opacity: 0;
+    pointer-events: none;
+    white-space: nowrap;
+    max-width: 90vw;
+    white-space: normal;
+    text-align: center;
+    line-height: 1.4;
+  `;
+
+  // Thêm icon (có thể bỏ nếu muốn, comment 3 dòng này)
+  const icon = document.createElement('i');
+  icon.className = isSuccess ? 'fa-regular fa-circle-check' : 'fa-regular fa-circle-xmark';
+  icon.style.fontSize = '18px';
+  icon.style.marginRight = '4px';
+
+  const textSpan = document.createElement('span');
+  textSpan.textContent = message;
+
+  toast.appendChild(icon);
+  toast.appendChild(textSpan);
+  document.body.appendChild(toast);
+
+  // Hiệu ứng xuất hiện
+  setTimeout(() => {
+    toast.style.opacity = '1';
+    toast.style.transform = 'translateX(-50%) translateY(0)';
+  }, 10);
+
+  // Tự động ẩn sau 3.5 giây
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateX(-50%) translateY(20px)';
+    setTimeout(() => {
+      if (toast.parentNode) toast.parentNode.removeChild(toast);
+    }, 300);
+  }, 3500);
+}
+
+async function loadHistory() {
+    const historyListDiv = document.getElementById('historyList');
+    historyListDiv.innerHTML = '<p>Đang tải...</p>';
+    try {
+        const response = await fetch(API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({
+                action: "getUserHistory",
+                salesEmail: currentEmail
+            })
+        });
+        const history = await response.json();
+        if (!history.length) {
+            historyListDiv.innerHTML = '<p>Chưa có bản ghi nào.</p>';
+            return;
+        }
+        let html = '';
+        history.forEach(record => {
+            let statusClass = '';
+            if (record.status === 'Done') statusClass = 'status-Done';
+            else if (record.status === 'Processing') statusClass = 'status-Processing';
+            else statusClass = 'status-Uploaded';
+            
+            html += `
+                <div class="history-item">
+                    <div class="history-info">
+                        <strong>${escapeHtml(record.clientName || 'Khách hàng')}</strong> - ${record.createdAt || 'N/A'}
+                    </div>
+                    <div class="history-actions">
+                        <span class="status-badge ${statusClass}">${record.status || 'Chưa rõ'}</span>
+                        ${record.canExpedite ? `<button class="expedite-btn" data-record-id="${escapeHtml(record.recordId)}">Xử lý gấp</button>` : ''}
+                    </div>
+                </div>
+            `;
+        });
+        historyListDiv.innerHTML = html;
+        document.querySelectorAll('.expedite-btn').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                const recordId = btn.getAttribute('data-record-id');
+                await requestExpedite(recordId);
+            });
+        });
+    } catch (err) {
+        console.error(err);
+        historyListDiv.innerHTML = '<p>Lỗi tải lịch sử.</p>';
+    }
+}
+
+// Sửa lại requestExpedite: bỏ confirm, tự động đóng modal, dùng toast
+async function requestExpedite(recordId) {
+    // Đóng modal ngay lập tức
+    const modal = document.getElementById('historyModal');
+    modal.classList.remove('active');
+    
+    try {
+        const response = await fetch(API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({
+                action: "expedite",
+                recordId: recordId,
+                salesEmail: currentEmail
+            })
+        });
+        const result = await response.json();
+        if (result.status === 200) {
+            showToast('Đã gửi yêu cầu xử lý gấp!', true);
+        } else {
+            showToast('⚠️ ' + (result.message || 'Không thể gửi yêu cầu'), false);
+        }
+    } catch (err) {
+        console.error(err);
+        showToast('❌ Lỗi kết nối: ' + err.message, false);
+    }
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/[&<>]/g, function(m) {
+        if (m === '&') return '&amp;';
+        if (m === '<') return '&lt;';
+        if (m === '>') return '&gt;';
+        return m;
+    });
+}
+
+// Gắn sự kiện cho nút "Biên bản"
+document.getElementById('historyBtn').addEventListener('click', () => {
+    if (!currentEmail) {
+        alert("Vui lòng đăng nhập.");
+        return;
+    }
+    loadHistory();
+    document.getElementById('historyModal').classList.add('active');
+});
+document.getElementById('closeHistoryBtn').addEventListener('click', () => {
+    document.getElementById('historyModal').classList.remove('active');
+});
+window.addEventListener('click', (e) => {
+    const modal = document.getElementById('historyModal');
+    if (e.target === modal) modal.classList.remove('active');
+});
+// Tạm thời cho nút QR Check-in
+document.getElementById('qrCheckinBtn').addEventListener('click', () => {
+    alert("Tính năng đang phát triển.");
+});
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js')
+        .then(reg => console.log('PopMinutes PWA đã kích hoạt thành công tại: ', reg.scope))
+        .catch(err => console.log('Kích hoạt PWA thất bại: ', err));
+    });
+  }
+</script>
+</body>
+</html>
