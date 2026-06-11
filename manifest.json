@@ -1,22 +1,22 @@
 {
   "short_name": "PopMinutes",
-  "name": "PopMinutes AI",
+  "name": "PopMinutes AI - Biên bản họp thông minh",
+  "description": "Ứng dụng xử lý biên bản cuộc họp bằng AI dành cho team sales và doanh nghiệp",
   "icons": [
     {
-      "src": "https://raw.githubusercontent.com/hoangtrucnhi/PopMinutes-PWA/refs/heads/main/launchericon-192x192.png",
+      "src": "launchericon-192x192.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "https://raw.githubusercontent.com/hoangtrucnhi/PopMinutes-PWA/refs/heads/main/launchericon-512x512.png",
+      "src": "launchericon-512x512.png",
       "sizes": "512x512",
       "type": "image/png"
     }
   ],
-  "start_url": "https://script.google.com/macros/s/AKfycbxQ8HeKwVuV4g1yMDFgAkkStAOW2nuN0VwSk2WJiZ75FcXGXvlayQmHeH8O0Bq2ZH42/exec",
+  "start_url": "./index.html",
   "display": "standalone",
+  "orientation": "portrait",
   "theme_color": "#1B2B7A",
   "background_color": "#FFFFFF"
 }
-
-
