@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<link rel="icon" type="image/png" href="./launchericon-192x192.png">
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
 /* ========== TOÀN BỘ STYLE (GIỮ NGUYÊN TỪ FILE CŨ) ========== */
@@ -145,7 +146,7 @@ audio { width: 100%; margin-top: 20px; border-radius: 12px; height: 44px; outlin
 <link rel="manifest" href="?type=manifest">
 <link rel="apple-touch-icon" sizes="192x192" href="https://raw.githubusercontent.com/hoangtrucnhi/PopMinutes-PWA/main/launchericon-192x192.png">
 <link rel="apple-touch-icon" sizes="512x512" href="https://raw.githubusercontent.com/hoangtrucnhi/PopMinutes-PWA/main/launchericon-512x512.png">
-<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="#1B2B7A">
 </head>
 <body>
@@ -814,6 +815,51 @@ if ('serviceWorker' in navigator) {
             .catch(err => console.log('Kích hoạt PWA thất bại: ', err));
     });
 }
+let deferredPrompt;
+const btnInstall = document.getElementById('btnInstall');
+
+// Bắt sự kiện trình duyệt đã sẵn sàng cho phép cài đặt PWA
+window.addEventListener('beforeinstallprompt', (e) => {
+  // Ngăn trình duyệt hiện banner tự động cũ kỹ
+  e.preventDefault();
+  // Lưu sự kiện lại để kích hoạt khi người dùng bấm nút
+  deferredPrompt = e;
+  
+  // Hiển thị nút "Cài đặt" của cậu lên
+  if (btnInstall) {
+    btnInstall.style.display = 'block';
+  }
+});
+
+// Xử lý khi người dùng bấm vào nút Cài đặt của cậu
+if (btnInstall) {
+  btnInstall.addEventListener('click', async () => {
+    if (!deferredPrompt) return;
+    
+    // Hiển thị hộp thoại cài đặt của hệ điều hành
+    deferredPrompt.prompt();
+    
+    // Chờ người dùng phản hồi (Đồng ý hoặc Từ chối)
+    const { outcome } = await deferredPrompt.userChoice;
+    console.log(`User response to the install prompt: ${outcome}`);
+    
+    // Xóa prompt cũ đi vì nó chỉ dùng được 1 lần
+    deferredPrompt = null;
+    // Ẩn nút cài đặt đi sau khi họ đã tương tác
+    btnInstall.style.display = 'none';
+  });
+}
+
+// Ẩn nút đi nếu ứng dụng đã được cài đặt thành công rồi (Appmode)
+window.addEventListener('appinstalled', () => {
+  console.log('PopMinutes PWA đã được cài đặt thành công vào máy!');
+  if (btnInstall) {
+    btnInstall.style.display = 'none';
+  }
+});
 </script>
+<button id="btnInstall" style="display: none; background-color: #28a745;">
+  📥 Cài đặt Ứng dụng PopMinutes
+</button>
 </body>
 </html>
