@@ -143,7 +143,7 @@ audio { width: 100%; margin-top: 20px; border-radius: 12px; height: 44px; outlin
 </style>
 
 <!-- PWA CONFIGURATION (THAY ĐƯỜNG DẪN TĨNH BẰNG THAM SỐ ĐỘNG) -->
-<link rel="manifest" href="?type=manifest">
+<link rel="manifest" href="/PopMinutes-PWA/manifest.json">
 <link rel="apple-touch-icon" sizes="192x192" href="https://raw.githubusercontent.com/hoangtrucnhi/PopMinutes-PWA/main/launchericon-192x192.png">
 <link rel="apple-touch-icon" sizes="512x512" href="https://raw.githubusercontent.com/hoangtrucnhi/PopMinutes-PWA/main/launchericon-512x512.png">
 <meta name="mobile-web-app-capable" content="yes">
@@ -810,7 +810,7 @@ document.getElementById('qrCheckinBtn').addEventListener('click', () => {
 // ========== ĐĂNG KÝ SERVICE WORKER (ĐƯỜNG DẪN ĐỘNG) ==========
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-        navigator.serviceWorker.register('?type=sw')
+        navigator.serviceWorker.register('/PopMinutes-PWA/sw.js')
             .then(reg => console.log('PopMinutes PWA đã kích hoạt thành công tại: ', reg.scope))
             .catch(err => console.log('Kích hoạt PWA thất bại: ', err));
     });
