@@ -21,21 +21,3 @@
   "theme_color": "#1B2B7A",
   "background_color": "#FFFFFF"
 }
-// Phần này thêm vào service worker của bạn (sw.js)
-self.addEventListener('push', event => {
-  const data = event.data.json();
-  const options = {
-    body: data.body,
-    icon: 'https://your-domain.com/icon-192.png',
-    badge: 'https://your-domain.com/badge-icon.png',
-    data: { url: data.clickUrl } // URL để mở khi người dùng click vào thông báo
-  };
-  event.waitUntil(self.registration.showNotification(data.title, options));
-});
-
-self.addEventListener('notificationclick', event => {
-  event.notification.close();
-  if (event.notification.data && event.notification.data.url) {
-    event.waitUntil(clients.openWindow(event.notification.data.url));
-  }
-});
