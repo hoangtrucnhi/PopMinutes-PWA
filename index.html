@@ -312,14 +312,6 @@ let currentEmail = "", currentSalesName = "", currentCompanyName = "";
 const MAX_FILE_SIZE_MB = 35;
 const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
 
-const isSecure = location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1';
-if (!isSecure) {
-const warn = document.getElementById('https-warning');
-if (warn) { warn.innerHTML = ''; warn.classList.remove('hidden'); }
-const help = document.getElementById('httpsHelp');
-if (help) { help.innerHTML = '💡 Mẹo: Bạn có thể ghi âm cuộc họp bằng ứng dụng ghi âm mặc định của điện thoại, sau đó chọn tải lên đây.'; help.classList.remove('hidden'); }
-}
-
 // XỬ LÝ ĐĂNG NHẬP
 async function handleLogin() {
 const emailInput = document.getElementById('emailInput').value.trim();
