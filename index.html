@@ -623,8 +623,10 @@ toggleCcBtn.innerHTML = '<i class="fa-solid fa-circle-plus"></i> Thêm người 
 }
 });
 }
-document.getElementById('checkinBtn').addEventListener('click', () => alert("Nâng cấp gói để sử dụng tính năng."));
-
+// Tạm thời cho nút QR Check-in
+document.getElementById('qrCheckinBtn').addEventListener('click', () => {
+    showToast("Nâng cấp gói để sử dụng tính năng.", false);
+});
 const AUTH_STORAGE_KEY = "popminutes_auth";
 const SESSION_DAYS = 90;
 function saveAuthInfo(data) {
