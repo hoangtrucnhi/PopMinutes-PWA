@@ -851,8 +851,9 @@ window.addEventListener('click', (e) => {
         closeHistoryModal();
     }
 });
-document.getElementById('checkinBtn').addEventListener('click', () => alert("Nâng cấp gói để sử dụng tính năng."));
-});
+// Tạm thời cho nút QR Check-in
+document.getElementById('qrCheckinBtn').addEventListener('click', () => {
+    showToast("Tính năng đang phát triển.", false);
 
 // ========== ĐĂNG KÝ SERVICE WORKER ==========
 if ('serviceWorker' in navigator) {
