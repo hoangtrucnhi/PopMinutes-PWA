@@ -8,8 +8,9 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-<link rel="icon" type="image/png" href="./launchericon-192x192.png">
-<link rel="icon" type="image/png" href="./launchericon-512x512.png">
+<!-- Favicon + PWA manifest (đường dẫn tương đối) -->
+<link rel="icon" type="image/png" href="launchericon-192x192.png">
+<link rel="icon" type="image/png" href="launchericon-512x512.png">
 <link rel="apple-touch-icon" sizes="192x192" href="launchericon-192x192.png">
 <link rel="apple-touch-icon" sizes="512x512" href="launchericon-512x512.png">
 <link rel="manifest" href="manifest.json">
@@ -194,10 +195,6 @@ audio { width: 100%; margin-top: 20px; border-radius: 12px; height: 44px; outlin
 .close-history:hover { background: #f0f0f0; }
 </style>
 
-<!-- PWA CONFIGURATION -->
-<link rel="manifest" href="/PopMinutes-PWA/manifest.json">
-<link rel="apple-touch-icon" sizes="192x192" href="https://raw.githubusercontent.com/hoangtrucnhi/PopMinutes-PWA/main/launchericon-192x192.png">
-<link rel="apple-touch-icon" sizes="512x512" href="https://raw.githubusercontent.com/hoangtrucnhi/PopMinutes-PWA/main/launchericon-512x512.png">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="#1B2B7A">
 </head>
@@ -862,10 +859,10 @@ document.getElementById('qrCheckinBtn').addEventListener('click', () => {
     showToast("Tính năng đang phát triển.", false);
 });
 
-// ========== ĐĂNG KÝ SERVICE WORKER ==========
+// ========== ĐĂNG KÝ SERVICE WORKER (ĐƯỜNG DẪN TƯƠNG ĐỐI) ==========
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/PopMinutes-PWA/sw.js')
+        navigator.serviceWorker.register('sw.js')
             .then(reg => console.log('PopMinutes PWA đã kích hoạt thành công tại: ', reg.scope))
             .catch(err => console.log('Kích hoạt PWA thất bại: ', err));
     });
