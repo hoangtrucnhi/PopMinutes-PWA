@@ -894,6 +894,24 @@ window.addEventListener('appinstalled', () => {
     btnInstall.style.display = 'none';
   }
 });
+  // Tự động xóa Service Worker cũ và cache lỗi
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then(function(registrations) {
+    for(let registration of registrations) {
+      registration.unregister();
+      console.log('Đã xóa Service Worker cũ');
+    }
+  });
+}
+// Xóa tất cả cache của ứng dụng
+if ('caches' in window) {
+  caches.keys().then(function(names) {
+    for (let name of names) {
+      caches.delete(name);
+      console.log('Đã xóa cache:', name);
+    }
+  });
+}
 </script>
 <button id="btnInstall" style="display: none; background-color: #28a745; position: fixed; bottom: 20px; right: 20px; z-index: 9999; padding: 10px 15px; border: none; border-radius: 30px; color: white; font-weight: bold; cursor: pointer;">
   📥 Cài đặt Ứng dụng PopMinutes
