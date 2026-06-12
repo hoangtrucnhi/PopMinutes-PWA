@@ -11,7 +11,7 @@
 <link rel="icon" type="image/png" href="./launchericon-192x192.png">
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
-/* ========== TOÀN BỘ STYLE (GIỮ NGUYÊN TỪ FILE CŨ) ========== */
+/* ========== TOÀN BỘ STYLE (GIỮ NGUYÊN TỪ FILE CŨ, CHỈ SỬA MODAL LỊCH SỬ) ========== */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
 --navy: #1B2B7A;
@@ -125,24 +125,72 @@ audio { width: 100%; margin-top: 20px; border-radius: 12px; height: 44px; outlin
 #recordStatus { margin-top: 24px; text-align: center; font-size: 14px; line-height: 1.5; }
 #fileStatus { font-size: 13px; font-weight: 700; text-align: center; margin-top: 16px; color: var(--success); }
 @media (max-width: 640px) { .app { max-width: 100%; } .hero-card { margin-left: 16px; margin-right: 16px; } .dash-section { padding-left: 16px; padding-right: 16px; } }
-.history-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 200; }
-.history-modal.active { display: flex; }
-.history-container { background: white; width: 90%; max-width: 500px; max-height: 80vh; border-radius: 24px; overflow-y: auto; padding: 20px; position: relative; }
-.history-item { border-bottom: 1px solid #eee; padding: 12px 0; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+
+/* ========== SỬA LỖI MODAL LỊCH SỬ TRÊN TABLET ========== */
+.history-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6); /* tăng đậm để bù lại khi không có blur */
+  /* backdrop-filter: blur(4px);  ĐÃ COMMENT - nguyên nhân gây lỗi trên tablet */
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000; /* ưu tiên cao hơn */
+}
+.history-modal.active {
+  display: flex !important; /* ghi đè mọi style khác */
+}
+.history-container {
+  background: white;
+  width: 90%;
+  max-width: 500px;
+  max-height: 80vh;
+  border-radius: 24px;
+  overflow-y: auto;
+  padding: 20px;
+  position: relative;
+  box-shadow: 0 20px 35px -8px rgba(0,0,0,0.3);
+}
+.history-item {
+  border-bottom: 1px solid #eee;
+  padding: 12px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
 .history-item:last-child { border-bottom: none; }
 .history-info { flex: 2; font-size: 14px; font-weight: 500; }
 .history-actions { display: flex; gap: 8px; align-items: center; }
-.status-badge { display: inline-block; padding: 4px 8px; border-radius: 20px; font-size: 12px; font-weight: bold; white-space: nowrap; }
+.status-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: bold;
+  white-space: nowrap;
+}
 .status-Done { background: #10B981; color: white; }
 .status-Processing { background: #F59E0B; color: white; }
 .status-Uploaded { background: #3B82F6; color: white; }
-.expedite-btn { background: #EF4444; color: white; border: none; padding: 6px 12px; border-radius: 20px; font-size: 12px; cursor: pointer; white-space: nowrap; }
+.expedite-btn {
+  background: #EF4444;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+}
 .expedite-btn:disabled { background: #ccc; cursor: not-allowed; }
 .history-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
-.close-history { background: none; border: none; font-size: 24px; cursor: pointer; }
+.close-history { background: none; border: none; font-size: 24px; cursor: pointer; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+.close-history:hover { background: #f0f0f0; }
 </style>
 
-<!-- PWA CONFIGURATION (THAY ĐƯỜNG DẪN TĨNH BẰNG THAM SỐ ĐỘNG) -->
+<!-- PWA CONFIGURATION -->
 <link rel="manifest" href="/PopMinutes-PWA/manifest.json">
 <link rel="apple-touch-icon" sizes="192x192" href="https://raw.githubusercontent.com/hoangtrucnhi/PopMinutes-PWA/main/launchericon-192x192.png">
 <link rel="apple-touch-icon" sizes="512x512" href="https://raw.githubusercontent.com/hoangtrucnhi/PopMinutes-PWA/main/launchericon-512x512.png">
@@ -225,7 +273,6 @@ audio { width: 100%; margin-top: 20px; border-radius: 12px; height: 44px; outlin
 </div>
 </div>
 
-<!-- PHẦN MỚI: LỊCH SỬ -->
 <div class="dash-section">
 <div class="section-title">Lịch sử</div>
 <div class="feature-grid">
@@ -279,7 +326,7 @@ audio { width: 100%; margin-top: 20px; border-radius: 12px; height: 44px; outlin
 </div>
 </div>
 
-<!-- HISTORY MODAL -->
+<!-- HISTORY MODAL (ĐÃ SỬA LỖI) -->
 <div id="historyModal" class="history-modal">
     <div class="history-container">
         <div class="history-header">
@@ -622,11 +669,8 @@ return true;
 }
 window.addEventListener('DOMContentLoaded', async () => { await tryAutoLogin(); });
 
-// ========== CÁC HÀM MỚI CHO LỊCH SỬ ==========
-// Thêm hàm showToast thay thế alert
-// Hàm showToast cải tiến (đẹp, mượt, có thể bỏ icon)
+// ========== CÁC HÀM MỚI CHO LỊCH SỬ (ĐÃ SỬA LỖI TRÊN TABLET) ==========
 function showToast(message, isSuccess = true) {
-  // Xóa toast cũ nếu tồn tại
   let oldToast = document.getElementById('customToast');
   if (oldToast) oldToast.remove();
 
@@ -645,7 +689,7 @@ function showToast(message, isSuccess = true) {
     font-weight: 600;
     font-family: 'Plus Jakarta Sans', sans-serif;
     box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-    z-index: 1000;
+    z-index: 100000;
     display: flex;
     align-items: center;
     gap: 10px;
@@ -655,14 +699,12 @@ function showToast(message, isSuccess = true) {
     transition: opacity 0.3s ease, transform 0.3s ease;
     opacity: 0;
     pointer-events: none;
-    white-space: nowrap;
-    max-width: 90vw;
     white-space: normal;
     text-align: center;
     line-height: 1.4;
+    max-width: 90vw;
   `;
 
-  // Thêm icon (có thể bỏ nếu muốn, comment 3 dòng này)
   const icon = document.createElement('i');
   icon.className = isSuccess ? 'fa-regular fa-circle-check' : 'fa-regular fa-circle-xmark';
   icon.style.fontSize = '18px';
@@ -675,13 +717,11 @@ function showToast(message, isSuccess = true) {
   toast.appendChild(textSpan);
   document.body.appendChild(toast);
 
-  // Hiệu ứng xuất hiện
   setTimeout(() => {
     toast.style.opacity = '1';
     toast.style.transform = 'translateX(-50%) translateY(0)';
   }, 10);
 
-  // Tự động ẩn sau 3.5 giây
   setTimeout(() => {
     toast.style.opacity = '0';
     toast.style.transform = 'translateX(-50%) translateY(20px)';
@@ -740,11 +780,10 @@ async function loadHistory() {
     }
 }
 
-// Sửa lại requestExpedite: bỏ confirm, tự động đóng modal, dùng toast
 async function requestExpedite(recordId) {
-    // Đóng modal ngay lập tức
-    const modal = document.getElementById('historyModal');
-    modal.classList.remove('active');
+    const modalElem = document.getElementById('historyModal');
+    modalElem.style.display = 'none';
+    modalElem.classList.remove('active');
     
     try {
         const response = await fetch(API_URL, {
@@ -778,28 +817,48 @@ function escapeHtml(str) {
     });
 }
 
-// Gắn sự kiện cho nút "Biên bản"
-document.getElementById('historyBtn').addEventListener('click', () => {
+// ===== SỬA LỖI MODAL TRÊN TABLET: DÙNG CẢ style.display VÀ class =====
+const historyModal = document.getElementById('historyModal');
+const historyBtn = document.getElementById('historyBtn');
+const closeHistoryBtn = document.getElementById('closeHistoryBtn');
+
+function openHistoryModal() {
     if (!currentEmail) {
-        alert("Vui lòng đăng nhập.");
+        showToast("Vui lòng đăng nhập.", false);
         return;
     }
-    loadHistory();
-    document.getElementById('historyModal').classList.add('active');
-});
-document.getElementById('closeHistoryBtn').addEventListener('click', () => {
-    document.getElementById('historyModal').classList.remove('active');
-});
+    // Load dữ liệu
+    loadHistory().catch(err => console.error(err));
+    // Hiển thị modal bằng cả style lẫn class (đảm bảo trên tablet)
+    historyModal.style.display = 'flex';
+    historyModal.classList.add('active');
+    console.log("Modal history đã được mở (style + class)");
+}
+
+function closeHistoryModal() {
+    historyModal.style.display = 'none';
+    historyModal.classList.remove('active');
+}
+
+if (historyBtn) {
+    historyBtn.addEventListener('click', openHistoryModal);
+}
+if (closeHistoryBtn) {
+    closeHistoryBtn.addEventListener('click', closeHistoryModal);
+}
+// Đóng khi click ra ngoài vùng container
 window.addEventListener('click', (e) => {
-    const modal = document.getElementById('historyModal');
-    if (e.target === modal) modal.classList.remove('active');
-});
-// Tạm thời cho nút QR Check-in
-document.getElementById('qrCheckinBtn').addEventListener('click', () => {
-    alert("Tính năng đang phát triển.");
+    if (e.target === historyModal) {
+        closeHistoryModal();
+    }
 });
 
-// ========== ĐĂNG KÝ SERVICE WORKER (ĐƯỜNG DẪN ĐỘNG) ==========
+// Tạm thời cho nút QR Check-in
+document.getElementById('qrCheckinBtn').addEventListener('click', () => {
+    showToast("Tính năng đang phát triển.", false);
+});
+
+// ========== ĐĂNG KÝ SERVICE WORKER ==========
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('/PopMinutes-PWA/sw.js')
@@ -810,39 +869,25 @@ if ('serviceWorker' in navigator) {
 let deferredPrompt;
 const btnInstall = document.getElementById('btnInstall');
 
-// Bắt sự kiện trình duyệt đã sẵn sàng cho phép cài đặt PWA
 window.addEventListener('beforeinstallprompt', (e) => {
-  // Ngăn trình duyệt hiện banner tự động cũ kỹ
   e.preventDefault();
-  // Lưu sự kiện lại để kích hoạt khi người dùng bấm nút
   deferredPrompt = e;
-  
-  // Hiển thị nút "Cài đặt" của cậu lên
   if (btnInstall) {
     btnInstall.style.display = 'block';
   }
 });
 
-// Xử lý khi người dùng bấm vào nút Cài đặt của cậu
 if (btnInstall) {
   btnInstall.addEventListener('click', async () => {
     if (!deferredPrompt) return;
-    
-    // Hiển thị hộp thoại cài đặt của hệ điều hành
     deferredPrompt.prompt();
-    
-    // Chờ người dùng phản hồi (Đồng ý hoặc Từ chối)
     const { outcome } = await deferredPrompt.userChoice;
     console.log(`User response to the install prompt: ${outcome}`);
-    
-    // Xóa prompt cũ đi vì nó chỉ dùng được 1 lần
     deferredPrompt = null;
-    // Ẩn nút cài đặt đi sau khi họ đã tương tác
     btnInstall.style.display = 'none';
   });
 }
 
-// Ẩn nút đi nếu ứng dụng đã được cài đặt thành công rồi (Appmode)
 window.addEventListener('appinstalled', () => {
   console.log('PopMinutes PWA đã được cài đặt thành công vào máy!');
   if (btnInstall) {
@@ -850,7 +895,7 @@ window.addEventListener('appinstalled', () => {
   }
 });
 </script>
-<button id="btnInstall" style="display: none; background-color: #28a745;">
+<button id="btnInstall" style="display: none; background-color: #28a745; position: fixed; bottom: 20px; right: 20px; z-index: 9999; padding: 10px 15px; border: none; border-radius: 30px; color: white; font-weight: bold; cursor: pointer;">
   📥 Cài đặt Ứng dụng PopMinutes
 </button>
 </body>
