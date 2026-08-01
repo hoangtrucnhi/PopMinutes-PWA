@@ -11,7 +11,7 @@
 <link rel="icon" type="image/png" href="./launchericon-192x192.png">
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
-/* ========== TOÀN BỘ STYLE (GIỮ NGUYÊN TỪ FILE CŨ, CHỈ SỬA MODAL LỊCH SỬ) ========== */
+/* ========== TOÀN BỘ STYLE (GIỮ NGUYÊN TỪ FILE CŨ) ========== */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
 --navy: #1B2B7A;
@@ -130,15 +130,14 @@ audio { width: 100%; margin-top: 20px; border-radius: 12px; height: 44px; outlin
 .history-modal {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.6); /* tăng đậm để bù lại khi không có blur */
-  /* backdrop-filter: blur(4px);  ĐÃ COMMENT - nguyên nhân gây lỗi trên tablet */
+  background: rgba(0, 0, 0, 0.6);
   display: none;
   align-items: center;
   justify-content: center;
-  z-index: 10000; /* ưu tiên cao hơn */
+  z-index: 10000;
 }
 .history-modal.active {
-  display: flex !important; /* ghi đè mọi style khác */
+  display: flex !important;
 }
 .history-container {
   background: white;
@@ -188,6 +187,22 @@ audio { width: 100%; margin-top: 20px; border-radius: 12px; height: 44px; outlin
 .history-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
 .close-history { background: none; border: none; font-size: 24px; cursor: pointer; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
 .close-history:hover { background: #f0f0f0; }
+
+/* ===== STYLE CHO DÒNG THÔNG BÁO ĐỒNG Ý ===== */
+.consent-disclaimer {
+  font-size: 12px;
+  color: var(--muted);
+  text-align: center;
+  line-height: 1.6;
+  margin: 20px 0 16px;
+  padding: 10px 14px;
+  background: #F8FAFC;
+  border-radius: var(--radius-sm);
+  border-left: 3px solid var(--navy-light);
+}
+.consent-disclaimer strong {
+  color: var(--text);
+}
 </style>
 
 <!-- PWA CONFIGURATION -->
@@ -319,14 +334,25 @@ audio { width: 100%; margin-top: 20px; border-radius: 12px; height: 44px; outlin
 <p class="footer-tip">Hỗ trợ: <strong class="text-slate-700">mp3, m4a, wav,...</strong>.<br>File tối đa: <strong class="text-slate-700">35MB </strong>  (hơn 35MB, nén tại <a href="https://freecompress.com/vi/compress-mp3" target="_blank" style="color:var(--navy); text-decoration:underline;">đây</a>)</p>
 </div>
 <audio id="audioPlayback" controls class="hidden"></audio>
-<button id="uploadRecordBtn" class="btn-primary" style="margin-top: 28px; height: 56px;" disabled><i class="fa-solid fa-paper-plane"></i> Gửi về hệ thống xử lý AI</button>
+
+<!-- ===== DÒNG THÔNG BÁO ĐỒNG Ý XỬ LÝ DỮ LIỆU (THÊM MỚI) ===== -->
+<div class="consent-disclaimer">
+  <i class="fa-solid fa-shield-halved" style="color: var(--navy-light); margin-right: 6px;"></i>
+  Bằng việc tải lên, bạn xác nhận có quyền hợp pháp và đã được sự đồng ý của những người tham gia để xử lý dữ liệu cuộc họp này.
+</div>
+
+<!-- ===== ĐỔI TÊN NÚT THÀNH "Bắt đầu" ===== -->
+<button id="uploadRecordBtn" class="btn-primary" style="margin-top: 8px; height: 56px;" disabled>
+  <i class="fa-solid fa-play"></i> Bắt đầu
+</button>
+
 <div id="recordStatus"></div>
 <div id="httpsHelp" class="info-box hidden"></div>
 </div>
 </div>
 </div>
 
-<!-- HISTORY MODAL (ĐÃ SỬA LỖI) -->
+<!-- HISTORY MODAL -->
 <div id="historyModal" class="history-modal">
     <div class="history-container">
         <div class="history-header">
@@ -668,7 +694,7 @@ return true;
 }
 window.addEventListener('DOMContentLoaded', async () => { await tryAutoLogin(); });
 
-// ========== CÁC HÀM MỚI CHO LỊCH SỬ (ĐÃ SỬA LỖI TRÊN TABLET) ==========
+// ========== CÁC HÀM MỚI CHO LỊCH SỬ ==========
 function showToast(message, isSuccess = true) {
   let oldToast = document.getElementById('customToast');
   if (oldToast) oldToast.remove();
@@ -816,7 +842,6 @@ function escapeHtml(str) {
     });
 }
 
-// ===== SỬA LỖI MODAL TRÊN TABLET: DÙNG CẢ style.display VÀ class =====
 const historyModal = document.getElementById('historyModal');
 const historyBtn = document.getElementById('historyBtn');
 const closeHistoryBtn = document.getElementById('closeHistoryBtn');
@@ -826,12 +851,9 @@ function openHistoryModal() {
         showToast("Vui lòng đăng nhập.", false);
         return;
     }
-    // Load dữ liệu
     loadHistory().catch(err => console.error(err));
-    // Hiển thị modal bằng cả style lẫn class (đảm bảo trên tablet)
     historyModal.style.display = 'flex';
     historyModal.classList.add('active');
-    console.log("Modal history đã được mở (style + class)");
 }
 
 function closeHistoryModal() {
@@ -845,13 +867,11 @@ if (historyBtn) {
 if (closeHistoryBtn) {
     closeHistoryBtn.addEventListener('click', closeHistoryModal);
 }
-// Đóng khi click ra ngoài vùng container
 window.addEventListener('click', (e) => {
     if (e.target === historyModal) {
         closeHistoryModal();
     }
 });
-// Tạm thời cho nút QR Check-in
 document.getElementById('qrCheckinBtn').addEventListener('click', () => {
     alert("Nâng cấp để sử dụng tính năng.");
 });
@@ -901,7 +921,6 @@ if ('serviceWorker' in navigator) {
     }
   });
 }
-// Xóa tất cả cache của ứng dụng
 if ('caches' in window) {
   caches.keys().then(function(names) {
     for (let name of names) {
