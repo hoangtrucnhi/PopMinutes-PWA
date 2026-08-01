@@ -581,11 +581,12 @@
             color: var(--navy);
             box-shadow: 0 8px 24px rgba(27, 43, 122, 0.1);
         }
+        /* Nút nén file màu đỏ nhạt, đồng bộ với phong cách nút ghi âm cũ */
         .circle-btn.compress-btn {
-            background: #FEF3C7;
-            border-color: #F59E0B;
-            color: #B45309;
-            box-shadow: 0 8px 24px rgba(245, 158, 11, 0.2);
+            background: var(--danger-pale);
+            border-color: #FCA5A5;
+            color: var(--danger);
+            box-shadow: 0 8px 24px rgba(239, 68, 68, 0.15);
         }
         .circle-btn:active {
             transform: scale(0.92);
@@ -790,40 +791,35 @@
             background: #f0f0f0;
         }
 
-        /* ===== STYLE CHO DÒNG THÔNG BÁO ĐỒNG Ý ===== */
+        /* ===== STYLE CHO DÒNG THÔNG BÁO ĐỒNG Ý – nhẹ nhàng, chữ nghiêng, không đậm ===== */
         .consent-disclaimer {
             font-size: 14px;
-            font-weight: 700;
+            font-weight: 400;
+            /* không đậm */
+            font-style: italic;
             color: #1E293B;
             text-align: center;
             line-height: 1.7;
             margin: 24px 0 18px;
             padding: 14px 18px;
-            background: #FEF9C3;
+            background: #F8FAFC;
+            /* nền sáng nhẹ */
             border-radius: 10px;
-            border: 2.5px solid #F59E0B;
-            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.25);
-            position: relative;
+            border: 1px solid #CBD5E1;
+            /* viền xám nhạt */
+            box-shadow: none;
             transition: all 0.2s ease;
-            animation: highlightPulse 2.5s ease-in-out infinite;
         }
         .consent-disclaimer i {
-            color: #D97706;
+            color: var(--muted);
             font-size: 16px;
             margin-right: 8px;
         }
         .consent-disclaimer strong {
-            color: #B45309;
-            font-weight: 800;
-        }
-        @keyframes highlightPulse {
-            0%,
-            100% {
-                box-shadow: 0 4px 12px rgba(245, 158, 11, 0.25);
-            }
-            50% {
-                box-shadow: 0 4px 24px rgba(245, 158, 11, 0.45);
-            }
+            font-weight: 400;
+            /* ghi đè để không đậm */
+            color: inherit;
+            font-style: italic;
         }
 
         /* PWA CONFIGURATION */
@@ -993,10 +989,10 @@
                                 <span id="fileStatusLabel" class="control-label">Tải lên</span>
                             </div>
 
-                            <!-- Nút nén file (mở trang nén) -->
+                            <!-- Nút nén file (mở trang nén) – dùng icon file zip, màu đỏ nhạt -->
                             <div class="control-wrapper">
                                 <a href="https://freecompress.com/vi/compress-mp3" target="_blank" rel="noopener noreferrer" class="circle-btn compress-btn">
-                                    <i class="fa-solid fa-compress"></i>
+                                    <i class="fa-regular fa-file-zipper"></i>
                                 </a>
                                 <span class="control-label">Nén file</span>
                             </div>
@@ -1008,9 +1004,9 @@
 
                     <audio id="audioPlayback" controls class="hidden"></audio>
 
-                    <!-- DÒNG THÔNG BÁO ĐỒNG Ý -->
+                    <!-- DÒNG THÔNG BÁO ĐỒNG Ý – đã làm nhẹ nhàng, chữ nghiêng, không đậm -->
                     <div class="consent-disclaimer">
-                        <i class="fa-solid fa-shield-halved"></i>
+                        <i class="fa-regular fa-shield-halved"></i>
                         <strong>Bằng việc tải lên, bạn xác nhận có quyền hợp pháp và đã được sự đồng ý của những người tham gia để xử lý dữ liệu cuộc họp này.</strong>
                     </div>
 
