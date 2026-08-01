@@ -12,7 +12,7 @@
     <script src="https://cdn.tailwindcss.com">
     </script>
     <style>
-        /* ========== TOÀN BỘ STYLE (GIỮ NGUYÊN TỪ FILE CŨ) ========== */
+        /* ========== TOÀN BỘ STYLE (GIỮ NGUYÊN) ========== */
         *,
         *::before,
         *::after {
@@ -544,23 +544,10 @@
             align-items: center;
             gap: 8px;
         }
-        .timer-badge {
-            font-size: 15px;
-            font-weight: 800;
-            font-variant-numeric: tabular-nums;
-            color: var(--navy);
-            background: var(--navy-pale);
-            padding: 6px 14px;
-            border-radius: 99px;
-        }
-        canvas {
-            display: block;
-            background: #F8FAFC;
-            border-radius: var(--radius-sm);
-            width: 100%;
-            height: 64px;
-            margin-bottom: 28px;
-            border: 1px solid var(--border);
+        /* Ẩn timer badge và canvas – không cần ghi âm */
+        .timer-badge,
+        #waveformCanvas {
+            display: none !important;
         }
         .dual-controls {
             display: flex;
@@ -586,19 +573,7 @@
             transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
             cursor: pointer;
             border: 2.5px solid transparent;
-        }
-        .circle-btn.record-idle {
-            background: var(--danger-pale);
-            border-color: #FCA5A5;
-            color: var(--danger);
-            box-shadow: 0 8px 24px rgba(239, 68, 68, 0.15);
-        }
-        .circle-btn.record-active {
-            background: var(--danger);
-            border-color: var(--danger);
-            color: var(--white);
-            box-shadow: var(--shadow-float);
-            animation: pulseBtn 1.5s infinite;
+            text-decoration: none;
         }
         .circle-btn.file-pick-btn {
             background: var(--navy-pale);
@@ -606,21 +581,18 @@
             color: var(--navy);
             box-shadow: 0 8px 24px rgba(27, 43, 122, 0.1);
         }
+        .circle-btn.compress-btn {
+            background: #FEF3C7;
+            border-color: #F59E0B;
+            color: #B45309;
+            box-shadow: 0 8px 24px rgba(245, 158, 11, 0.2);
+        }
         .circle-btn:active {
             transform: scale(0.92);
             box-shadow: none;
         }
         .circle-btn i {
             font-size: 26px;
-        }
-        @keyframes pulseBtn {
-            0%,
-            100% {
-                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
-            }
-            70% {
-                box-shadow: 0 0 0 16px rgba(239, 68, 68, 0);
-            }
         }
         .control-label {
             font-size: 13.5px;
@@ -819,7 +791,6 @@
         }
 
         /* ===== STYLE CHO DÒNG THÔNG BÁO ĐỒNG Ý ===== */
-        /* Bỏ "dấu ngoặc ngoài" – xóa border-left, background, padding cũ, tạo hiệu ứng highlight nổi bật */
         .consent-disclaimer {
             font-size: 14px;
             font-weight: 700;
@@ -828,13 +799,13 @@
             line-height: 1.7;
             margin: 24px 0 18px;
             padding: 14px 18px;
-            /* Nền vàng highlight như bút dạ quang + viền cam đậm */
             background: #FEF9C3;
             border-radius: 10px;
             border: 2.5px solid #F59E0B;
             box-shadow: 0 4px 12px rgba(245, 158, 11, 0.25);
             position: relative;
             transition: all 0.2s ease;
+            animation: highlightPulse 2.5s ease-in-out infinite;
         }
         .consent-disclaimer i {
             color: #D97706;
@@ -845,7 +816,6 @@
             color: #B45309;
             font-weight: 800;
         }
-        /* Thêm một hiệu ứng nhấp nháy nhẹ để thu hút ánh nhìn (không gây khó chịu) */
         @keyframes highlightPulse {
             0%,
             100% {
@@ -854,9 +824,6 @@
             50% {
                 box-shadow: 0 4px 24px rgba(245, 158, 11, 0.45);
             }
-        }
-        .consent-disclaimer {
-            animation: highlightPulse 2.5s ease-in-out infinite;
         }
 
         /* PWA CONFIGURATION */
@@ -1007,37 +974,47 @@
                             </div>
                         </div>
                     </div>
+
                     <div class="record-panel">
                         <div class="record-panel-header">
-                            <div class="record-panel-title"><i class="fa-solid fa-wave-square" style="color: var(--navy)"></i> Tiến trình âm thanh</div>
+                            <div class="record-panel-title"><i class="fa-solid fa-wave-square" style="color: var(--navy)"></i> Tệp âm thanh</div>
+                            <!-- Đã ẩn timer badge -->
                             <div class="timer-badge" id="recordTimer">00:00</div>
                         </div>
+                        <!-- Đã ẩn canvas -->
                         <canvas id="waveformCanvas" width="400" height="64"></canvas>
+
+                        <!-- Hai nút: Tải lên (trái) và Nén file (phải) -->
                         <div class="dual-controls">
-                            <div class="control-wrapper">
-                                <button type="button" id="recordToggleBtn" class="circle-btn record-idle">
-                                    <i id="recordIcon" class="fa-solid fa-microphone"></i>
-                                </button>
-                                <span id="recordLabel" class="control-label">Ghi âm</span>
-                            </div>
+                            <!-- Nút tải lên -->
                             <div class="control-wrapper">
                                 <label for="fileInput" class="circle-btn file-pick-btn"><i class="fa-solid fa-folder-open"></i></label>
                                 <input type="file" id="fileInput" accept="audio/*" class="hidden">
                                 <span id="fileStatusLabel" class="control-label">Tải lên</span>
                             </div>
+
+                            <!-- Nút nén file (mở trang nén) -->
+                            <div class="control-wrapper">
+                                <a href="https://freecompress.com/vi/compress-mp3" target="_blank" rel="noopener noreferrer" class="circle-btn compress-btn">
+                                    <i class="fa-solid fa-compress"></i>
+                                </a>
+                                <span class="control-label">Nén file</span>
+                            </div>
                         </div>
+
                         <div id="fileStatus"></div>
-                        <p class="footer-tip">Hỗ trợ: <strong class="text-slate-700">mp3, m4a, wav,...</strong>.<br>File tối đa: <strong class="text-slate-700">35MB </strong> (hơn 35MB, nén tại <a href="https://freecompress.com/vi/compress-mp3" target="_blank" style="color:var(--navy); text-decoration:underline;">đây</a>)</p>
+                        <p class="footer-tip">Hỗ trợ: <strong class="text-slate-700">mp3, m4a, wav,...</strong>.<br>File tối đa: <strong class="text-slate-700">35MB</strong> (nếu quá, hãy nén bằng nút bên phải)</p>
                     </div>
+
                     <audio id="audioPlayback" controls class="hidden"></audio>
 
-                    <!-- ===== DÒNG THÔNG BÁO ĐỒNG Ý – ĐÃ BỎ "DẤU NGOẶC NGOÀI" VÀ HIGHLIGHT NỔI BẬT ===== -->
+                    <!-- DÒNG THÔNG BÁO ĐỒNG Ý -->
                     <div class="consent-disclaimer">
                         <i class="fa-solid fa-shield-halved"></i>
                         <strong>Bằng việc tải lên, bạn xác nhận có quyền hợp pháp và đã được sự đồng ý của những người tham gia để xử lý dữ liệu cuộc họp này.</strong>
                     </div>
 
-                    <!-- ===== ĐỔI TÊN NÚT THÀNH "Bắt đầu" ===== -->
+                    <!-- Nút Bắt đầu -->
                     <button id="uploadRecordBtn" class="btn-primary" style="margin-top: 8px; height: 56px;" disabled>
                         <i class="fa-solid fa-play"></i> Bắt đầu
                     </button>
@@ -1064,7 +1041,7 @@
     </div>
 
     <script>
-        // ========== CÁC HÀM TIỆN ÍCH CŨ ==========
+        // ========== CÁC HÀM TIỆN ÍCH ==========
         function updateClock() {
             const t = new Date();
             const s = t.getHours().toString().padStart(2, '0') + ':' + t.getMinutes().toString().padStart(2, '0');
@@ -1150,70 +1127,33 @@
             document.getElementById('salesEmailDisplay').value = currentEmail || "";
         }
 
-        // LOGIC UPLOAD (bỏ chức năng ghi âm)
-        let mediaRecorder, audioChunks = [],
-            isRecording = false;
-        let audioBlob = null,
-            selectedFileBlob = null;
-        let recordStartTime = 0,
-            timerInterval = null;
-        let audioContext = null,
-            source = null,
-            analyser = null,
-            animationId = null;
-
+        // LOGIC UPLOAD (đã loại bỏ ghi âm)
+        let selectedFileBlob = null;
         const modal = document.getElementById('recorderModal');
         const openBtn = document.getElementById('openRecorderBtn');
-        const recordToggleBtn = document.getElementById('recordToggleBtn');
-        const recordIcon = document.getElementById('recordIcon');
-        const recordLabel = document.getElementById('recordLabel');
         const uploadBtn = document.getElementById('uploadRecordBtn');
         const closeModalBtn = document.getElementById('closeModalBtn');
         const audioPlayback = document.getElementById('audioPlayback');
         const recordStatusDiv = document.getElementById('recordStatus');
         const fileInput = document.getElementById('fileInput');
         const fileStatusLabel = document.getElementById('fileStatusLabel');
-        const recordTimer = document.getElementById('recordTimer');
-        const canvas = document.getElementById('waveformCanvas');
-        const canvasCtx = canvas.getContext('2d');
 
         openBtn.addEventListener('click', () => {
             if (!currentEmail) { alert("Vui lòng đăng nhập hệ thống trước."); return; }
             updateModalSalesInfo();
             modal.classList.add('flex');
             resetRecorder();
-            recordToggleBtn.disabled = false;
-            recordLabel.innerText = "Ghi âm (nâng cấp)";
         });
 
         function closeModal() {
             modal.classList.remove('flex');
-            if (mediaRecorder && (mediaRecorder.state === 'recording' || mediaRecorder.state === 'paused')) {
-                mediaRecorder.stop();
-                if (mediaRecorder.stream) mediaRecorder.stream.getTracks().forEach(t => t.stop());
-            }
             resetRecorder();
         }
         closeModalBtn.addEventListener('click', closeModal);
 
-        function drawWaveform(dataArray) {
-            canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
-            canvasCtx.fillStyle = '#F8FAFC';
-            canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
-        }
-
-        function startRecording() {}
-
-        function stopRecording() {}
-        recordToggleBtn.onclick = () => {
-            recordStatusDiv.innerHTML =
-                '<span style="color:var(--danger);">🔒 Tính năng ghi âm yêu cầu nâng cấp lên gói Cao cấp 1 năm. Vui lòng liên hệ quản trị viên để được hỗ trợ.</span>';
-        };
-
         fileInput.addEventListener('change', e => {
             if (e.target.files.length > 0) {
                 selectedFileBlob = e.target.files[0];
-                audioBlob = null;
                 audioPlayback.src = URL.createObjectURL(selectedFileBlob);
                 audioPlayback.classList.remove('hidden');
                 uploadBtn.disabled = false;
@@ -1253,12 +1193,12 @@
                 recordStatusDiv.innerHTML = '<span style="color:orange">⚠️ Đang xử lý, vui lòng chờ...</span>';
                 return;
             }
-            let blobToUpload = audioBlob || selectedFileBlob;
+            let blobToUpload = selectedFileBlob;
             if (!blobToUpload) { recordStatusDiv.innerHTML = '<span style="color:var(--danger)">Chưa có file.</span>'; return; }
             if (blobToUpload.size > MAX_FILE_SIZE_BYTES) {
                 const fileSizeMB = (blobToUpload.size / (1024 * 1024)).toFixed(2);
                 recordStatusDiv.innerHTML =
-                    `<span style="color:var(--danger)">❌ File vượt quá ${MAX_FILE_SIZE_MB}MB (dung lượng ${fileSizeMB}MB). Vui lòng nén file trước khi upload tại <a href="https://freecompress.com/vi/compress-mp3" target="_blank" style="color:var(--navy); text-decoration:underline;">freecompress.com/vi/compress-mp3</a></span>`;
+                    `<span style="color:var(--danger)">❌ File vượt quá ${MAX_FILE_SIZE_MB}MB (dung lượng ${fileSizeMB}MB). Vui lòng nén file trước khi upload.</span>`;
                 return;
             }
             const clientName = document.getElementById('clientNameInput').value.trim();
@@ -1325,19 +1265,9 @@
         uploadBtn.onclick = uploadAudio;
 
         function resetRecorder() {
-            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-                mediaRecorder.stop();
-                if (mediaRecorder.stream) mediaRecorder.stream.getTracks().forEach(t => t.stop());
-            }
-            audioChunks = [];
-            audioBlob = null;
             selectedFileBlob = null;
             audioPlayback.classList.add('hidden');
             uploadBtn.disabled = true;
-            recordToggleBtn.disabled = false;
-            recordToggleBtn.className = "circle-btn record-idle";
-            recordIcon.className = "fa-solid fa-microphone text-2xl";
-            recordLabel.innerText = "Ghi âm (nâng cấp)";
             recordStatusDiv.innerHTML = '';
             fileInput.value = '';
             fileStatusLabel.innerText = "Tải lên";
@@ -1349,16 +1279,6 @@
             }
             if (document.getElementById('ccEmail1')) document.getElementById('ccEmail1').value = '';
             if (document.getElementById('ccEmail2')) document.getElementById('ccEmail2').value = '';
-            clearInterval(timerInterval);
-            recordTimer.innerText = '00:00';
-            canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
-            canvasCtx.fillStyle = '#F8FAFC';
-            canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
-            cancelAnimationFrame(animationId);
-            if (audioContext) audioContext.close();
-            audioContext = null;
-            analyser = null;
-            source = null;
         }
 
         const toggleCcBtn = document.getElementById('toggleCcBtn');
@@ -1375,6 +1295,7 @@
                 }
             });
         }
+
         document.getElementById('checkinBtn').addEventListener('click', () => alert("Nâng cấp gói để sử dụng tính năng."));
         const AUTH_STORAGE_KEY = "popminutes_auth";
         const SESSION_DAYS = 90;
@@ -1424,7 +1345,7 @@
         }
         window.addEventListener('DOMContentLoaded', async () => { await tryAutoLogin(); });
 
-        // ========== CÁC HÀM MỚI CHO LỊCH SỬ ==========
+        // ========== LỊCH SỬ ==========
         function showToast(message, isSuccess = true) {
             let oldToast = document.getElementById('customToast');
             if (oldToast) oldToast.remove();
