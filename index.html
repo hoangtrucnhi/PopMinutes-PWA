@@ -822,6 +822,77 @@
             font-style: italic;
         }
 
+        /* ===== MODAL CẢNH BÁO NÉN FILE ===== */
+        .warning-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 99999;
+            padding: 20px;
+        }
+        .warning-modal.active {
+            display: flex;
+        }
+        .warning-modal-content {
+            background: white;
+            max-width: 440px;
+            width: 100%;
+            border-radius: 24px;
+            padding: 28px 24px 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: fadeIn 0.25s ease;
+        }
+        .warning-modal-content h3 {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--text);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .warning-modal-content h3 i {
+            color: var(--danger);
+        }
+        .warning-modal-content p {
+            font-size: 14px;
+            line-height: 1.6;
+            color: var(--text);
+            margin-bottom: 20px;
+        }
+        .warning-modal-content .btn-group {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+        .warning-modal-content .btn-group button {
+            padding: 10px 24px;
+            border-radius: 60px;
+            font-weight: 700;
+            font-size: 14px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .warning-modal-content .btn-group .btn-cancel {
+            background: #F1F5F9;
+            color: var(--text);
+        }
+        .warning-modal-content .btn-group .btn-cancel:hover {
+            background: #E2E8F0;
+        }
+        .warning-modal-content .btn-group .btn-continue {
+            background: var(--danger);
+            color: white;
+        }
+        .warning-modal-content .btn-group .btn-continue:hover {
+            background: #DC2626;
+        }
+
         /* PWA CONFIGURATION */
         <link rel="manifest" href="/PopMinutes-PWA/manifest.json">
         <link rel="apple-touch-icon" sizes="192x192" href="https://raw.githubusercontent.com/hoangtrucnhi/PopMinutes-PWA/main/launchericon-192x192.png">
@@ -989,13 +1060,18 @@
                                 <span id="fileStatusLabel" class="control-label">Tải lên</span>
                             </div>
 
-                            <!-- Nút nén file (mở trang nén) – dùng icon file zip, màu đỏ nhạt -->
+                            <!-- Nút nén file – đổi tên và thêm cảnh báo -->
                             <div class="control-wrapper">
-                                <a href="https://freecompress.com/vi/compress-mp3" target="_blank" rel="noopener noreferrer" class="circle-btn compress-btn">
+                                <button type="button" id="compressBtn" class="circle-btn compress-btn">
                                     <i class="fa-regular fa-file-zipper"></i>
-                                </a>
-                                <span class="control-label">Nén file</span>
+                                </button>
+                                <span class="control-label">Nén file (bên thứ 3)</span>
                             </div>
+                        </div>
+
+                        <!-- Ghi chú nhỏ bên dưới để minh bạch -->
+                        <div style="text-align: center; font-size: 12px; color: var(--muted); margin-top: 6px;">
+                            ⚠️ Nén file qua công cụ bên ngoài, vui lòng cân nhắc với dữ liệu nhạy cảm.
                         </div>
 
                         <div id="fileStatus"></div>
@@ -1017,6 +1093,24 @@
 
                     <div id="recordStatus"></div>
                     <div id="httpsHelp" class="info-box hidden"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- WARNING MODAL KHI CLICK NÉN FILE -->
+        <div id="compressWarningModal" class="warning-modal">
+            <div class="warning-modal-content">
+                <h3><i class="fa-solid fa-triangle-exclamation"></i> Cảnh báo</h3>
+                <p>
+                    Bạn đang được chuyển hướng đến công cụ nén file của bên thứ ba (<strong>freecompress.com</strong>).
+                    <br><br>
+                    PopMinutes <strong>không quản lý, không liên kết và không chịu trách nhiệm</strong> về chính sách bảo mật hay an toàn dữ liệu của nền tảng này.
+                    <br><br>
+                    Đối với các cuộc họp chứa nội dung bảo mật hoặc nhạy cảm cao, vui lòng cân nhắc rủi ro trước khi tải file lên các dịch vụ miễn phí trực tuyến.
+                </p>
+                <div class="btn-group">
+                    <button class="btn-cancel" id="cancelCompressBtn">Hủy</button>
+                    <button class="btn-continue" id="confirmCompressBtn">Tôi đã hiểu, tiếp tục</button>
                 </div>
             </div>
         </div>
@@ -1058,7 +1152,35 @@
         const MAX_FILE_SIZE_MB = 35;
         const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
 
-        // XỬ LÝ ĐĂNG NHẬP
+        // ========== XỬ LÝ WARNING MODAL NÉN FILE ==========
+        const compressBtn = document.getElementById('compressBtn');
+        const warningModal = document.getElementById('compressWarningModal');
+        const cancelBtn = document.getElementById('cancelCompressBtn');
+        const confirmBtn = document.getElementById('confirmCompressBtn');
+        const COMPRESS_URL = 'https://freecompress.com/vi/compress-mp3';
+
+        compressBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            warningModal.classList.add('active');
+        });
+
+        cancelBtn.addEventListener('click', () => {
+            warningModal.classList.remove('active');
+        });
+
+        confirmBtn.addEventListener('click', () => {
+            warningModal.classList.remove('active');
+            window.open(COMPRESS_URL, '_blank');
+        });
+
+        // Đóng modal khi click ra ngoài
+        warningModal.addEventListener('click', (e) => {
+            if (e.target === warningModal) {
+                warningModal.classList.remove('active');
+            }
+        });
+
+        // ========== ĐĂNG NHẬP ==========
         async function handleLogin() {
             const emailInput = document.getElementById('emailInput').value.trim();
             const userIdInput = document.getElementById('userIdInput').value.trim();
@@ -1123,7 +1245,7 @@
             document.getElementById('salesEmailDisplay').value = currentEmail || "";
         }
 
-        // LOGIC UPLOAD (đã loại bỏ ghi âm)
+        // ========== LOGIC UPLOAD ==========
         let selectedFileBlob = null;
         const modal = document.getElementById('recorderModal');
         const openBtn = document.getElementById('openRecorderBtn');
