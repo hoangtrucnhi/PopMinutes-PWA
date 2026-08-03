@@ -1323,7 +1323,7 @@
             if (currentAbortController) currentAbortController.abort();
             const controller = new AbortController();
             currentAbortController = controller;
-            const timeoutId = setTimeout(() => controller.abort(), 300000);
+            const timeoutId = setTimeout(() => controller.abort(), 360000); // 6 phút
             try {
                 const audioBase64 = await blobToBase64(blobToUpload);
                 const payload = {
