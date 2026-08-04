@@ -553,7 +553,6 @@
             align-items: center;
             gap: 8px;
         }
-        /* Ẩn timer badge và canvas – không cần ghi âm */
         .timer-badge,
         #waveformCanvas {
             display: none !important;
@@ -1195,8 +1194,11 @@
                     currentSalesName = result.sales.name;
                     currentCompanyName = result.enterprise.name;
                     saveAuthInfo(result);
+                    
+                    // 👉 ĐÃ SỬA: Ẩn màn hình login và hiện màn hình dashboard
                     document.getElementById('login-screen').classList.add('hidden');
                     document.getElementById('dashboard-screen').classList.remove('hidden');
+                    
                     document.getElementById('user-name-display').textContent = currentSalesName;
                     document.getElementById('company-name-display').textContent = currentCompanyName;
                     document.getElementById('remaining-hours-display').textContent = result.enterprise.remainingHours;
@@ -1285,87 +1287,84 @@
         let currentAbortController = null;
 
         // ========== HÀM UPLOAD ==========
-async function uploadAudio() {
-    if (isUploading) return;
-    let blobToUpload = selectedFileBlob;
-    if (!blobToUpload) {
-        recordStatusDiv.innerHTML = '<span style="color:var(--danger)">Chưa có file.</span>';
-        return;
-    }
+        async function uploadAudio() {
+            if (isUploading) return;
+            let blobToUpload = selectedFileBlob;
+            if (!blobToUpload) {
+                recordStatusDiv.innerHTML = '<span style="color:var(--danger)">Chưa có file.</span>';
+                return;
+            }
 
-    const clientName = document.getElementById('clientNameInput').value.trim();
-    if (!clientName) {
-        recordStatusDiv.innerHTML = '<span style="color:var(--danger)">Vui lòng điền tên đối tác.</span>';
-        return;
-    }
+            const clientName = document.getElementById('clientNameInput').value.trim();
+            if (!clientName) {
+                recordStatusDiv.innerHTML = '<span style="color:var(--danger)">Vui lòng điền tên đối tác.</span>';
+                return;
+            }
 
-    isUploading = true;
-    uploadBtn.disabled = true;
-    recordStatusDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang khởi tạo kết nối...';
+            isUploading = true;
+            uploadBtn.disabled = true;
+            recordStatusDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang khởi tạo kết nối...';
 
-    try {
-        // PHA 1: Xin Signed URL từ Cloud Function (Gói tin chỉ vài KB, không bao giờ bị 413)
-        const getUrlResponse = await fetch('https://asia-southeast1-gen-lang-client-0303222519.cloudfunctions.net/get-upload-url', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                action: 'getSignedUrl',
-                filename: blobToUpload.name || 'recording.mp3',
-                contentType: blobToUpload.type || 'audio/mpeg'
-            })
-        });
+            try {
+                const getUrlResponse = await fetch('https://asia-southeast1-gen-lang-client-0303222519.cloudfunctions.net/get-upload-url', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'getSignedUrl',
+                        filename: blobToUpload.name || 'recording.mp3',
+                        contentType: blobToUpload.type || 'audio/mpeg'
+                    })
+                });
 
-        const urlResult = await getUrlResponse.json();
-        if (urlResult.status !== 200) throw new Error(urlResult.message || 'Không thể lấy Signed URL');
+                const urlResult = await getUrlResponse.json();
+                if (urlResult.status !== 200) throw new Error(urlResult.message || 'Không thể lấy Signed URL');
 
-        const { uploadUrl, filePath } = urlResult;
+                const { uploadUrl, filePath } = urlResult;
 
-        // PHA 2: Đẩy trực tiếp file 60MB - 100MB+ lên GCS Bucket qua Signed URL
-        recordStatusDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang tải file lên Cloud...';
-        
-        const uploadResponse = await fetch(uploadUrl, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': blobToUpload.type || 'audio/mpeg'
-            },
-            body: blobToUpload
-        });
+                recordStatusDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang tải file lên Cloud...';
+                
+                const uploadResponse = await fetch(uploadUrl, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': blobToUpload.type || 'audio/mpeg'
+                    },
+                    body: blobToUpload
+                });
 
-        if (!uploadResponse.ok) throw new Error('Tải file lên Cloud Storage thất bại');
+                if (!uploadResponse.ok) throw new Error('Tải file lên Cloud Storage thất bại');
 
-        // PHA 3: Thông báo cho Backend biết file đã lên xong để AI kích hoạt
-        recordStatusDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i> AI đang tiến hành phân tích cuộc họp...';
-        
-        const processResponse = await fetch('https://asia-southeast1-gen-lang-client-0303222519.cloudfunctions.net/get-upload-url', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                action: 'processAudio',
-                salesEmail: currentEmail,
-                salesName: currentSalesName,
-                companyName: currentCompanyName,
-                clientName: clientName,
-                filePath: filePath
-            })
-        });
+                recordStatusDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i> AI đang tiến hành phân tích cuộc họp...';
+                
+                const processResponse = await fetch('https://asia-southeast1-gen-lang-client-0303222519.cloudfunctions.net/get-upload-url', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'processAudio',
+                        salesEmail: currentEmail,
+                        salesName: currentSalesName,
+                        companyName: currentCompanyName,
+                        clientName: clientName,
+                        filePath: filePath
+                    })
+                });
 
-        const processResult = await processResponse.json();
+                const processResult = await processResponse.json();
 
-        if (processResult.status === 200) {
-            recordStatusDiv.innerHTML = '<div style="color:#065F46; font-weight:600;">✅ Tải lên thành công! AI đang lập biên bản.</div>';
-            setTimeout(() => closeModal(), 3000);
-        } else {
-            throw new Error(processResult.message);
+                if (processResult.status === 200) {
+                    recordStatusDiv.innerHTML = '<div style="color:#065F46; font-weight:600;">✅ Tải lên thành công! AI đang lập biên bản.</div>';
+                    setTimeout(() => closeModal(), 3000);
+                } else {
+                    throw new Error(processResult.message);
+                }
+
+            } catch (err) {
+                console.error('Upload error:', err);
+                recordStatusDiv.innerHTML = `<span style="color:var(--danger)">❌ Lỗi: ${err.message}</span>`;
+                uploadBtn.disabled = false;
+            } finally {
+                isUploading = false;
+            }
         }
-
-    } catch (err) {
-        console.error('Upload error:', err);
-        recordStatusDiv.innerHTML = `<span style="color:var(--danger)">❌ Lỗi: ${err.message}</span>`;
-        uploadBtn.disabled = false;
-    } finally {
-        isUploading = false;
-    }
-}
 
         function resetRecorder() {
             selectedFileBlob = null;
@@ -1432,8 +1431,11 @@ async function uploadAudio() {
                     currentEmail = auth.email;
                     currentSalesName = result.sales.name;
                     currentCompanyName = result.enterprise.name;
+                    
+                    // 👉 ĐÃ SỬA: Ẩn màn hình login và hiện màn hình dashboard khi tự động đăng nhập
                     document.getElementById('login-screen').classList.add('hidden');
                     document.getElementById('dashboard-screen').classList.remove('hidden');
+                    
                     document.getElementById('user-name-display').textContent = currentSalesName;
                     document.getElementById('company-name-display').textContent = currentCompanyName;
                     document.getElementById('remaining-hours-display').textContent = result.enterprise.remainingHours;
