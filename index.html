@@ -1285,104 +1285,87 @@
         let currentAbortController = null;
 
         // ========== HÀM UPLOAD ==========
-        async function uploadAudio() {
-            if (isUploading) {
-                recordStatusDiv.innerHTML = '<span style="color:orange">⚠️ Đang xử lý, vui lòng chờ...</span>';
-                return;
-            }
-            let blobToUpload = selectedFileBlob;
-            if (!blobToUpload) {
-                recordStatusDiv.innerHTML = '<span style="color:var(--danger)">Chưa có file.</span>';
-                return;
-            }
+async function uploadAudio() {
+    if (isUploading) return;
+    let blobToUpload = selectedFileBlob;
+    if (!blobToUpload) {
+        recordStatusDiv.innerHTML = '<span style="color:var(--danger)">Chưa có file.</span>';
+        return;
+    }
 
-            const clientName = document.getElementById('clientNameInput').value.trim();
-            const ccEmail1 = document.getElementById('ccEmail1')?.value.trim() || '';
-            const ccEmail2 = document.getElementById('ccEmail2')?.value.trim() || '';
-            if (!clientName) {
-                recordStatusDiv.innerHTML = '<span style="color:var(--danger)">Vui lòng điền tên đối tác.</span>';
-                return;
-            }
+    const clientName = document.getElementById('clientNameInput').value.trim();
+    if (!clientName) {
+        recordStatusDiv.innerHTML = '<span style="color:var(--danger)">Vui lòng điền tên đối tác.</span>';
+        return;
+    }
 
-            isUploading = true;
-            uploadBtn.disabled = true;
-            recordStatusDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý (có thể mất vài phút)...';
+    isUploading = true;
+    uploadBtn.disabled = true;
+    recordStatusDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang khởi tạo kết nối...';
 
-            if (currentAbortController) currentAbortController.abort();
-            const controller = new AbortController();
-            currentAbortController = controller;
-            const timeoutId = setTimeout(() => controller.abort(), 600000);
+    try {
+        // PHA 1: Xin Signed URL từ Cloud Function (Gói tin chỉ vài KB, không bao giờ bị 413)
+        const getUrlResponse = await fetch('https://asia-southeast1-gen-lang-client-0303222519.cloudfunctions.net/get-upload-url', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                action: 'getSignedUrl',
+                filename: blobToUpload.name || 'recording.mp3',
+                contentType: blobToUpload.type || 'audio/mpeg'
+            })
+        });
 
-            try {
-                // Bước 1: Upload file lên Cloud Function (multipart)
-                const formData = new FormData();
-                formData.append('file', blobToUpload, blobToUpload.name);
-                formData.append('filename', blobToUpload.name);
+        const urlResult = await getUrlResponse.json();
+        if (urlResult.status !== 200) throw new Error(urlResult.message || 'Không thể lấy Signed URL');
 
-                const uploadResponse = await fetch(CLOUD_FUNCTION_URL, {
-                    method: 'POST',
-                    body: formData,
-                    signal: controller.signal
-                });
-                if (!uploadResponse.ok) throw new Error('Upload file thất bại');
-                const uploadResult = await uploadResponse.json();
-                if (uploadResult.status !== 200) throw new Error(uploadResult.message);
+        const { uploadUrl, filePath } = urlResult;
 
-                const { fileId, fileUrl, relativePath } = uploadResult;
+        // PHA 2: Đẩy trực tiếp file 60MB - 100MB+ lên GCS Bucket qua Signed URL
+        recordStatusDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang tải file lên Cloud...';
+        
+        const uploadResponse = await fetch(uploadUrl, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': blobToUpload.type || 'audio/mpeg'
+            },
+            body: blobToUpload
+        });
 
-                // Bước 2: Gọi Cloud Function để ghi dữ liệu
-                const payload = {
-                    action: 'uploadAudio',
-                    salesEmail: currentEmail,
-                    salesName: currentSalesName,
-                    companyName: currentCompanyName,
-                    clientName: clientName,
-                    clientEmail: ccEmail1,
-                    managerEmail: ccEmail2,
-                    filePath: relativePath,
-                    fileUrl: fileUrl
-                };
+        if (!uploadResponse.ok) throw new Error('Tải file lên Cloud Storage thất bại');
 
-                const gasResponse = await fetch(CLOUD_FUNCTION_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload),
-                    signal: controller.signal
-                });
-                clearTimeout(timeoutId);
-                if (!gasResponse.ok) throw new Error(`HTTP ${gasResponse.status}`);
-                const gasResult = await gasResponse.json();
+        // PHA 3: Thông báo cho Backend biết file đã lên xong để AI kích hoạt
+        recordStatusDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i> AI đang tiến hành phân tích cuộc họp...';
+        
+        const processResponse = await fetch('https://asia-southeast1-gen-lang-client-0303222519.cloudfunctions.net/get-upload-url', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                action: 'processAudio',
+                salesEmail: currentEmail,
+                salesName: currentSalesName,
+                companyName: currentCompanyName,
+                clientName: clientName,
+                filePath: filePath
+            })
+        });
 
-                if (gasResult.status === 200) {
-                    recordStatusDiv.innerHTML =
-                        '<div style="background:#ECFDF5; padding:16px; border-radius:12px;">✅ Đã nhận thành công! AI sẽ xử lý biên bản.</div>';
-                    setTimeout(() => closeModal(), 5000);
-                } else if (gasResult.status === 403) {
-                    recordStatusDiv.innerHTML =
-                        '<div style="background:#FEF2F2; padding:16px; border-radius:12px;">❌ Gói dịch vụ đã hết hạn.</div>';
-                    uploadBtn.disabled = false;
-                } else {
-                    throw new Error(gasResult.message || 'Lỗi không xác định');
-                }
-            } catch (err) {
-                clearTimeout(timeoutId);
-                console.error('Upload error:', err);
-                let errorMsg = err.message;
-                if (err.name === 'AbortError') {
-                    errorMsg = 'Quá thời gian chờ (10 phút). Kiểm tra lại sheet sau vài phút, nếu chưa có dòng mới hãy thử lại.';
-                } else if (err.message.includes('Failed to fetch')) {
-                    errorMsg = 'Mất kết nối máy chủ. Hãy kiểm tra mạng và thử lại sau 10 phút.';
-                }
-                recordStatusDiv.innerHTML = `<span style="color:var(--danger)">❌ ${errorMsg}</span>`;
-                uploadBtn.disabled = false;
-            } finally {
-                isUploading = false;
-                currentAbortController = null;
-            }
+        const processResult = await processResponse.json();
+
+        if (processResult.status === 200) {
+            recordStatusDiv.innerHTML = '<div style="color:#065F46; font-weight:600;">✅ Tải lên thành công! AI đang lập biên bản.</div>';
+            setTimeout(() => closeModal(), 3000);
+        } else {
+            throw new Error(processResult.message);
         }
 
-        // Gắn sự kiện Click cho nút Bắt đầu
-        uploadBtn.addEventListener('click', uploadAudio);
+    } catch (err) {
+        console.error('Upload error:', err);
+        recordStatusDiv.innerHTML = `<span style="color:var(--danger)">❌ Lỗi: ${err.message}</span>`;
+        uploadBtn.disabled = false;
+    } finally {
+        isUploading = false;
+    }
+}
 
         function resetRecorder() {
             selectedFileBlob = null;
