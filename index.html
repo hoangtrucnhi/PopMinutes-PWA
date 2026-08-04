@@ -1138,16 +1138,14 @@
         setInterval(updateClock, 30000);
 
         // ========== CẤU HÌNH API ==========
-        const API_URL =
-            "https://script.google.com/macros/s/AKfycbxQ8HeKwVuV4g1yMDFgAkkStAOW2nuN0VwSk2WJiZ75FcXGXvlayQmHeH8O0Bq2ZH42/exec";
+        // LƯU Ý: SỬ DỤNG CLOUD FUNCTION LÀM PROXY CHO TẤT CẢ REQUEST
         const CLOUD_FUNCTION_URL = "https://asia-southeast1-gen-lang-client-0303222519.cloudfunctions.net/get-upload-url";
         let currentEmail = "",
             currentSalesName = "",
             currentCompanyName = "";
 
-        // Không còn giới hạn 35MB vì Cloud Function cho phép upload lớn hơn
-        // Vẫn giữ biến để không làm hỏng code khác
-        const MAX_FILE_SIZE_MB = 500; // 500MB
+        // Giới hạn file 500MB (Cloud Function không giới hạn, nhưng vẫn đặt an toàn)
+        const MAX_FILE_SIZE_MB = 500;
         const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
 
         // ========== XỬ LÝ WARNING MODAL NÉN FILE ==========
@@ -1191,8 +1189,9 @@
             document.getElementById('login-loader').style.display = 'block';
             errorMsg.classList.add('hidden');
             try {
-const loginUrl = `${CLOUD_FUNCTION_URL}?action=authenticateSales&email=${encodeURIComponent(emailInput)}&userId=${encodeURIComponent(userIdInput)}`;
-const response = await fetch(loginUrl);
+                // Gọi Cloud Function thay vì GAS
+                const loginUrl = `${CLOUD_FUNCTION_URL}?action=authenticateSales&email=${encodeURIComponent(emailInput)}&userId=${encodeURIComponent(userIdInput)}`;
+                const response = await fetch(loginUrl);
                 const result = await response.json();
                 if (result.status === 200 && result.authenticated) {
                     currentEmail = emailInput;
@@ -1361,7 +1360,7 @@ const response = await fetch(loginUrl);
                 });
                 if (!uploadResponse.ok) throw new Error('Upload file lên Drive thất bại');
 
-                // Bước 3: Gọi GAS để ghi vào sheet
+                // Bước 3: Gọi Cloud Function để chuyển tiếp đến GAS (action uploadAudio)
                 const payload = {
                     action: "uploadAudio",
                     salesEmail: currentEmail,
@@ -1374,9 +1373,9 @@ const response = await fetch(loginUrl);
                     fileUrl: fileUrl
                 };
 
-                const gasResponse = await fetch(API_URL, {
+                const gasResponse = await fetch(CLOUD_FUNCTION_URL, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload),
                     signal: controller.signal
                 });
@@ -1471,8 +1470,9 @@ const response = await fetch(loginUrl);
                 const age = Date.now() - auth.timestamp;
                 const maxAge = SESSION_DAYS * 24 * 60 * 60 * 1000;
                 if (age > maxAge) { localStorage.removeItem(AUTH_STORAGE_KEY); return false; }
-const loginUrl = `${CLOUD_FUNCTION_URL}?action=authenticateSales&email=${encodeURIComponent(emailInput)}&userId=${encodeURIComponent(userIdInput)}`;
-const response = await fetch(loginUrl);
+                const loginUrl =
+                    `${CLOUD_FUNCTION_URL}?action=authenticateSales&email=${encodeURIComponent(auth.email)}&userId=${encodeURIComponent(auth.salesId)}`;
+                const response = await fetch(loginUrl);
                 const result = await response.json();
                 if (result.status === 200 && result.authenticated) {
                     currentEmail = auth.email;
@@ -1501,33 +1501,33 @@ const response = await fetch(loginUrl);
             const toast = document.createElement('div');
             toast.id = 'customToast';
             toast.style.cssText = `
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%) translateY(20px);
-            background-color: ${isSuccess ? '#1B2B7A' : '#EF4444'};
-            color: white;
-            padding: 12px 24px;
-            border-radius: 60px;
-            font-size: 14px;
-            font-weight: 600;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-            z-index: 100000;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            backdrop-filter: blur(8px);
-            background-color: ${isSuccess ? 'rgba(27, 43, 122, 0.95)' : 'rgba(239, 68, 68, 0.95)'};
-            border: 1px solid rgba(255,255,255,0.2);
-            transition: opacity 0.3s ease, transform 0.3s ease;
-            opacity: 0;
-            pointer-events: none;
-            white-space: normal;
-            text-align: center;
-            line-height: 1.4;
-            max-width: 90vw;
-          `;
+                position: fixed;
+                bottom: 30px;
+                left: 50%;
+                transform: translateX(-50%) translateY(20px);
+                background-color: ${isSuccess ? '#1B2B7A' : '#EF4444'};
+                color: white;
+                padding: 12px 24px;
+                border-radius: 60px;
+                font-size: 14px;
+                font-weight: 600;
+                font-family: 'Plus Jakarta Sans', sans-serif;
+                box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+                z-index: 100000;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                backdrop-filter: blur(8px);
+                background-color: ${isSuccess ? 'rgba(27, 43, 122, 0.95)' : 'rgba(239, 68, 68, 0.95)'};
+                border: 1px solid rgba(255,255,255,0.2);
+                transition: opacity 0.3s ease, transform 0.3s ease;
+                opacity: 0;
+                pointer-events: none;
+                white-space: normal;
+                text-align: center;
+                line-height: 1.4;
+                max-width: 90vw;
+            `;
 
             const icon = document.createElement('i');
             icon.className = isSuccess ? 'fa-regular fa-circle-check' : 'fa-regular fa-circle-xmark';
@@ -1559,9 +1559,9 @@ const response = await fetch(loginUrl);
             const historyListDiv = document.getElementById('historyList');
             historyListDiv.innerHTML = '<p>Đang tải...</p>';
             try {
-                const response = await fetch(API_URL, {
+                const response = await fetch(CLOUD_FUNCTION_URL, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         action: "getUserHistory",
                         salesEmail: currentEmail
@@ -1580,16 +1580,16 @@ const response = await fetch(loginUrl);
                     else statusClass = 'status-Uploaded';
 
                     html += `
-                <div class="history-item">
-                    <div class="history-info">
-                        <strong>${escapeHtml(record.clientName || 'Khách hàng')}</strong> - ${record.createdAt || 'N/A'}
-                    </div>
-                    <div class="history-actions">
-                        <span class="status-badge ${statusClass}">${record.status || 'Chưa rõ'}</span>
-                        ${record.canExpedite ? `<button class="expedite-btn" data-record-id="${escapeHtml(record.recordId)}">Xử lý gấp</button>` : ''}
-                    </div>
-                </div>
-              `;
+                        <div class="history-item">
+                            <div class="history-info">
+                                <strong>${escapeHtml(record.clientName || 'Khách hàng')}</strong> - ${record.createdAt || 'N/A'}
+                            </div>
+                            <div class="history-actions">
+                                <span class="status-badge ${statusClass}">${record.status || 'Chưa rõ'}</span>
+                                ${record.canExpedite ? `<button class="expedite-btn" data-record-id="${escapeHtml(record.recordId)}">Xử lý gấp</button>` : ''}
+                            </div>
+                        </div>
+                    `;
                 });
                 historyListDiv.innerHTML = html;
                 document.querySelectorAll('.expedite-btn').forEach(btn => {
@@ -1610,9 +1610,9 @@ const response = await fetch(loginUrl);
             modalElem.classList.remove('active');
 
             try {
-                const response = await fetch(API_URL, {
+                const response = await fetch(CLOUD_FUNCTION_URL, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         action: "expedite",
                         recordId: recordId,
