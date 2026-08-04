@@ -1191,9 +1191,8 @@
             document.getElementById('login-loader').style.display = 'block';
             errorMsg.classList.add('hidden');
             try {
-                const loginUrl =
-                    `${API_URL}?action=authenticateSales&email=${encodeURIComponent(emailInput)}&userId=${encodeURIComponent(userIdInput)}`;
-                const response = await fetch(loginUrl);
+const loginUrl = `${CLOUD_FUNCTION_URL}?action=authenticateSales&email=${encodeURIComponent(emailInput)}&userId=${encodeURIComponent(userIdInput)}`;
+const response = await fetch(loginUrl);
                 const result = await response.json();
                 if (result.status === 200 && result.authenticated) {
                     currentEmail = emailInput;
@@ -1472,9 +1471,8 @@
                 const age = Date.now() - auth.timestamp;
                 const maxAge = SESSION_DAYS * 24 * 60 * 60 * 1000;
                 if (age > maxAge) { localStorage.removeItem(AUTH_STORAGE_KEY); return false; }
-                const loginUrl =
-                    `${API_URL}?action=authenticateSales&email=${encodeURIComponent(auth.email)}&userId=${encodeURIComponent(auth.salesId)}`;
-                const response = await fetch(loginUrl);
+const loginUrl = `${CLOUD_FUNCTION_URL}?action=authenticateSales&email=${encodeURIComponent(emailInput)}&userId=${encodeURIComponent(userIdInput)}`;
+const response = await fetch(loginUrl);
                 const result = await response.json();
                 if (result.status === 200 && result.authenticated) {
                     currentEmail = auth.email;
