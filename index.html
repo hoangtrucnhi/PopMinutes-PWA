@@ -4,15 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>PopMinutes</title>
+    
+    <!-- PWA CONFIGURATION -->
+    <link rel="manifest" href="/PopMinutes-PWA/manifest.json">
+    <link rel="apple-touch-icon" sizes="192x192" href="https://raw.githubusercontent.com/hoangtrucnhi/PopMinutes-PWA/main/launchericon-192x192.png">
+    <link rel="apple-touch-icon" sizes="512x512" href="https://raw.githubusercontent.com/hoangtrucnhi/PopMinutes-PWA/main/launchericon-512x512.png">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="#1B2B7A">
+
+    <!-- FONTS & ICONS -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="icon" type="image/png" href="./launchericon-192x192.png">
-    <script src="https://cdn.tailwindcss.com">
-    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+
     <style>
-        /* ========== TOÀN BỘ STYLE (GIỮ NGUYÊN) ========== */
+        /* ========== TOÀN BỘ STYLE ========== */
         *,
         *::before,
         *::after {
@@ -581,7 +590,6 @@
             color: var(--navy);
             box-shadow: 0 8px 24px rgba(27, 43, 122, 0.1);
         }
-        /* Nút nén file màu đỏ nhạt, đồng bộ với phong cách nút ghi âm cũ */
         .circle-btn.compress-btn {
             background: var(--danger-pale);
             border-color: #FCA5A5;
@@ -689,7 +697,7 @@
             }
         }
 
-        /* ========== SỬA LỖI MODAL LỊCH SỬ TRÊN TABLET ========== */
+        /* MODAL LỊCH SỬ */
         .history-modal {
             position: fixed;
             inset: 0;
@@ -791,11 +799,10 @@
             background: #f0f0f0;
         }
 
-        /* ===== STYLE CHO DÒNG THÔNG BÁO ĐỒNG Ý – nhẹ nhàng, chữ nghiêng, không đậm ===== */
+        /* STYLE DÒNG THÔNG BÁO ĐỒNG Ý */
         .consent-disclaimer {
             font-size: 14px;
             font-weight: 400;
-            /* không đậm */
             font-style: italic;
             color: #1E293B;
             text-align: center;
@@ -803,10 +810,8 @@
             margin: 24px 0 18px;
             padding: 14px 18px;
             background: #F8FAFC;
-            /* nền sáng nhẹ */
             border-radius: 10px;
             border: 1px solid #CBD5E1;
-            /* viền xám nhạt */
             box-shadow: none;
             transition: all 0.2s ease;
         }
@@ -817,12 +822,11 @@
         }
         .consent-disclaimer strong {
             font-weight: 400;
-            /* ghi đè để không đậm */
             color: inherit;
             font-style: italic;
         }
 
-        /* ===== MODAL CẢNH BÁO NÉN FILE ===== */
+        /* MODAL CẢNH BÁO NÉN FILE */
         .warning-modal {
             position: fixed;
             inset: 0;
@@ -892,13 +896,6 @@
         .warning-modal-content .btn-group .btn-continue:hover {
             background: #DC2626;
         }
-
-        /* PWA CONFIGURATION */
-        <link rel="manifest" href="/PopMinutes-PWA/manifest.json">
-        <link rel="apple-touch-icon" sizes="192x192" href="https://raw.githubusercontent.com/hoangtrucnhi/PopMinutes-PWA/main/launchericon-192x192.png">
-        <link rel="apple-touch-icon" sizes="512x512" href="https://raw.githubusercontent.com/hoangtrucnhi/PopMinutes-PWA/main/launchericon-512x512.png">
-        <meta name="mobile-web-app-capable" content="yes">
-        <meta name="apple-mobile-web-app-status-bar-style" content="#1B2B7A">
     </style>
 </head>
 <body>
@@ -917,12 +914,12 @@
                 <label class="field-label">Email</label>
                 <div class="input-wrap">
                     <i class="fa-regular fa-envelope"></i>
-                    <input type="email" id="emailInput" class="modal-input pl-11" placeholder="sales@congty.com" onkeydown="if(event.key==='Enter') handleLogin()" style="padding-left: 44px;">
+                    <input type="email" id="emailInput" class="modal-input" placeholder="sales@congty.com" onkeydown="if(event.key==='Enter') handleLogin()" style="padding-left: 44px;">
                 </div>
                 <label class="field-label">User ID</label>
                 <div class="input-wrap">
                     <i class="fa-regular fa-id-card"></i>
-                    <input type="text" id="userIdInput" class="modal-input pl-11" placeholder="S-PM-APP-000" style="padding-left: 44px;">
+                    <input type="text" id="userIdInput" class="modal-input" placeholder="S-PM-APP-000" style="padding-left: 44px;">
                 </div>
                 <button class="btn-primary" onclick="handleLogin()">
                     <span id="login-text">Tiếp tục</span>
@@ -1045,13 +1042,11 @@
                     <div class="record-panel">
                         <div class="record-panel-header">
                             <div class="record-panel-title"><i class="fa-solid fa-wave-square" style="color: var(--navy)"></i> Tệp âm thanh</div>
-                            <!-- Đã ẩn timer badge -->
                             <div class="timer-badge" id="recordTimer">00:00</div>
                         </div>
-                        <!-- Đã ẩn canvas -->
                         <canvas id="waveformCanvas" width="400" height="64"></canvas>
 
-                        <!-- Hai nút: Tải lên (trái) và Nén file (phải) -->
+                        <!-- Controls -->
                         <div class="dual-controls">
                             <!-- Nút tải lên -->
                             <div class="control-wrapper">
@@ -1060,7 +1055,7 @@
                                 <span id="fileStatusLabel" class="control-label">Tải lên</span>
                             </div>
 
-                            <!-- Nút nén file – đổi tên và thêm cảnh báo -->
+                            <!-- Nút nén file -->
                             <div class="control-wrapper">
                                 <button type="button" id="compressBtn" class="circle-btn compress-btn">
                                     <i class="fa-regular fa-file-zipper"></i>
@@ -1074,7 +1069,7 @@
 
                     <audio id="audioPlayback" controls class="hidden"></audio>
 
-                    <!-- DÒNG THÔNG BÁO ĐỒNG Ý – đã làm nhẹ nhàng, chữ nghiêng, không đậm, dùng icon khiên đặc (solid) -->
+                    <!-- Thông báo đồng ý -->
                     <div class="consent-disclaimer">
                         <i class="fa-solid fa-shield"></i>
                         <strong>Bằng việc tải lên, bạn xác nhận có quyền hợp pháp và đã được sự đồng ý của những người tham gia để xử lý dữ liệu cuộc họp này.</strong>
@@ -1096,7 +1091,7 @@
             <div class="warning-modal-content">
                 <h3><i class="fa-solid fa-triangle-exclamation"></i> Cảnh báo</h3>
                 <p>
-                    "Bạn đang được chuyển hướng đến công cụ của bên thứ ba (<strong>freecompress.com</strong>).
+                    Bạn đang được chuyển hướng đến công cụ của bên thứ ba (<strong>freecompress.com</strong>).
                     <br><br>
                     Xin lưu ý, PopMinutes <strong>không quản lý, không liên kết và không chịu trách nhiệm</strong> về chính sách bảo mật hay an toàn dữ liệu của nền tảng này.
                     <br><br>
@@ -1124,6 +1119,11 @@
 
     </div>
 
+    <!-- BUTTON CÀI ĐẶT PWA -->
+    <button id="btnInstall" style="display: none; background-color: #28a745; position: fixed; bottom: 20px; right: 20px; z-index: 9999; padding: 10px 15px; border: none; border-radius: 30px; color: white; font-weight: bold; cursor: pointer;">
+        📥 Cài đặt Ứng dụng PopMinutes
+    </button>
+
     <script>
         // ========== CÁC HÀM TIỆN ÍCH ==========
         function updateClock() {
@@ -1138,13 +1138,11 @@
         setInterval(updateClock, 30000);
 
         // ========== CẤU HÌNH API ==========
-        // LƯU Ý: SỬ DỤNG CLOUD FUNCTION LÀM PROXY CHO TẤT CẢ REQUEST
         const CLOUD_FUNCTION_URL = "https://asia-southeast1-gen-lang-client-0303222519.cloudfunctions.net/get-upload-url";
         let currentEmail = "",
             currentSalesName = "",
             currentCompanyName = "";
 
-        // Giới hạn file 500MB (Cloud Function không giới hạn, nhưng vẫn đặt an toàn)
         const MAX_FILE_SIZE_MB = 500;
         const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
 
@@ -1189,7 +1187,6 @@
             document.getElementById('login-loader').style.display = 'block';
             errorMsg.classList.add('hidden');
             try {
-                // Gọi Cloud Function thay vì GAS
                 const loginUrl = `${CLOUD_FUNCTION_URL}?action=authenticateSales&email=${encodeURIComponent(emailInput)}&userId=${encodeURIComponent(userIdInput)}`;
                 const response = await fetch(loginUrl);
                 const result = await response.json();
@@ -1271,8 +1268,7 @@
                 audioPlayback.classList.remove('hidden');
                 uploadBtn.disabled = false;
                 recordStatusDiv.innerText = '';
-                const shortName = selectedFileBlob.name.length > 25 ? selectedFileBlob.name.substring(0, 22) + '...' :
-                    selectedFileBlob.name;
+                const shortName = selectedFileBlob.name.length > 25 ? selectedFileBlob.name.substring(0, 22) + '...' : selectedFileBlob.name;
                 document.getElementById('fileStatus').innerHTML =
                     `<i class="fa-solid fa-file-audio"></i> ${shortName} (${(selectedFileBlob.size / (1024*1024)).toFixed(2)}MB)`;
                 fileStatusLabel.innerText = "Đổi tệp khác";
@@ -1285,118 +1281,108 @@
             }
         });
 
-        function blobToBase64(blob) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const result = String(e.target.result || "");
-                    const base64 = result.includes(',') ? result.split(',')[1] : result;
-                    resolve(base64);
-                };
-                reader.onerror = reject;
-                reader.readAsDataURL(blob);
-            });
-        }
-
         let isUploading = false;
         let currentAbortController = null;
 
-        // ========== HÀM UPLOAD MỚI ==========
-async function uploadAudio() {
-  if (isUploading) {
-    recordStatusDiv.innerHTML = '<span style="color:orange">⚠️ Đang xử lý, vui lòng chờ...</span>';
-    return;
-  }
-  let blobToUpload = selectedFileBlob;
-  if (!blobToUpload) {
-    recordStatusDiv.innerHTML = '<span style="color:var(--danger)">Chưa có file.</span>';
-    return;
-  }
+        // ========== HÀM UPLOAD ==========
+        async function uploadAudio() {
+            if (isUploading) {
+                recordStatusDiv.innerHTML = '<span style="color:orange">⚠️ Đang xử lý, vui lòng chờ...</span>';
+                return;
+            }
+            let blobToUpload = selectedFileBlob;
+            if (!blobToUpload) {
+                recordStatusDiv.innerHTML = '<span style="color:var(--danger)">Chưa có file.</span>';
+                return;
+            }
 
-  const clientName = document.getElementById('clientNameInput').value.trim();
-  const ccEmail1 = document.getElementById('ccEmail1')?.value.trim() || '';
-  const ccEmail2 = document.getElementById('ccEmail2')?.value.trim() || '';
-  if (!clientName) {
-    recordStatusDiv.innerHTML = '<span style="color:var(--danger)">Vui lòng điền tên đối tác.</span>';
-    return;
-  }
+            const clientName = document.getElementById('clientNameInput').value.trim();
+            const ccEmail1 = document.getElementById('ccEmail1')?.value.trim() || '';
+            const ccEmail2 = document.getElementById('ccEmail2')?.value.trim() || '';
+            if (!clientName) {
+                recordStatusDiv.innerHTML = '<span style="color:var(--danger)">Vui lòng điền tên đối tác.</span>';
+                return;
+            }
 
-  isUploading = true;
-  uploadBtn.disabled = true;
-  recordStatusDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý (có thể mất vài phút)...';
+            isUploading = true;
+            uploadBtn.disabled = true;
+            recordStatusDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý (có thể mất vài phút)...';
 
-  if (currentAbortController) currentAbortController.abort();
-  const controller = new AbortController();
-  currentAbortController = controller;
-  const timeoutId = setTimeout(() => controller.abort(), 600000);
+            if (currentAbortController) currentAbortController.abort();
+            const controller = new AbortController();
+            currentAbortController = controller;
+            const timeoutId = setTimeout(() => controller.abort(), 600000);
 
-  try {
-    // Bước 1: Upload file lên Cloud Function (multipart)
-    const formData = new FormData();
-    formData.append('file', blobToUpload, blobToUpload.name);
-    formData.append('filename', blobToUpload.name);
+            try {
+                // Bước 1: Upload file lên Cloud Function (multipart)
+                const formData = new FormData();
+                formData.append('file', blobToUpload, blobToUpload.name);
+                formData.append('filename', blobToUpload.name);
 
-    const uploadResponse = await fetch(CLOUD_FUNCTION_URL, {
-      method: 'POST',
-      body: formData, // Content-Type tự động là multipart/form-data
-      signal: controller.signal
-    });
-    if (!uploadResponse.ok) throw new Error('Upload file thất bại');
-    const uploadResult = await uploadResponse.json();
-    if (uploadResult.status !== 200) throw new Error(uploadResult.message);
+                const uploadResponse = await fetch(CLOUD_FUNCTION_URL, {
+                    method: 'POST',
+                    body: formData,
+                    signal: controller.signal
+                });
+                if (!uploadResponse.ok) throw new Error('Upload file thất bại');
+                const uploadResult = await uploadResponse.json();
+                if (uploadResult.status !== 200) throw new Error(uploadResult.message);
 
-    const { fileId, fileUrl, relativePath } = uploadResult;
+                const { fileId, fileUrl, relativePath } = uploadResult;
 
-    // Bước 2: Gọi Cloud Function để ghi vào sheet
-    const payload = {
-      action: 'uploadAudio',
-      salesEmail: currentEmail,
-      salesName: currentSalesName,
-      companyName: currentCompanyName,
-      clientName: clientName,
-      clientEmail: ccEmail1,
-      managerEmail: ccEmail2,
-      filePath: relativePath,
-      fileUrl: fileUrl
-    };
+                // Bước 2: Gọi Cloud Function để ghi dữ liệu
+                const payload = {
+                    action: 'uploadAudio',
+                    salesEmail: currentEmail,
+                    salesName: currentSalesName,
+                    companyName: currentCompanyName,
+                    clientName: clientName,
+                    clientEmail: ccEmail1,
+                    managerEmail: ccEmail2,
+                    filePath: relativePath,
+                    fileUrl: fileUrl
+                };
 
-    const gasResponse = await fetch(CLOUD_FUNCTION_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-      signal: controller.signal
-    });
-    clearTimeout(timeoutId);
-    if (!gasResponse.ok) throw new Error(`HTTP ${gasResponse.status}`);
-    const gasResult = await gasResponse.json();
+                const gasResponse = await fetch(CLOUD_FUNCTION_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload),
+                    signal: controller.signal
+                });
+                clearTimeout(timeoutId);
+                if (!gasResponse.ok) throw new Error(`HTTP ${gasResponse.status}`);
+                const gasResult = await gasResponse.json();
 
-    if (gasResult.status === 200) {
-      recordStatusDiv.innerHTML =
-        '<div style="background:#ECFDF5; padding:16px; border-radius:12px;">✅ Đã nhận thành công! AI sẽ xử lý biên bản.</div>';
-      setTimeout(() => closeModal(), 5000);
-    } else if (gasResult.status === 403) {
-      recordStatusDiv.innerHTML =
-        '<div style="background:#FEF2F2; padding:16px; border-radius:12px;">❌ Gói dịch vụ đã hết hạn.</div>';
-      uploadBtn.disabled = false;
-    } else {
-      throw new Error(gasResult.message || 'Lỗi không xác định');
-    }
-  } catch (err) {
-    clearTimeout(timeoutId);
-    console.error('Upload error:', err);
-    let errorMsg = err.message;
-    if (err.name === 'AbortError') {
-      errorMsg = 'Quá thời gian chờ (10 phút). Kiểm tra lại sheet sau vài phút, nếu chưa có dòng mới hãy thử lại.';
-    } else if (err.message.includes('Failed to fetch')) {
-      errorMsg = 'Mất kết nối máy chủ. Hãy kiểm tra mạng và thử lại sau 10 phút.';
-    }
-    recordStatusDiv.innerHTML = `<span style="color:var(--danger)">❌ ${errorMsg}</span>`;
-    uploadBtn.disabled = false;
-  } finally {
-    isUploading = false;
-    currentAbortController = null;
-  }
-}
+                if (gasResult.status === 200) {
+                    recordStatusDiv.innerHTML =
+                        '<div style="background:#ECFDF5; padding:16px; border-radius:12px;">✅ Đã nhận thành công! AI sẽ xử lý biên bản.</div>';
+                    setTimeout(() => closeModal(), 5000);
+                } else if (gasResult.status === 403) {
+                    recordStatusDiv.innerHTML =
+                        '<div style="background:#FEF2F2; padding:16px; border-radius:12px;">❌ Gói dịch vụ đã hết hạn.</div>';
+                    uploadBtn.disabled = false;
+                } else {
+                    throw new Error(gasResult.message || 'Lỗi không xác định');
+                }
+            } catch (err) {
+                clearTimeout(timeoutId);
+                console.error('Upload error:', err);
+                let errorMsg = err.message;
+                if (err.name === 'AbortError') {
+                    errorMsg = 'Quá thời gian chờ (10 phút). Kiểm tra lại sheet sau vài phút, nếu chưa có dòng mới hãy thử lại.';
+                } else if (err.message.includes('Failed to fetch')) {
+                    errorMsg = 'Mất kết nối máy chủ. Hãy kiểm tra mạng và thử lại sau 10 phút.';
+                }
+                recordStatusDiv.innerHTML = `<span style="color:var(--danger)">❌ ${errorMsg}</span>`;
+                uploadBtn.disabled = false;
+            } finally {
+                isUploading = false;
+                currentAbortController = null;
+            }
+        }
+
+        // Gắn sự kiện Click cho nút Bắt đầu
+        uploadBtn.addEventListener('click', uploadAudio);
 
         function resetRecorder() {
             selectedFileBlob = null;
@@ -1456,8 +1442,7 @@ async function uploadAudio() {
                 const age = Date.now() - auth.timestamp;
                 const maxAge = SESSION_DAYS * 24 * 60 * 60 * 1000;
                 if (age > maxAge) { localStorage.removeItem(AUTH_STORAGE_KEY); return false; }
-                const loginUrl =
-                    `${CLOUD_FUNCTION_URL}?action=authenticateSales&email=${encodeURIComponent(auth.email)}&userId=${encodeURIComponent(auth.salesId)}`;
+                const loginUrl = `${CLOUD_FUNCTION_URL}?action=authenticateSales&email=${encodeURIComponent(auth.email)}&userId=${encodeURIComponent(auth.salesId)}`;
                 const response = await fetch(loginUrl);
                 const result = await response.json();
                 if (result.status === 200 && result.authenticated) {
@@ -1474,8 +1459,11 @@ async function uploadAudio() {
                     saveAuthInfo(result);
                     return true;
                 } else { localStorage.removeItem(AUTH_STORAGE_KEY); return false; }
-            } catch (e) { console.error(e);
-                localStorage.removeItem(AUTH_STORAGE_KEY); return false; }
+            } catch (e) {
+                console.error(e);
+                localStorage.removeItem(AUTH_STORAGE_KEY);
+                return false;
+            }
         }
         window.addEventListener('DOMContentLoaded', async () => { await tryAutoLogin(); });
 
@@ -1491,7 +1479,7 @@ async function uploadAudio() {
                 bottom: 30px;
                 left: 50%;
                 transform: translateX(-50%) translateY(20px);
-                background-color: ${isSuccess ? '#1B2B7A' : '#EF4444'};
+                background-color: ${isSuccess ? 'rgba(27, 43, 122, 0.95)' : 'rgba(239, 68, 68, 0.95)'};
                 color: white;
                 padding: 12px 24px;
                 border-radius: 60px;
@@ -1504,7 +1492,6 @@ async function uploadAudio() {
                 align-items: center;
                 gap: 10px;
                 backdrop-filter: blur(8px);
-                background-color: ${isSuccess ? 'rgba(27, 43, 122, 0.95)' : 'rgba(239, 68, 68, 0.95)'};
                 border: 1px solid rgba(255,255,255,0.2);
                 transition: opacity 0.3s ease, transform 0.3s ease;
                 opacity: 0;
@@ -1579,7 +1566,7 @@ async function uploadAudio() {
                 });
                 historyListDiv.innerHTML = html;
                 document.querySelectorAll('.expedite-btn').forEach(btn => {
-                    btn.addEventListener('click', async (e) => {
+                    btn.addEventListener('click', async () => {
                         const recordId = btn.getAttribute('data-record-id');
                         await requestExpedite(recordId);
                     });
@@ -1646,22 +1633,20 @@ async function uploadAudio() {
             historyModal.classList.remove('active');
         }
 
-        if (historyBtn) {
-            historyBtn.addEventListener('click', openHistoryModal);
-        }
-        if (closeHistoryBtn) {
-            closeHistoryBtn.addEventListener('click', closeHistoryModal);
-        }
+        if (historyBtn) historyBtn.addEventListener('click', openHistoryModal);
+        if (closeHistoryBtn) closeHistoryBtn.addEventListener('click', closeHistoryModal);
+
         window.addEventListener('click', (e) => {
             if (e.target === historyModal) {
                 closeHistoryModal();
             }
         });
+
         document.getElementById('qrCheckinBtn').addEventListener('click', () => {
             alert("Nâng cấp để sử dụng tính năng.");
         });
 
-        // ========== ĐĂNG KÝ SERVICE WORKER ==========
+        // ========== ĐĂNG KÝ SERVICE WORKER (PWA) ==========
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('/PopMinutes-PWA/sw-v2.js')
@@ -1669,15 +1654,14 @@ async function uploadAudio() {
                     .catch(err => console.log('Kích hoạt PWA thất bại: ', err));
             });
         }
+
         let deferredPrompt;
         const btnInstall = document.getElementById('btnInstall');
 
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
-            if (btnInstall) {
-                btnInstall.style.display = 'block';
-            }
+            if (btnInstall) btnInstall.style.display = 'block';
         });
 
         if (btnInstall) {
@@ -1685,38 +1669,16 @@ async function uploadAudio() {
                 if (!deferredPrompt) return;
                 deferredPrompt.prompt();
                 const { outcome } = await deferredPrompt.userChoice;
-                console.log(`User response to the install prompt: ${outcome}`);
+                console.log(`User response to install prompt: ${outcome}`);
                 deferredPrompt = null;
                 btnInstall.style.display = 'none';
             });
         }
 
         window.addEventListener('appinstalled', () => {
-            console.log('PopMinutes PWA đã được cài đặt thành công vào máy!');
-            if (btnInstall) {
-                btnInstall.style.display = 'none';
-            }
+            console.log('PopMinutes PWA đã được cài đặt thành công!');
+            if (btnInstall) btnInstall.style.display = 'none';
         });
-        // Tự động xóa Service Worker cũ và cache lỗi
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.getRegistrations().then(function(registrations) {
-                for (let registration of registrations) {
-                    registration.unregister();
-                    console.log('Đã xóa Service Worker cũ');
-                }
-            });
-        }
-        if ('caches' in window) {
-            caches.keys().then(function(names) {
-                for (let name of names) {
-                    caches.delete(name);
-                    console.log('Đã xóa cache:', name);
-                }
-            });
-        }
     </script>
-    <button id="btnInstall" style="display: none; background-color: #28a745; position: fixed; bottom: 20px; right: 20px; z-index: 9999; padding: 10px 15px; border: none; border-radius: 30px; color: white; font-weight: bold; cursor: pointer;">
-        📥 Cài đặt Ứng dụng PopMinutes
-    </button>
 </body>
 </html>
