@@ -1303,6 +1303,11 @@
                 return;
             }
 
+            // --- LẤY DỮ LIỆU TỪ 2 TRƯỜNG EMAIL CC ---
+            const ccEmail1 = document.getElementById('ccEmail1') ? document.getElementById('ccEmail1').value.trim() : '';
+            const ccEmail2 = document.getElementById('ccEmail2') ? document.getElementById('ccEmail2').value.trim() : '';
+            // ----------------------------------------
+
             isUploading = true;
             uploadBtn.disabled = true;
             recordStatusDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang khởi tạo kết nối...';
@@ -1337,6 +1342,7 @@
 
                 recordStatusDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i> AI đang tiến hành phân tích cuộc họp...';
                 
+                // --- ĐẨY THÊM ccEmail1 VÀ ccEmail2 VÀO PAYLOAD GỬI CHO SERVER ---
                 const processResponse = await fetch('https://asia-southeast1-gen-lang-client-0303222519.cloudfunctions.net/get-upload-url', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -1346,7 +1352,9 @@
                         salesName: currentSalesName,
                         companyName: currentCompanyName,
                         clientName: clientName,
-                        filePath: filePath
+                        filePath: filePath,
+                        ccEmail1: ccEmail1,
+                        ccEmail2: ccEmail2
                     })
                 });
 
