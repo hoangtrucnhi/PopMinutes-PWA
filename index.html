@@ -1525,13 +1525,17 @@
             const historyListDiv = document.getElementById('historyList');
             historyListDiv.innerHTML = '<p>Đang tải...</p>';
             try {
+                // Gửi dạng form data để tránh preflight CORS
+                const formData = new URLSearchParams();
+                formData.append('action', 'getUserHistory');
+                formData.append('salesEmail', currentEmail);
+
                 const response = await fetch(APPS_SCRIPT_URL, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        action: "getUserHistory",
-                        salesEmail: currentEmail
-                    })
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: formData.toString()
                 });
                 const history = await response.json();
                 if (!history.length) {
@@ -1576,14 +1580,17 @@
             modalElem.classList.remove('active');
 
             try {
+                const formData = new URLSearchParams();
+                formData.append('action', 'expedite');
+                formData.append('recordId', recordId);
+                formData.append('salesEmail', currentEmail);
+
                 const response = await fetch(APPS_SCRIPT_URL, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        action: "expedite",
-                        recordId: recordId,
-                        salesEmail: currentEmail
-                    })
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: formData.toString()
                 });
                 const result = await response.json();
                 if (result.status === 200) {
