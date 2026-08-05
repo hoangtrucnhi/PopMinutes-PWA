@@ -1195,7 +1195,6 @@
                     currentCompanyName = result.enterprise.name;
                     saveAuthInfo(result);
                     
-                    // 👉 ĐÃ SỬA: Ẩn màn hình login và hiện màn hình dashboard
                     document.getElementById('login-screen').classList.add('hidden');
                     document.getElementById('dashboard-screen').classList.remove('hidden');
                     
@@ -1249,6 +1248,9 @@
         const recordStatusDiv = document.getElementById('recordStatus');
         const fileInput = document.getElementById('fileInput');
         const fileStatusLabel = document.getElementById('fileStatusLabel');
+
+        // GÁN SỰ KIỆN CLICK CHO NÚT BẮT ĐẦU TẠI ĐÂY
+        uploadBtn.addEventListener('click', uploadAudio);
 
         openBtn.addEventListener('click', () => {
             if (!currentEmail) { alert("Vui lòng đăng nhập hệ thống trước."); return; }
@@ -1432,7 +1434,6 @@
                     currentSalesName = result.sales.name;
                     currentCompanyName = result.enterprise.name;
                     
-                    // 👉 ĐÃ SỬA: Ẩn màn hình login và hiện màn hình dashboard khi tự động đăng nhập
                     document.getElementById('login-screen').classList.add('hidden');
                     document.getElementById('dashboard-screen').classList.remove('hidden');
                     
