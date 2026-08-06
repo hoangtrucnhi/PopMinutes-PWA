@@ -1137,7 +1137,7 @@
         setInterval(updateClock, 30000);
 
         // ========== CẤU HÌNH API ==========
-        const CLOUD_FUNCTION_URL = "https://us-central1-gen-lang-client-0303222519.cloudfunctions.net/transcribe-fn";
+        const CLOUD_FUNCTION_URL = "https://asia-southeast1-gen-lang-client-0303222519.cloudfunctions.net/get-upload-url";
         const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxQ8HeKwVuV4g1yMDFgAkkStAOW2nuN0VwSk2WJiZ75FcXGXvlayQmHeH8O0Bq2ZH42/exec";
 
         let currentEmail = "",
@@ -1312,7 +1312,7 @@
             recordStatusDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang khởi tạo kết nối...';
 
             try {
-                const getUrlResponse = await fetch('https://us-central1-gen-lang-client-0303222519.cloudfunctions.net/transcribe-fn', {
+                const getUrlResponse = await fetch('https://asia-southeast1-gen-lang-client-0303222519.cloudfunctions.net/get-upload-url', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -1342,7 +1342,7 @@
                 recordStatusDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i> AI đang tiến hành phân tích cuộc họp...';
                 
                 // --- ĐÃ ĐỔI TÊN BIẾN clientEmail VÀ managerEmail ĐỂ ĐỒNG BỘ VỚI BACKEND ---
-                const processResponse = await fetch('https://us-central1-gen-lang-client-0303222519.cloudfunctions.net/transcribe-fn', {
+                const processResponse = await fetch('https://asia-southeast1-gen-lang-client-0303222519.cloudfunctions.net/get-upload-url', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
