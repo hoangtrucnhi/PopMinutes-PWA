@@ -21,7 +21,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
 
     <style>
-        /* ========== TOÀN BỘ STYLE ========== */
+        /* ========== TOÀN BỘ STYLE (giữ nguyên) ========== */
         *,
         *::before,
         *::after {
@@ -372,7 +372,7 @@
             font-weight: 800;
             color: var(--text);
             margin-bottom: 16px;
-            letter-spacing: 0.5px; /* Thêm khoảng cách để chữ không bị dính */
+            letter-spacing: -0.2px;
         }
         .feature-grid {
             display: grid;
@@ -1173,9 +1173,6 @@
     let currentLang = localStorage.getItem('popminutes_lang') || 'vi';
     document.getElementById('languageSelect').value = currentLang;
 
-    // Biến lưu key lỗi hiện tại để cập nhật khi đổi ngôn ngữ
-    let lastErrorKey = null;
-
     function t(key) {
         return translations[currentLang]?.[key] || key;
     }
@@ -1249,6 +1246,7 @@
         for (let id in idMap) {
             const el = document.getElementById(id);
             if (el && t(idMap[id]) !== undefined) {
+                // Với file-tip có thể chứa HTML, nên dùng innerHTML
                 if (id === 'file-tip') {
                     el.innerHTML = t(idMap[id]);
                 } else {
@@ -1282,12 +1280,6 @@
             document.getElementById('fileStatusLabel').textContent = t('change_file_btn');
         }
 
-        // Cập nhật thông báo lỗi nếu đang hiển thị
-        const errorMsg = document.getElementById('error-message');
-        if (errorMsg && !errorMsg.classList.contains('hidden') && lastErrorKey) {
-            errorMsg.textContent = t(lastErrorKey);
-        }
-
         updateDashboardDynamicText();
     }
 
@@ -1311,6 +1303,17 @@
         const statusDiv = document.getElementById('recordStatus');
         if (statusDiv && statusDiv.innerHTML.includes(t('status_connecting').substring(0, 10))) {
             statusDiv.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${t('status_connecting')}`;
+        }
+        const errorMsg = document.getElementById('error-message');
+        if (!errorMsg.classList.contains('hidden')) {
+            const currentText = errorMsg.textContent;
+            const errKeys = ['err_empty', 'err_invalid', 'err_network'];
+            for (let key of errKeys) {
+                if (currentText === translations.vi[key] || currentText === translations.en[key]) {
+                    errorMsg.textContent = t(key);
+                    break;
+                }
+            }
         }
     });
 
@@ -1340,13 +1343,11 @@
         if (!emailInput || !userIdInput) {
             errorMsg.textContent = t('err_empty');
             errorMsg.classList.remove('hidden');
-            lastErrorKey = 'err_empty';
             return;
         }
         document.getElementById('login-text').style.display = 'none';
         document.getElementById('login-loader').style.display = 'block';
         errorMsg.classList.add('hidden');
-        lastErrorKey = null;
 
         try {
             const loginUrl = `${CLOUD_FUNCTION_URL}?action=authenticateSales&email=${encodeURIComponent(emailInput)}&userId=${encodeURIComponent(userIdInput)}`;
@@ -1369,12 +1370,10 @@
             } else {
                 errorMsg.textContent = t('err_invalid');
                 errorMsg.classList.remove('hidden');
-                lastErrorKey = 'err_invalid';
             }
         } catch (e) {
             errorMsg.innerHTML = `<i class='fa-solid fa-triangle-exclamation'></i> ${t('err_network')}`;
             errorMsg.classList.remove('hidden');
-            lastErrorKey = 'err_network';
         } finally {
             document.getElementById('login-text').style.display = '';
             document.getElementById('login-loader').style.display = 'none';
@@ -1396,10 +1395,6 @@
         document.getElementById('dashboard-screen').classList.add('hidden');
         document.getElementById('login-screen').classList.remove('hidden');
         closeModal();
-        // Reset lỗi
-        const errorMsg = document.getElementById('error-message');
-        errorMsg.classList.add('hidden');
-        lastErrorKey = null;
     }
 
     function updateModalSalesInfo() {
@@ -1479,6 +1474,7 @@
     fileInput.addEventListener('change', e => {
         if (e.target.files.length > 0) {
             const file = e.target.files[0];
+            // Đặt tên file gốc
             handleFileSelected(file);
         } else {
             resetRecorder();
@@ -1488,6 +1484,7 @@
     // Ghi âm
     recordBtn.addEventListener('click', async function() {
         if (isRecording) {
+            // Dừng ghi
             if (mediaRecorder) {
                 mediaRecorder.stop();
             }
@@ -1498,6 +1495,7 @@
             return;
         }
 
+        // Bắt đầu ghi
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
             mediaRecorder = new MediaRecorder(stream);
@@ -1510,12 +1508,15 @@
             };
 
             mediaRecorder.onstop = () => {
+                // Tạo file từ các chunk
                 const audioBlob = new Blob(recordedChunks, { type: 'audio/webm' });
                 const fileName = `recording_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.webm`;
                 const audioFile = new File([audioBlob], fileName, { type: 'audio/webm' });
                 handleFileSelected(audioFile);
                 recordStatusDiv.innerHTML = `<span style="color:var(--success)">${t('recording_saved')}</span>`;
+                // Dừng các track
                 stream.getTracks().forEach(track => track.stop());
+                // Cập nhật label
                 recordLabel.textContent = t('record_btn');
                 recordBtn.querySelector('i').className = 'fa-solid fa-microphone';
                 recordBtn.classList.remove('recording');
@@ -1899,6 +1900,7 @@
             document.getElementById('fileStatusLabel').textContent = t('change_file_btn');
         }
         updateDashboardDynamicText();
+        // Cập nhật trạng thái nút upload ban đầu
         updateUploadButton();
     });
 </script>
