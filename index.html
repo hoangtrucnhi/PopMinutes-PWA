@@ -21,7 +21,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
 
     <style>
-        /* ========== TOÀN BỘ STYLE (giữ nguyên như cũ) ========== */
+        /* ========== TOÀN BỘ STYLE (giữ nguyên) ========== */
         *,
         *::before,
         *::after {
@@ -1119,6 +1119,9 @@
             hours_unit: 'Giờ sử dụng tại quán cafe',
             package_label: 'Gói dịch vụ',
             expiry_label: 'Hạn sử dụng',
+            undefined_package: 'Chưa xác định',
+            undefined_expiry: '--',
+            trial_account: 'Tài khoản Dùng thử',
             tools_title: 'Tiện ích',
             cafe_btn: 'Quán cafe',
             cafe_sub: 'Đặt chỗ hẹn',
@@ -1192,6 +1195,9 @@
             hours_unit: 'Hours used at café',
             package_label: 'Package',
             expiry_label: 'Expiry',
+            undefined_package: 'Not defined',
+            undefined_expiry: '--',
+            trial_account: 'Trial Account',
             tools_title: 'Utilities',
             cafe_btn: 'Café',
             cafe_sub: 'Book a meeting spot',
@@ -1282,7 +1288,7 @@
             }
         });
 
-        // Cập nhật các thẻ theo id (để đảm bảo)
+        // Cập nhật các thẻ theo id
         const idMap = {
             'login-title': 'login_title',
             'login-sub': 'login_sub',
@@ -1344,14 +1350,34 @@
             toggleCcBtn.innerHTML = `<i class="fa-solid ${icon}"></i> ${label}`;
         }
 
-        // Cập nhật fileStatusLabel (nếu chưa có file, hiển thị "Tải lên" / "Upload")
-        // Nếu đã có file, sẽ được xử lý trong event change của fileInput
+        // Cập nhật fileStatusLabel
         const fileInput = document.getElementById('fileInput');
         if (!fileInput.files.length) {
             document.getElementById('fileStatusLabel').textContent = t('upload_btn');
         } else {
-            // Nếu có file, giữ nguyên "Đổi tệp khác" hoặc "Change file"
             document.getElementById('fileStatusLabel').textContent = t('change_file_btn');
+        }
+
+        // Cập nhật các giá trị động trong dashboard nếu có
+        updateDashboardDynamicText();
+    }
+
+    // Hàm cập nhật các giá trị động (package, expiry, trial account) khi đổi ngôn ngữ
+    function updateDashboardDynamicText() {
+        // Các giá trị này sẽ được set lại khi login, nhưng nếu đang hiển thị và chưa đăng nhập thì dùng key
+        const packageDisplay = document.getElementById('package-display');
+        const expiryDisplay = document.getElementById('expiry-display');
+        const salesNameDisplay = document.getElementById('salesNameDisplay');
+        // Nếu đang hiển thị chữ "Chưa xác định" hoặc "--" thì cập nhật
+        if (packageDisplay && packageDisplay.textContent === 'Chưa xác định' || packageDisplay.textContent === 'Not defined') {
+            packageDisplay.textContent = t('undefined_package');
+        }
+        if (expiryDisplay && (expiryDisplay.textContent === '--' || expiryDisplay.textContent === '--')) {
+            expiryDisplay.textContent = t('undefined_expiry');
+        }
+        // Cập nhật trial account trong modal nếu đang hiển thị
+        if (salesNameDisplay && salesNameDisplay.value === 'Tài khoản Dùng thử' || salesNameDisplay.value === 'Trial Account') {
+            salesNameDisplay.value = t('trial_account');
         }
     }
 
@@ -1363,23 +1389,31 @@
         if (statusDiv && statusDiv.innerHTML.includes(t('status_connecting').substring(0, 10))) {
             statusDiv.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${t('status_connecting')}`;
         }
+        // Cập nhật thông báo lỗi nếu đang hiển thị
+        const errorMsg = document.getElementById('error-message');
+        if (!errorMsg.classList.contains('hidden')) {
+            // Lấy nội dung hiện tại, nếu nó khớp với một trong các key lỗi thì cập nhật lại
+            const currentText = errorMsg.textContent;
+            // Kiểm tra nếu nó là một trong các lỗi đã dịch thì gán lại
+            const errKeys = ['err_empty', 'err_invalid', 'err_network'];
+            for (let key of errKeys) {
+                if (currentText === translations.vi[key] || currentText === translations.en[key]) {
+                    errorMsg.textContent = t(key);
+                    break;
+                }
+            }
+        }
     });
 
     // Áp dụng ngôn ngữ khi trang load
     document.addEventListener('DOMContentLoaded', function() {
         applyLanguage(currentLang);
-        // Cập nhật lại các thông báo lỗi nếu đang hiển thị
-        const errorMsg = document.getElementById('error-message');
-        if (!errorMsg.classList.contains('hidden')) {
-            // Nếu lỗi đang hiển thị, có thể cập nhật lại bằng cách lấy text hiện tại so với key
-            // Nhưng tạm thời không làm gì vì lỗi sẽ do logic đặt.
-        }
     });
 
     // ========================================================================
     //  CÁC HÀM TIỆN ÍCH
     // ========================================================================
-    // Không cần đồng hồ nữa
+    // (không cần đồng hồ)
 
     // ========================================================================
     //  CẤU HÌNH API
@@ -1447,10 +1481,11 @@
                 document.getElementById('user-name-display').textContent = currentSalesName;
                 document.getElementById('company-name-display').textContent = currentCompanyName;
                 document.getElementById('remaining-hours-display').textContent = result.enterprise.remainingHours;
-                document.getElementById('package-display').textContent = result.enterprise.packageId || "Chưa xác định";
-                document.getElementById('expiry-display').textContent = result.enterprise.expiryDate || "--";
+                document.getElementById('package-display').textContent = result.enterprise.packageId || t('undefined_package');
+                document.getElementById('expiry-display').textContent = result.enterprise.expiryDate || t('undefined_expiry');
             } else {
-                errorMsg.textContent = result.message || t('err_invalid');
+                // Luôn hiển thị lỗi đã dịch, không dùng result.message
+                errorMsg.textContent = t('err_invalid');
                 errorMsg.classList.remove('hidden');
             }
         } catch (e) {
@@ -1472,15 +1507,15 @@
         document.getElementById('user-name-display').textContent = "";
         document.getElementById('company-name-display').textContent = "";
         document.getElementById('remaining-hours-display').textContent = "--";
-        document.getElementById('package-display').textContent = "--";
-        document.getElementById('expiry-display').textContent = "--";
+        document.getElementById('package-display').textContent = t('undefined_package');
+        document.getElementById('expiry-display').textContent = t('undefined_expiry');
         document.getElementById('dashboard-screen').classList.add('hidden');
         document.getElementById('login-screen').classList.remove('hidden');
         closeModal();
     }
 
     function updateModalSalesInfo() {
-        document.getElementById('salesNameDisplay').value = currentSalesName || "Tài khoản Dùng thử";
+        document.getElementById('salesNameDisplay').value = currentSalesName || t('trial_account');
         document.getElementById('salesEmailDisplay').value = currentEmail || "";
     }
 
@@ -1692,8 +1727,8 @@
                 document.getElementById('user-name-display').textContent = currentSalesName;
                 document.getElementById('company-name-display').textContent = currentCompanyName;
                 document.getElementById('remaining-hours-display').textContent = result.enterprise.remainingHours;
-                document.getElementById('package-display').textContent = result.enterprise.packageId || "Chưa xác định";
-                document.getElementById('expiry-display').textContent = result.enterprise.expiryDate || "--";
+                document.getElementById('package-display').textContent = result.enterprise.packageId || t('undefined_package');
+                document.getElementById('expiry-display').textContent = result.enterprise.expiryDate || t('undefined_expiry');
                 saveAuthInfo(result);
                 return true;
             } else {
@@ -1901,6 +1936,8 @@
         if (document.getElementById('fileInput').files.length > 0) {
             document.getElementById('fileStatusLabel').textContent = t('change_file_btn');
         }
+        // Cập nhật các giá trị động nếu chưa đăng nhập
+        updateDashboardDynamicText();
     });
 </script>
 </body>
