@@ -605,7 +605,7 @@
             color: var(--navy);
             box-shadow: 0 8px 24px rgba(27,43,122,0.1);
         }
-        /* Nút ghi âm: nền đỏ mờ, viền đỏ đậm, chữ trắng */
+        /* Nút ghi âm: nền đỏ mờ, viền đỏ đậm, chữ đỏ */
         #recordBtn {
             background: rgba(239, 68, 68, 0.2);
             border-color: #EF4444;
@@ -947,7 +947,8 @@
                 <input type="text" id="userIdInput" class="modal-input" data-i18n-placeholder="userid_placeholder" placeholder="S-PM-APP-000" style="padding-left:44px;">
             </div>
 
-            <button class="btn-primary" onclick="handleLogin()">
+            <!-- Nút đăng nhập có id để gắn sự kiện -->
+            <button class="btn-primary" id="loginButton">
                 <span id="login-text" data-i18n="login_btn">Tiếp tục</span>
                 <div id="login-loader" class="loader"></div>
             </button>
@@ -1106,7 +1107,7 @@
                         </div>
                     </div>
                     <div id="fileStatus"></div>
-                    <!-- Thêm dòng hỗ trợ định dạng file -->
+                    <!-- file_tip đã sửa: chỉ hỗ trợ định dạng, không dung lượng/nén -->
                     <p class="footer-tip" data-i18n="file_tip">Hỗ trợ: <strong class="text-slate-700">mp3, m4a, wav,...</strong></p>
                 </div>
 
@@ -1194,7 +1195,7 @@
             record_btn: 'Ghi âm',
             stop_record_btn: 'Dừng ghi',
             recording_status: 'Đang ghi...',
-            file_tip: 'Hỗ trợ: <strong>mp3, m4a, wav,...</strong>.<br>File tối đa: <strong>35MB</strong> (nếu quá, hãy nén bằng nút bên phải)',
+            file_tip: 'Hỗ trợ: <strong>mp3, m4a, wav,...</strong>',
             consent_text: 'Bằng việc tải lên, bạn xác nhận có quyền hợp pháp và đã được sự đồng ý của những người tham gia để xử lý dữ liệu cuộc họp này.',
             start_btn: 'Bắt đầu',
             history_title_modal: 'Lịch sử xử lý',
@@ -1263,7 +1264,7 @@
             record_btn: 'Record',
             stop_record_btn: 'Stop recording',
             recording_status: 'Recording...',
-            file_tip: 'Supports: <strong>mp3, m4a, wav,...</strong>.,
+            file_tip: 'Supports: <strong>mp3, m4a, wav,...</strong>',
             consent_text: 'By uploading, you confirm that you have the legal right and have obtained consent from participants to process this meeting data.',
             start_btn: 'Start',
             history_title_modal: 'Processing History',
@@ -1322,30 +1323,32 @@
 
     // Hàm đóng tất cả menu
     function closeAllMenus() {
-        loginLangMenu.classList.remove('active');
-        dashLangMenu.classList.remove('active');
+        if (loginLangMenu) loginLangMenu.classList.remove('active');
+        if (dashLangMenu) dashLangMenu.classList.remove('active');
     }
 
     // Mở/đóng menu login
-    loginLangToggle.addEventListener('click', function(e) {
-        e.stopPropagation();
-        // Đóng menu dashboard nếu đang mở
-        dashLangMenu.classList.remove('active');
-        loginLangMenu.classList.toggle('active');
-    });
+    if (loginLangToggle && loginLangMenu) {
+        loginLangToggle.addEventListener('click', function(e) {
+            e.stopPropagation();
+            if (dashLangMenu) dashLangMenu.classList.remove('active');
+            loginLangMenu.classList.toggle('active');
+        });
+    }
 
     // Mở/đóng menu dashboard
-    dashLangToggle.addEventListener('click', function(e) {
-        e.stopPropagation();
-        // Đóng menu login nếu đang mở
-        loginLangMenu.classList.remove('active');
-        dashLangMenu.classList.toggle('active');
-    });
+    if (dashLangToggle && dashLangMenu) {
+        dashLangToggle.addEventListener('click', function(e) {
+            e.stopPropagation();
+            if (loginLangMenu) loginLangMenu.classList.remove('active');
+            dashLangMenu.classList.toggle('active');
+        });
+    }
 
     // Đóng menu khi click ra ngoài
     document.addEventListener('click', function(e) {
-        const isLoginClick = loginLangToggle.contains(e.target) || loginLangMenu.contains(e.target);
-        const isDashClick = dashLangToggle.contains(e.target) || dashLangMenu.contains(e.target);
+        const isLoginClick = loginLangToggle && (loginLangToggle.contains(e.target) || (loginLangMenu && loginLangMenu.contains(e.target)));
+        const isDashClick = dashLangToggle && (dashLangToggle.contains(e.target) || (dashLangMenu && dashLangMenu.contains(e.target)));
         if (!isLoginClick && !isDashClick) {
             closeAllMenus();
         }
@@ -1505,34 +1508,35 @@
     });
 
     // ========================================================================
-    //  CẤU HÌNH API
+    //  XỬ LÝ ĐĂNG NHẬP (dùng addEventListener để đảm bảo)
     // ========================================================================
-    const CLOUD_FUNCTION_URL = "https://asia-southeast1-gen-lang-client-0303222519.cloudfunctions.net/get-upload-url";
-    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxQ8HeKwVuV4g1yMDFgAkkStAOW2nuN0VwSk2WJiZ75FcXGXvlayQmHeH8O0Bq2ZH42/exec";
-    const AUTH_STORAGE_KEY = "popminutes_auth";
-    const SESSION_DAYS = 90;
+    const loginButton = document.getElementById('loginButton');
+    if (loginButton) {
+        loginButton.addEventListener('click', handleLogin);
+    }
 
-    let currentEmail = "",
-        currentSalesName = "",
-        currentCompanyName = "";
+    // Thêm sự kiện Enter cho các ô input
+    document.getElementById('emailInput')?.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') handleLogin();
+    });
+    document.getElementById('userIdInput')?.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') handleLogin();
+    });
 
-    // ========================================================================
-    //  ĐĂNG NHẬP
-    // ========================================================================
     async function handleLogin() {
-        const emailInput = document.getElementById('emailInput').value.trim();
-        const userIdInput = document.getElementById('userIdInput').value.trim();
-        const errorMsg = document.getElementById('error-message');
-        if (!emailInput || !userIdInput) {
-            errorMsg.textContent = t('err_empty');
-            errorMsg.classList.remove('hidden');
-            return;
-        }
-        document.getElementById('login-text').style.display = 'none';
-        document.getElementById('login-loader').style.display = 'block';
-        errorMsg.classList.add('hidden');
-
         try {
+            const emailInput = document.getElementById('emailInput').value.trim();
+            const userIdInput = document.getElementById('userIdInput').value.trim();
+            const errorMsg = document.getElementById('error-message');
+            if (!emailInput || !userIdInput) {
+                errorMsg.textContent = t('err_empty');
+                errorMsg.classList.remove('hidden');
+                return;
+            }
+            document.getElementById('login-text').style.display = 'none';
+            document.getElementById('login-loader').style.display = 'block';
+            errorMsg.classList.add('hidden');
+
             const loginUrl = `${CLOUD_FUNCTION_URL}?action=authenticateSales&email=${encodeURIComponent(emailInput)}&userId=${encodeURIComponent(userIdInput)}`;
             const response = await fetch(loginUrl);
             const result = await response.json();
@@ -1551,10 +1555,12 @@
                 document.getElementById('package-display').textContent = result.enterprise.packageId || t('undefined_package');
                 document.getElementById('expiry-display').textContent = result.enterprise.expiryDate || t('undefined_expiry');
             } else {
-                errorMsg.textContent = t('err_invalid');
+                errorMsg.textContent = result.message || t('err_invalid');
                 errorMsg.classList.remove('hidden');
             }
         } catch (e) {
+            console.error('Login error:', e);
+            const errorMsg = document.getElementById('error-message');
             errorMsg.innerHTML = `<i class='fa-solid fa-triangle-exclamation'></i> ${t('err_network')}`;
             errorMsg.classList.remove('hidden');
         } finally {
@@ -1586,7 +1592,19 @@
     }
 
     // ========================================================================
-    //  LOGIC UPLOAD & RECORD
+    //  CẤU HÌNH API
+    // ========================================================================
+    const CLOUD_FUNCTION_URL = "https://asia-southeast1-gen-lang-client-0303222519.cloudfunctions.net/get-upload-url";
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxQ8HeKwVuV4g1yMDFgAkkStAOW2nuN0VwSk2WJiZ75FcXGXvlayQmHeH8O0Bq2ZH42/exec";
+    const AUTH_STORAGE_KEY = "popminutes_auth";
+    const SESSION_DAYS = 90;
+
+    let currentEmail = "",
+        currentSalesName = "",
+        currentCompanyName = "";
+
+    // ========================================================================
+    //  LOGIC UPLOAD & RECORD (giữ nguyên)
     // ========================================================================
     let selectedFileBlob = null;
     let mediaRecorder = null;
@@ -1604,12 +1622,10 @@
     const recordBtn = document.getElementById('recordBtn');
     const recordLabel = document.getElementById('recordLabel');
 
-    // Hàm cập nhật trạng thái nút upload
     function updateUploadButton() {
         uploadBtn.disabled = !selectedFileBlob;
     }
 
-    // Hàm xử lý khi có file (từ upload hoặc ghi âm)
     function handleFileSelected(file) {
         selectedFileBlob = file;
         audioPlayback.src = URL.createObjectURL(file);
@@ -1619,11 +1635,8 @@
         const shortName = file.name.length > 25 ? file.name.substring(0,22)+'...' : file.name;
         document.getElementById('fileStatus').innerHTML =
             `<i class="fa-solid fa-file-audio"></i> ${shortName} (${(file.size/(1024*1024)).toFixed(2)}MB)`;
-        // KHÔNG đổi label của nút upload, giữ nguyên "Tải lên"
-        // fileStatusLabel.textContent = t('upload_btn'); // đã giữ nguyên
     }
 
-    // Reset recorder state
     function resetRecorder() {
         if (mediaRecorder && isRecording) {
             mediaRecorder.stop();
@@ -1638,8 +1651,6 @@
         recordStatusDiv.innerHTML = '';
         fileInput.value = '';
         document.getElementById('fileStatus').innerHTML = '';
-        // Giữ label là "Tải lên"
-        // fileStatusLabel.textContent = t('upload_btn'); // đã có sẵn
         document.getElementById('clientNameInput').value = '';
         const ccFields = document.getElementById('ccFields');
         if (ccFields && !ccFields.classList.contains('hidden')) {
@@ -1649,13 +1660,11 @@
         }
         if (document.getElementById('ccEmail1')) document.getElementById('ccEmail1').value = '';
         if (document.getElementById('ccEmail2')) document.getElementById('ccEmail2').value = '';
-        // Reset record button
         recordBtn.classList.remove('recording');
         recordLabel.textContent = t('record_btn');
         recordBtn.querySelector('i').className = 'fa-solid fa-microphone';
     }
 
-    // Sự kiện chọn file từ input
     fileInput.addEventListener('change', e => {
         if (e.target.files.length > 0) {
             const file = e.target.files[0];
@@ -1665,10 +1674,8 @@
         }
     });
 
-    // Ghi âm
     recordBtn.addEventListener('click', async function() {
         if (isRecording) {
-            // Dừng ghi
             if (mediaRecorder) {
                 mediaRecorder.stop();
             }
@@ -1679,7 +1686,6 @@
             return;
         }
 
-        // Bắt đầu ghi
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
             mediaRecorder = new MediaRecorder(stream);
@@ -1692,15 +1698,12 @@
             };
 
             mediaRecorder.onstop = () => {
-                // Tạo file từ các chunk
                 const audioBlob = new Blob(recordedChunks, { type: 'audio/webm' });
                 const fileName = `recording_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.webm`;
                 const audioFile = new File([audioBlob], fileName, { type: 'audio/webm' });
                 handleFileSelected(audioFile);
                 recordStatusDiv.innerHTML = `<span style="color:var(--success)">${t('recording_saved')}</span>`;
-                // Dừng các track
                 stream.getTracks().forEach(track => track.stop());
-                // Cập nhật label
                 recordLabel.textContent = t('record_btn');
                 recordBtn.querySelector('i').className = 'fa-solid fa-microphone';
                 recordBtn.classList.remove('recording');
@@ -1718,7 +1721,6 @@
         }
     });
 
-    // Mở modal
     openBtn.addEventListener('click', () => {
         if (!currentEmail) {
             alert(t('toast_login_required'));
@@ -1735,7 +1737,6 @@
     }
     closeModalBtn.addEventListener('click', closeModal);
 
-    // Upload
     uploadBtn.addEventListener('click', uploadAudio);
 
     let isUploading = false;
@@ -1833,9 +1834,6 @@
         });
     }
 
-    // ========================================================================
-    //  CÁC SỰ KIỆN CHO CHECKIN (NÂNG CẤP)
-    // ========================================================================
     document.getElementById('checkinBtn').addEventListener('click', () => alert(t('toast_upgrade_required')));
     document.getElementById('qrCheckinBtn').addEventListener('click', () => alert(t('toast_upgrade_required')));
 
@@ -2080,7 +2078,6 @@
     window.addEventListener('DOMContentLoaded', async () => {
         await tryAutoLogin();
         applyLanguage(currentLang);
-        // Đánh dấu ngôn ngữ hiện tại trong cả hai menu
         loginLangItems.forEach(item => {
             item.classList.toggle('active-lang', item.dataset.lang === currentLang);
         });
@@ -2088,7 +2085,6 @@
             item.classList.toggle('active-lang', item.dataset.lang === currentLang);
         });
         updateFlagIcons(currentLang);
-        // Cập nhật trạng thái nút upload ban đầu
         updateUploadButton();
     });
 </script>
