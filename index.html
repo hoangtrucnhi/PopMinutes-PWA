@@ -69,7 +69,7 @@
             margin: 0 auto;
         }
 
-        /* ===== Nút ngôn ngữ hình tròn (giống avatar logout) ===== */
+        /* ===== Nút ngôn ngữ hình tròn ===== */
         .lang-btn {
             width: 44px;
             height: 44px;
@@ -84,6 +84,8 @@
             font-size: 20px;
             cursor: pointer;
             transition: all 0.2s;
+            position: relative;
+            z-index: 10;
         }
         .lang-btn:hover {
             background: rgba(255,255,255,0.2);
@@ -91,19 +93,19 @@
         .lang-btn:active {
             transform: scale(0.95);
         }
-        /* Menu ngôn ngữ popup */
+        /* Menu ngôn ngữ popup - luôn hiển thị trên cùng */
         .lang-menu {
             position: absolute;
-            top: 50px;
-            right: 10px;
+            top: 52px;
+            right: 0;
             background: white;
             border-radius: 12px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.25);
             padding: 8px 0;
             min-width: 160px;
-            z-index: 9999;
+            z-index: 99999 !important;
             display: none;
-            overflow: hidden;
+            overflow: visible;
         }
         .lang-menu.active {
             display: block;
@@ -127,6 +129,7 @@
             color: var(--navy);
         }
 
+        /* Các style khác giữ nguyên */
         .loader {
             width: 20px;
             height: 20px;
@@ -308,7 +311,7 @@
             justify-content: space-between;
             align-items: center;
             position: relative;
-            z-index: 1;
+            z-index: 5;
             gap: 10px;
         }
         .dash-greeting p {
@@ -900,7 +903,7 @@
                     <p data-i18n="greeting">Người dùng:</p>
                     <h2 id="user-name-display">Sales Name</h2>
                 </div>
-                <div style="display:flex; align-items:center; gap:8px; position:relative;">
+                <div style="display:flex; align-items:center; gap:8px; position:relative; z-index: 20;">
                     <!-- Nút ngôn ngữ hình tròn (cờ) -->
                     <button class="lang-btn" id="langToggleBtn" title="Chọn ngôn ngữ">
                         <span id="dashLangFlag">🇻🇳</span>
@@ -1155,6 +1158,8 @@
             status_uploading: 'Đang tải file lên Cloud...',
             status_processing: 'AI đang tiến hành phân tích cuộc họp...',
             recording_saved: 'Đã ghi âm xong!',
+            // Tooltip cho nút ngôn ngữ
+            lang_tooltip: 'Chọn ngôn ngữ',
         },
         en: {
             login_title: 'Smart Meeting Minutes AI',
@@ -1225,11 +1230,11 @@
             status_uploading: 'Uploading file to Cloud...',
             status_processing: 'AI is analyzing the meeting...',
             recording_saved: 'Recording saved!',
+            lang_tooltip: 'Select language',
         }
     };
 
     let currentLang = localStorage.getItem('popminutes_lang') || 'vi';
-    // Biến lưu key lỗi hiện tại để cập nhật khi đổi ngôn ngữ
     let lastErrorKey = null;
 
     function t(key) {
@@ -1244,6 +1249,10 @@
 
     function updateFlagIcon(lang) {
         dashFlag.textContent = lang === 'vi' ? '🇻🇳' : '🇬🇧';
+        // Cập nhật tooltip
+        if (langToggleBtn) {
+            langToggleBtn.title = t('lang_tooltip');
+        }
     }
 
     // Mở/đóng menu
@@ -1402,7 +1411,6 @@
     // Áp dụng ngôn ngữ khi load
     document.addEventListener('DOMContentLoaded', function() {
         applyLanguage(currentLang);
-        // Đánh dấu ngôn ngữ đang chọn trong menu
         langItems.forEach(item => {
             if (item.dataset.lang === currentLang) {
                 item.classList.add('active-lang');
@@ -1414,7 +1422,7 @@
     });
 
     // ========================================================================
-    //  CẤU HÌNH API
+    //  CẤU HÌNH API (giữ nguyên)
     // ========================================================================
     const CLOUD_FUNCTION_URL = "https://asia-southeast1-gen-lang-client-0303222519.cloudfunctions.net/get-upload-url";
     const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxQ8HeKwVuV4g1yMDFgAkkStAOW2nuN0VwSk2WJiZ75FcXGXvlayQmHeH8O0Bq2ZH42/exec";
@@ -1491,7 +1499,6 @@
         document.getElementById('dashboard-screen').classList.add('hidden');
         document.getElementById('login-screen').classList.remove('hidden');
         closeModal();
-        // Reset lỗi
         const errorMsg = document.getElementById('error-message');
         errorMsg.classList.add('hidden');
         lastErrorKey = null;
@@ -1503,7 +1510,7 @@
     }
 
     // ========================================================================
-    //  LOGIC UPLOAD & RECORD
+    //  LOGIC UPLOAD & RECORD (giữ nguyên, đã có từ trước)
     // ========================================================================
     let selectedFileBlob = null;
     let mediaRecorder = null;
@@ -1791,7 +1798,7 @@
     }
 
     // ========================================================================
-    //  LỊCH SỬ
+    //  LỊCH SỬ (giữ nguyên)
     // ========================================================================
     function showToast(message, isSuccess = true) {
         let oldToast = document.getElementById('customToast');
@@ -1979,7 +1986,6 @@
     window.addEventListener('DOMContentLoaded', async () => {
         await tryAutoLogin();
         applyLanguage(currentLang);
-        // Đánh dấu ngôn ngữ hiện tại trong menu
         langItems.forEach(item => {
             if (item.dataset.lang === currentLang) {
                 item.classList.add('active-lang');
