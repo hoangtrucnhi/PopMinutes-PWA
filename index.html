@@ -68,8 +68,6 @@
             box-shadow: var(--shadow-lg);
             margin: 0 auto;
         }
-
-        /* ----- Thanh chọn ngôn ngữ (chỉ dropdown, không giờ/pin/wifi) ----- */
         .lang-bar {
             background: var(--navy-deep);
             padding: 10px 24px;
@@ -95,8 +93,6 @@
             background: #1B2B7A;
             color: white;
         }
-
-        /* Các style còn lại giữ nguyên */
         .loader {
             width: 20px;
             height: 20px;
@@ -581,18 +577,21 @@
             cursor: pointer;
             border: 2.5px solid transparent;
             text-decoration: none;
-        }
-        .circle-btn.file-pick-btn {
             background: var(--navy-pale);
             border-color: #BFDBFE;
             color: var(--navy);
             box-shadow: 0 8px 24px rgba(27,43,122,0.1);
         }
-        .circle-btn.compress-btn {
+        .circle-btn.recording {
             background: var(--danger-pale);
             border-color: #FCA5A5;
             color: var(--danger);
-            box-shadow: 0 8px 24px rgba(239,68,68,0.15);
+            animation: pulse 1s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
         }
         .circle-btn:active {
             transform: scale(0.92);
@@ -800,67 +799,6 @@
             color: inherit;
             font-style: italic;
         }
-        .warning-modal {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.5);
-            backdrop-filter: blur(4px);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 99999;
-            padding: 20px;
-        }
-        .warning-modal.active { display: flex; }
-        .warning-modal-content {
-            background: white;
-            max-width: 440px;
-            width: 100%;
-            border-radius: 24px;
-            padding: 28px 24px 24px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            animation: fadeIn 0.25s ease;
-        }
-        .warning-modal-content h3 {
-            font-size: 18px;
-            font-weight: 800;
-            color: var(--text);
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .warning-modal-content h3 i { color: var(--danger); }
-        .warning-modal-content p {
-            font-size: 14px;
-            line-height: 1.6;
-            color: var(--text);
-            margin-bottom: 20px;
-        }
-        .warning-modal-content .btn-group {
-            display: flex;
-            gap: 12px;
-            justify-content: flex-end;
-        }
-        .warning-modal-content .btn-group button {
-            padding: 10px 24px;
-            border-radius: 60px;
-            font-weight: 700;
-            font-size: 14px;
-            border: none;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .warning-modal-content .btn-group .btn-cancel {
-            background: #F1F5F9;
-            color: var(--text);
-        }
-        .warning-modal-content .btn-group .btn-cancel:hover { background: #E2E8F0; }
-        .warning-modal-content .btn-group .btn-continue {
-            background: var(--danger);
-            color: white;
-        }
-        .warning-modal-content .btn-group .btn-continue:hover { background: #DC2626; }
     </style>
 </head>
 <body>
@@ -1028,20 +966,23 @@
                     <canvas id="waveformCanvas" width="400" height="64"></canvas>
 
                     <div class="dual-controls">
+                        <!-- Nút tải file lên -->
                         <div class="control-wrapper">
                             <label for="fileInput" class="circle-btn file-pick-btn"><i class="fa-solid fa-folder-open"></i></label>
                             <input type="file" id="fileInput" accept="audio/*" class="hidden">
                             <span id="fileStatusLabel" class="control-label" data-i18n="upload_btn">Tải lên</span>
                         </div>
+
+                        <!-- Nút ghi âm (thay thế nút nén file) -->
                         <div class="control-wrapper">
-                            <button type="button" id="compressBtn" class="circle-btn compress-btn">
-                                <i class="fa-regular fa-file-zipper"></i>
+                            <button type="button" id="recordBtn" class="circle-btn">
+                                <i class="fa-solid fa-microphone"></i>
                             </button>
-                            <span class="control-label" data-i18n="compress_btn">Nén file (bên thứ 3)</span>
+                            <span id="recordLabel" class="control-label" data-i18n="record_btn">Ghi âm</span>
                         </div>
                     </div>
                     <div id="fileStatus"></div>
-                    <p class="footer-tip" data-i18n="file_tip">Hỗ trợ: <strong class="text-slate-700">mp3, m4a, wav,...</strong>.<br>File tối đa: <strong class="text-slate-700">35MB</strong> (nếu quá, hãy nén bằng nút bên phải)</p>
+                    <!-- Đã xóa dòng footer-tip chứa thông báo dung lượng -->
                 </div>
 
                 <audio id="audioPlayback" controls class="hidden"></audio>
@@ -1057,22 +998,6 @@
 
                 <div id="recordStatus"></div>
                 <div id="httpsHelp" class="info-box hidden"></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ========== WARNING MODAL (COMPRESS) ========== -->
-    <div id="compressWarningModal" class="warning-modal">
-        <div class="warning-modal-content">
-            <h3><i class="fa-solid fa-triangle-exclamation"></i> <span data-i18n="warning_title">Cảnh báo</span></h3>
-            <p data-i18n="warning_text">
-                Bạn đang được chuyển hướng đến công cụ của bên thứ ba (<strong>freecompress.com</strong>).<br><br>
-                Xin lưu ý, PopMinutes <strong>không quản lý, không liên kết và không chịu trách nhiệm</strong> về chính sách bảo mật hay an toàn dữ liệu của nền tảng này.<br><br>
-                Đây chỉ là một tiện ích gợi ý, bạn hoàn toàn có thể chủ động sử dụng bất kỳ phần mềm nén file nào khác.
-            </p>
-            <div class="btn-group">
-                <button class="btn-cancel" id="cancelCompressBtn" data-i18n="warning_cancel">Hủy</button>
-                <button class="btn-continue" id="confirmCompressBtn" data-i18n="warning_continue">Tôi đã hiểu, tiếp tục</button>
             </div>
         </div>
     </div>
@@ -1103,7 +1028,6 @@
     // ========================================================================
     const translations = {
         vi: {
-            // Login
             login_title: 'Smart Meeting Minutes AI',
             login_sub: 'Hệ thống xử lý biên bản cuộc họp tối giản dành cho chuyên viên Sales',
             login_heading: 'Đăng nhập',
@@ -1113,7 +1037,6 @@
             userid_label: 'User ID',
             userid_placeholder: 'S-PM-APP-000',
             login_btn: 'Tiếp tục',
-            // Dashboard
             greeting: 'Người dùng:',
             customer_label: 'Khách Hàng',
             hours_unit: 'Giờ sử dụng tại quán cafe',
@@ -1132,7 +1055,6 @@
             checkin_sub: 'Địa điểm sử dụng',
             minutes_btn: 'Biên bản',
             minutes_sub: 'Lịch sử xử lý',
-            // Recorder modal
             modal_title: 'Khởi tạo biên bản họp AI',
             creator_label: 'Người tạo',
             client_label: 'Đối tác / Khách của bạn',
@@ -1145,28 +1067,21 @@
             file_panel_title: 'Tệp âm thanh',
             upload_btn: 'Tải lên',
             change_file_btn: 'Đổi tệp khác',
-            compress_btn: 'Nén file (bên thứ 3)',
-            file_tip: 'Hỗ trợ: <strong>mp3, m4a, wav,...</strong>.<br>File tối đa: <strong>35MB</strong> (nếu quá, hãy nén bằng nút bên phải)',
+            record_btn: 'Ghi âm',
+            stop_record_btn: 'Dừng ghi',
+            recording_status: 'Đang ghi...',
             consent_text: 'Bằng việc tải lên, bạn xác nhận có quyền hợp pháp và đã được sự đồng ý của những người tham gia để xử lý dữ liệu cuộc họp này.',
             start_btn: 'Bắt đầu',
-            // Warning modal
-            warning_title: 'Cảnh báo',
-            warning_text: 'Bạn đang được chuyển hướng đến công cụ của bên thứ ba (<strong>freecompress.com</strong>).<br><br>Xin lưu ý, PopMinutes <strong>không quản lý, không liên kết và không chịu trách nhiệm</strong> về chính sách bảo mật hay an toàn dữ liệu của nền tảng này.<br><br>Đây chỉ là một tiện ích gợi ý, bạn hoàn toàn có thể chủ động sử dụng bất kỳ phần mềm nén file nào khác.',
-            warning_cancel: 'Hủy',
-            warning_continue: 'Tôi đã hiểu, tiếp tục',
-            // History
             history_title_modal: 'Lịch sử xử lý',
             history_empty: 'Chưa có bản ghi nào.',
             history_loading: 'Đang tải...',
             expedite_btn: 'Xử lý gấp',
-            // Toast & status messages
             toast_upload_success: '✅ Tải lên thành công! AI đang lập biên bản.',
             toast_expedite_sent: 'Đã gửi yêu cầu xử lý gấp!',
             toast_expedite_fail: '⚠️ Không thể gửi yêu cầu',
             toast_network_error: '❌ Lỗi kết nối: ',
             toast_login_required: 'Vui lòng đăng nhập.',
             toast_upgrade_required: 'Nâng cấp gói để sử dụng tính năng.',
-            // Login errors
             err_empty: 'Vui lòng nhập đầy đủ Email và User ID!',
             err_invalid: 'Email hoặc User ID không đúng!',
             err_network: 'Không thể kết nối tới máy chủ.',
@@ -1175,10 +1090,11 @@
             err_upload_init: 'Không thể lấy Signed URL',
             err_upload_fail: 'Tải file lên Cloud Storage thất bại',
             err_process_fail: 'Tải lên thất bại! AI đang lập biên bản.',
-            // Upload status
+            err_mic_permission: 'Không thể truy cập microphone. Vui lòng cấp quyền.',
             status_connecting: 'Đang khởi tạo kết nối...',
             status_uploading: 'Đang tải file lên Cloud...',
             status_processing: 'AI đang tiến hành phân tích cuộc họp...',
+            recording_saved: 'Đã ghi âm xong!',
         },
         en: {
             login_title: 'Smart Meeting Minutes AI',
@@ -1220,14 +1136,11 @@
             file_panel_title: 'Audio file',
             upload_btn: 'Upload',
             change_file_btn: 'Change file',
-            compress_btn: 'Compress (3rd party)',
-            file_tip: 'Supports: <strong>mp3, m4a, wav,...</strong>.<br>Max file size: <strong>35MB</strong> (if exceeded, use the compress button on the right)',
+            record_btn: 'Record',
+            stop_record_btn: 'Stop recording',
+            recording_status: 'Recording...',
             consent_text: 'By uploading, you confirm that you have the legal right and have obtained consent from participants to process this meeting data.',
             start_btn: 'Start',
-            warning_title: 'Warning',
-            warning_text: 'You are being redirected to a third-party tool (<strong>freecompress.com</strong>).<br><br>Please note that PopMinutes <strong>does not manage, affiliate, or take responsibility</strong> for the privacy policy or data security of this platform.<br><br>This is only a suggested utility; you are free to use any other file compression software.',
-            warning_cancel: 'Cancel',
-            warning_continue: 'I understand, continue',
             history_title_modal: 'Processing History',
             history_empty: 'No records yet.',
             history_loading: 'Loading...',
@@ -1246,15 +1159,15 @@
             err_upload_init: 'Cannot get Signed URL',
             err_upload_fail: 'Upload to Cloud Storage failed',
             err_process_fail: 'Upload failed! AI is processing minutes.',
+            err_mic_permission: 'Cannot access microphone. Please grant permission.',
             status_connecting: 'Initializing connection...',
             status_uploading: 'Uploading file to Cloud...',
             status_processing: 'AI is analyzing the meeting...',
+            recording_saved: 'Recording saved!',
         }
     };
 
-    // Lấy ngôn ngữ từ localStorage hoặc trình duyệt
     let currentLang = localStorage.getItem('popminutes_lang') || 'vi';
-    // Đồng bộ dropdown
     document.getElementById('languageSelect').value = currentLang;
 
     function t(key) {
@@ -1266,7 +1179,6 @@
         localStorage.setItem('popminutes_lang', lang);
         document.getElementById('languageSelect').value = lang;
 
-        // Dịch các phần tử có data-i18n
         document.querySelectorAll('[data-i18n]').forEach(el => {
             const key = el.getAttribute('data-i18n');
             const translation = t(key);
@@ -1279,7 +1191,6 @@
             }
         });
 
-        // Dịch placeholder
         document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
             const key = el.getAttribute('data-i18n-placeholder');
             const translation = t(key);
@@ -1288,7 +1199,6 @@
             }
         });
 
-        // Cập nhật các thẻ theo id
         const idMap = {
             'login-title': 'login_title',
             'login-sub': 'login_sub',
@@ -1321,14 +1231,9 @@
             'add-cc-btn': 'add_cc_btn',
             'file-panel-title': 'file_panel_title',
             'upload-btn-label': 'upload_btn',
-            'compress-btn-label': 'compress_btn',
-            'file-tip': 'file_tip',
+            'record-btn-label': 'record_btn',
             'consent-text': 'consent_text',
             'start-btn': 'start_btn',
-            'warning-title': 'warning_title',
-            'warning-text': 'warning_text',
-            'warning-cancel': 'warning_cancel',
-            'warning-continue': 'warning_continue',
             'history-title-modal': 'history_title_modal',
             'history-empty': 'history_empty',
             'history-loading': 'history_loading',
@@ -1350,51 +1255,49 @@
             toggleCcBtn.innerHTML = `<i class="fa-solid ${icon}"></i> ${label}`;
         }
 
+        // Cập nhật nhãn của nút ghi âm và trạng thái
+        const recordBtn = document.getElementById('recordBtn');
+        const recordLabel = document.getElementById('recordLabel');
+        if (recordBtn && recordLabel) {
+            const isRecording = recordBtn.classList.contains('recording');
+            recordLabel.textContent = isRecording ? t('stop_record_btn') : t('record_btn');
+        }
+
         // Cập nhật fileStatusLabel
         const fileInput = document.getElementById('fileInput');
-        if (!fileInput.files.length) {
+        if (!fileInput.files.length && !selectedFileBlob) {
             document.getElementById('fileStatusLabel').textContent = t('upload_btn');
-        } else {
+        } else if (selectedFileBlob) {
             document.getElementById('fileStatusLabel').textContent = t('change_file_btn');
         }
 
-        // Cập nhật các giá trị động trong dashboard nếu có
         updateDashboardDynamicText();
     }
 
-    // Hàm cập nhật các giá trị động (package, expiry, trial account) khi đổi ngôn ngữ
     function updateDashboardDynamicText() {
-        // Các giá trị này sẽ được set lại khi login, nhưng nếu đang hiển thị và chưa đăng nhập thì dùng key
         const packageDisplay = document.getElementById('package-display');
         const expiryDisplay = document.getElementById('expiry-display');
         const salesNameDisplay = document.getElementById('salesNameDisplay');
-        // Nếu đang hiển thị chữ "Chưa xác định" hoặc "--" thì cập nhật
-        if (packageDisplay && packageDisplay.textContent === 'Chưa xác định' || packageDisplay.textContent === 'Not defined') {
+        if (packageDisplay && (packageDisplay.textContent === 'Chưa xác định' || packageDisplay.textContent === 'Not defined')) {
             packageDisplay.textContent = t('undefined_package');
         }
         if (expiryDisplay && (expiryDisplay.textContent === '--' || expiryDisplay.textContent === '--')) {
             expiryDisplay.textContent = t('undefined_expiry');
         }
-        // Cập nhật trial account trong modal nếu đang hiển thị
-        if (salesNameDisplay && salesNameDisplay.value === 'Tài khoản Dùng thử' || salesNameDisplay.value === 'Trial Account') {
+        if (salesNameDisplay && (salesNameDisplay.value === 'Tài khoản Dùng thử' || salesNameDisplay.value === 'Trial Account')) {
             salesNameDisplay.value = t('trial_account');
         }
     }
 
-    // Lắng nghe sự kiện thay đổi ngôn ngữ
     document.getElementById('languageSelect').addEventListener('change', function() {
         applyLanguage(this.value);
-        // Nếu đang hiển thị trạng thái kết nối, cập nhật lại
         const statusDiv = document.getElementById('recordStatus');
         if (statusDiv && statusDiv.innerHTML.includes(t('status_connecting').substring(0, 10))) {
             statusDiv.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${t('status_connecting')}`;
         }
-        // Cập nhật thông báo lỗi nếu đang hiển thị
         const errorMsg = document.getElementById('error-message');
         if (!errorMsg.classList.contains('hidden')) {
-            // Lấy nội dung hiện tại, nếu nó khớp với một trong các key lỗi thì cập nhật lại
             const currentText = errorMsg.textContent;
-            // Kiểm tra nếu nó là một trong các lỗi đã dịch thì gán lại
             const errKeys = ['err_empty', 'err_invalid', 'err_network'];
             for (let key of errKeys) {
                 if (currentText === translations.vi[key] || currentText === translations.en[key]) {
@@ -1405,15 +1308,9 @@
         }
     });
 
-    // Áp dụng ngôn ngữ khi trang load
     document.addEventListener('DOMContentLoaded', function() {
         applyLanguage(currentLang);
     });
-
-    // ========================================================================
-    //  CÁC HÀM TIỆN ÍCH
-    // ========================================================================
-    // (không cần đồng hồ)
 
     // ========================================================================
     //  CẤU HÌNH API
@@ -1422,32 +1319,10 @@
     const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxQ8HeKwVuV4g1yMDFgAkkStAOW2nuN0VwSk2WJiZ75FcXGXvlayQmHeH8O0Bq2ZH42/exec";
     const AUTH_STORAGE_KEY = "popminutes_auth";
     const SESSION_DAYS = 90;
-    const COMPRESS_URL = 'https://freecompress.com/vi/compress-mp3';
 
     let currentEmail = "",
         currentSalesName = "",
         currentCompanyName = "";
-
-    // ========================================================================
-    //  XỬ LÝ WARNING MODAL NÉN FILE
-    // ========================================================================
-    const compressBtn = document.getElementById('compressBtn');
-    const warningModal = document.getElementById('compressWarningModal');
-    const cancelBtn = document.getElementById('cancelCompressBtn');
-    const confirmBtn = document.getElementById('confirmCompressBtn');
-
-    compressBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        warningModal.classList.add('active');
-    });
-    cancelBtn.addEventListener('click', () => { warningModal.classList.remove('active'); });
-    confirmBtn.addEventListener('click', () => {
-        warningModal.classList.remove('active');
-        window.open(COMPRESS_URL, '_blank');
-    });
-    warningModal.addEventListener('click', (e) => {
-        if (e.target === warningModal) warningModal.classList.remove('active');
-    });
 
     // ========================================================================
     //  ĐĂNG NHẬP
@@ -1484,7 +1359,6 @@
                 document.getElementById('package-display').textContent = result.enterprise.packageId || t('undefined_package');
                 document.getElementById('expiry-display').textContent = result.enterprise.expiryDate || t('undefined_expiry');
             } else {
-                // Luôn hiển thị lỗi đã dịch, không dùng result.message
                 errorMsg.textContent = t('err_invalid');
                 errorMsg.classList.remove('hidden');
             }
@@ -1520,9 +1394,13 @@
     }
 
     // ========================================================================
-    //  LOGIC UPLOAD
+    //  LOGIC UPLOAD & RECORD
     // ========================================================================
     let selectedFileBlob = null;
+    let mediaRecorder = null;
+    let recordedChunks = [];
+    let isRecording = false;
+
     const modal = document.getElementById('recorderModal');
     const openBtn = document.getElementById('openRecorderBtn');
     const uploadBtn = document.getElementById('uploadRecordBtn');
@@ -1531,9 +1409,123 @@
     const recordStatusDiv = document.getElementById('recordStatus');
     const fileInput = document.getElementById('fileInput');
     const fileStatusLabel = document.getElementById('fileStatusLabel');
+    const recordBtn = document.getElementById('recordBtn');
+    const recordLabel = document.getElementById('recordLabel');
 
-    uploadBtn.addEventListener('click', uploadAudio);
+    // Hàm cập nhật trạng thái nút upload
+    function updateUploadButton() {
+        uploadBtn.disabled = !selectedFileBlob;
+    }
 
+    // Hàm xử lý khi có file (từ upload hoặc ghi âm)
+    function handleFileSelected(file) {
+        selectedFileBlob = file;
+        audioPlayback.src = URL.createObjectURL(file);
+        audioPlayback.classList.remove('hidden');
+        uploadBtn.disabled = false;
+        recordStatusDiv.innerText = '';
+        const shortName = file.name.length > 25 ? file.name.substring(0,22)+'...' : file.name;
+        document.getElementById('fileStatus').innerHTML =
+            `<i class="fa-solid fa-file-audio"></i> ${shortName} (${(file.size/(1024*1024)).toFixed(2)}MB)`;
+        fileStatusLabel.textContent = t('change_file_btn');
+    }
+
+    // Reset recorder state
+    function resetRecorder() {
+        if (mediaRecorder && isRecording) {
+            mediaRecorder.stop();
+            isRecording = false;
+            recordBtn.classList.remove('recording');
+            recordLabel.textContent = t('record_btn');
+            recordBtn.querySelector('i').className = 'fa-solid fa-microphone';
+        }
+        selectedFileBlob = null;
+        audioPlayback.classList.add('hidden');
+        uploadBtn.disabled = true;
+        recordStatusDiv.innerHTML = '';
+        fileInput.value = '';
+        document.getElementById('fileStatus').innerHTML = '';
+        fileStatusLabel.textContent = t('upload_btn');
+        document.getElementById('clientNameInput').value = '';
+        const ccFields = document.getElementById('ccFields');
+        if (ccFields && !ccFields.classList.contains('hidden')) {
+            ccFields.classList.add('hidden');
+            const toggle = document.getElementById('toggleCcBtn');
+            if (toggle) toggle.innerHTML = `<i class="fa-solid fa-circle-plus"></i> ${t('add_cc_btn')}`;
+        }
+        if (document.getElementById('ccEmail1')) document.getElementById('ccEmail1').value = '';
+        if (document.getElementById('ccEmail2')) document.getElementById('ccEmail2').value = '';
+        // Reset record button
+        recordBtn.classList.remove('recording');
+        recordLabel.textContent = t('record_btn');
+        recordBtn.querySelector('i').className = 'fa-solid fa-microphone';
+    }
+
+    // Sự kiện chọn file từ input
+    fileInput.addEventListener('change', e => {
+        if (e.target.files.length > 0) {
+            const file = e.target.files[0];
+            // Đặt tên file gốc
+            handleFileSelected(file);
+        } else {
+            resetRecorder();
+        }
+    });
+
+    // Ghi âm
+    recordBtn.addEventListener('click', async function() {
+        if (isRecording) {
+            // Dừng ghi
+            if (mediaRecorder) {
+                mediaRecorder.stop();
+            }
+            isRecording = false;
+            this.classList.remove('recording');
+            recordLabel.textContent = t('record_btn');
+            this.querySelector('i').className = 'fa-solid fa-microphone';
+            return;
+        }
+
+        // Bắt đầu ghi
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            mediaRecorder = new MediaRecorder(stream);
+            recordedChunks = [];
+
+            mediaRecorder.ondataavailable = (event) => {
+                if (event.data.size > 0) {
+                    recordedChunks.push(event.data);
+                }
+            };
+
+            mediaRecorder.onstop = () => {
+                // Tạo file từ các chunk
+                const audioBlob = new Blob(recordedChunks, { type: 'audio/webm' });
+                const fileName = `recording_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.webm`;
+                const audioFile = new File([audioBlob], fileName, { type: 'audio/webm' });
+                handleFileSelected(audioFile);
+                recordStatusDiv.innerHTML = `<span style="color:var(--success)">${t('recording_saved')}</span>`;
+                // Dừng các track
+                stream.getTracks().forEach(track => track.stop());
+                // Cập nhật label
+                recordLabel.textContent = t('record_btn');
+                recordBtn.querySelector('i').className = 'fa-solid fa-microphone';
+                recordBtn.classList.remove('recording');
+            };
+
+            mediaRecorder.start();
+            isRecording = true;
+            this.classList.add('recording');
+            recordLabel.textContent = t('stop_record_btn');
+            this.querySelector('i').className = 'fa-solid fa-stop';
+            recordStatusDiv.innerHTML = `<span style="color:var(--danger)">${t('recording_status')}</span>`;
+        } catch (err) {
+            console.error('Microphone error:', err);
+            recordStatusDiv.innerHTML = `<span style="color:var(--danger)">${t('err_mic_permission')}</span>`;
+        }
+    });
+
+    // Mở modal
     openBtn.addEventListener('click', () => {
         if (!currentEmail) {
             alert(t('toast_login_required'));
@@ -1550,25 +1542,8 @@
     }
     closeModalBtn.addEventListener('click', closeModal);
 
-    fileInput.addEventListener('change', e => {
-        if (e.target.files.length > 0) {
-            selectedFileBlob = e.target.files[0];
-            audioPlayback.src = URL.createObjectURL(selectedFileBlob);
-            audioPlayback.classList.remove('hidden');
-            uploadBtn.disabled = false;
-            recordStatusDiv.innerText = '';
-            const shortName = selectedFileBlob.name.length > 25 ? selectedFileBlob.name.substring(0,22)+'...' : selectedFileBlob.name;
-            document.getElementById('fileStatus').innerHTML =
-                `<i class="fa-solid fa-file-audio"></i> ${shortName} (${(selectedFileBlob.size/(1024*1024)).toFixed(2)}MB)`;
-            fileStatusLabel.textContent = t('change_file_btn');
-        } else {
-            selectedFileBlob = null;
-            audioPlayback.classList.add('hidden');
-            uploadBtn.disabled = true;
-            document.getElementById('fileStatus').innerHTML = '';
-            fileStatusLabel.textContent = t('upload_btn');
-        }
-    });
+    // Upload
+    uploadBtn.addEventListener('click', uploadAudio);
 
     let isUploading = false;
 
@@ -1648,25 +1623,6 @@
         } finally {
             isUploading = false;
         }
-    }
-
-    function resetRecorder() {
-        selectedFileBlob = null;
-        audioPlayback.classList.add('hidden');
-        uploadBtn.disabled = true;
-        recordStatusDiv.innerHTML = '';
-        fileInput.value = '';
-        fileStatusLabel.textContent = t('upload_btn');
-        document.getElementById('fileStatus').innerHTML = '';
-        document.getElementById('clientNameInput').value = '';
-        const ccFields = document.getElementById('ccFields');
-        if (ccFields && !ccFields.classList.contains('hidden')) {
-            ccFields.classList.add('hidden');
-            const toggle = document.getElementById('toggleCcBtn');
-            if (toggle) toggle.innerHTML = `<i class="fa-solid fa-circle-plus"></i> ${t('add_cc_btn')}`;
-        }
-        if (document.getElementById('ccEmail1')) document.getElementById('ccEmail1').value = '';
-        if (document.getElementById('ccEmail2')) document.getElementById('ccEmail2').value = '';
     }
 
     const toggleCcBtn = document.getElementById('toggleCcBtn');
@@ -1930,14 +1886,13 @@
     // ========================================================================
     window.addEventListener('DOMContentLoaded', async () => {
         await tryAutoLogin();
-        // Đảm bảo áp dụng ngôn ngữ sau khi login (nếu có thể)
         applyLanguage(currentLang);
-        // Cập nhật nút file nếu đã có file (trường hợp đặc biệt)
         if (document.getElementById('fileInput').files.length > 0) {
             document.getElementById('fileStatusLabel').textContent = t('change_file_btn');
         }
-        // Cập nhật các giá trị động nếu chưa đăng nhập
         updateDashboardDynamicText();
+        // Cập nhật trạng thái nút upload ban đầu
+        updateUploadButton();
     });
 </script>
 </body>
