@@ -317,7 +317,8 @@
             background: var(--navy);
             padding: 24px 28px 80px;
             position: relative;
-            overflow: hidden;
+            overflow: visible; /* Đã đổi từ hidden sang visible */
+            z-index: 10;       /* Đã thêm z-index */
         }
         .dash-topbar {
             display: flex;
@@ -927,7 +928,8 @@
                     <p data-i18n="greeting">Người dùng:</p>
                     <h2 id="user-name-display">Sales Name</h2>
                 </div>
-                <div style="display:flex; align-items:center; gap:8px; position:relative; z-index:1;">
+                <!-- Đã đổi z-index từ 1 sang 99 ở div này -->
+                <div style="display:flex; align-items:center; gap:8px; position:relative; z-index:99;">
                     <!-- Nút ngôn ngữ trên dashboard -->
                     <button class="lang-btn" id="dashLangToggleBtn" title="Chọn ngôn ngữ">
                         <span id="dashLangFlag">🇻🇳</span>
