@@ -21,7 +21,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
 
     <style>
-        /* ========== TOÀN BỘ STYLE ========== */
+        /* ========== TOÀN BỘ STYLE (giữ nguyên) ========== */
         *,
         *::before,
         *::after {
@@ -67,6 +67,31 @@
             overflow-x: hidden;
             box-shadow: var(--shadow-lg);
             margin: 0 auto;
+        }
+        .lang-bar {
+            background: var(--navy-deep);
+            padding: 10px 24px;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            z-index: 10;
+            position: relative;
+        }
+        .language-select {
+            background: rgba(255,255,255,0.12);
+            border: 1px solid rgba(255,255,255,0.25);
+            border-radius: 6px;
+            padding: 4px 8px;
+            color: white;
+            font-weight: 600;
+            font-size: 13px;
+            outline: none;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        .language-select option {
+            background: #1B2B7A;
+            color: white;
         }
         .loader {
             width: 20px;
@@ -275,60 +300,12 @@
             align-items: center;
             justify-content: center;
             color: #fff;
-            font-size: 18px;
+            font-size: 15px;
             cursor: pointer;
-            transition: all 0.2s;
-            text-decoration: none;
-            font-weight: 400;
-        }
-        .avatar-btn:hover {
-            background: rgba(255,255,255,0.2);
         }
         .avatar-btn:active {
+            background: rgba(255,255,255,0.2);
             transform: scale(0.95);
-        }
-        /* Nút chọn ngôn ngữ (hiển thị cờ) */
-        .lang-btn {
-            background: rgba(255,255,255,0.1);
-            border: 1px solid rgba(255,255,255,0.15);
-            backdrop-filter: blur(4px);
-            font-size: 20px;
-            line-height: 1;
-        }
-        /* Menu ngôn ngữ popup (z-index cao) */
-        .lang-menu {
-            position: absolute;
-            top: 50px;
-            right: 10px;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
-            padding: 8px 0;
-            min-width: 160px;
-            z-index: 9999;
-            display: none;
-            overflow: hidden;
-        }
-        .lang-menu.active {
-            display: block;
-        }
-        .lang-menu-item {
-            padding: 10px 20px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--text);
-            transition: background 0.15s;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .lang-menu-item:hover {
-            background: #F1F5F9;
-        }
-        .lang-menu-item.active-lang {
-            background: var(--navy-pale);
-            color: var(--navy);
         }
         .hero-card {
             background: var(--white);
@@ -605,26 +582,15 @@
             color: var(--navy);
             box-shadow: 0 8px 24px rgba(27,43,122,0.1);
         }
-        /* Nút ghi âm: nền đỏ mờ, viền đỏ đậm, chữ đỏ */
-        #recordBtn {
-            background: rgba(239, 68, 68, 0.2);
-            border-color: #EF4444;
-            color: #EF4444;
-            box-shadow: 0 8px 24px rgba(239,68,68,0.1);
-            transition: all 0.25s;
-        }
-        #recordBtn:hover {
-            background: rgba(239, 68, 68, 0.35);
-            transform: scale(1.02);
-        }
-        #recordBtn.recording {
+        .circle-btn.recording {
+            background: var(--danger-pale);
+            border-color: #FCA5A5;
+            color: var(--danger);
             animation: pulse 1s infinite;
-            background: rgba(239, 68, 68, 0.4);
-            border-color: #DC2626;
         }
         @keyframes pulse {
             0% { transform: scale(1); }
-            50% { transform: scale(1.08); }
+            50% { transform: scale(1.05); }
             100% { transform: scale(1); }
         }
         .circle-btn:active {
@@ -833,100 +799,22 @@
             color: inherit;
             font-style: italic;
         }
-        /* Nút upload label giữ nguyên "Tải lên" */
-        #fileStatusLabel {
-            pointer-events: none;
-        }
-        label.file-pick-btn {
-            cursor: pointer;
-        }
-        /* Thêm style cho nút ngôn ngữ ở login */
-        .login-lang-btn {
-            position: absolute;
-            top: 16px;
-            right: 16px;
-            background: rgba(255,255,255,0.15);
-            border: 1px solid rgba(255,255,255,0.3);
-            backdrop-filter: blur(4px);
-            color: white;
-            font-size: 20px;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            z-index: 10;
-            transition: all 0.2s;
-        }
-        .login-lang-btn:hover {
-            background: rgba(255,255,255,0.25);
-        }
-        .login-lang-btn:active {
-            transform: scale(0.92);
-        }
-        /* Menu ngôn ngữ cho login (phải hiển thị phía trên) */
-        .login-lang-menu {
-            position: absolute;
-            top: 60px;
-            right: 16px;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
-            padding: 8px 0;
-            min-width: 160px;
-            z-index: 9999;
-            display: none;
-            overflow: hidden;
-        }
-        .login-lang-menu.active {
-            display: block;
-        }
-        .login-lang-menu .lang-menu-item {
-            padding: 10px 20px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--text);
-            transition: background 0.15s;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .login-lang-menu .lang-menu-item:hover {
-            background: #F1F5F9;
-        }
-        .login-lang-menu .lang-menu-item.active-lang {
-            background: var(--navy-pale);
-            color: var(--navy);
-        }
-        /* Để menu không bị che bởi các thành phần khác */
-        .login-hero {
-            position: relative;
-        }
-        .dash-topbar .lang-menu,
-        .login-hero .login-lang-menu {
-            z-index: 9999 !important;
-        }
     </style>
 </head>
 <body>
 <div class="app">
 
+    <!-- ========== THANH CHỌN NGÔN NGỮ ========== -->
+    <div class="lang-bar">
+        <select id="languageSelect" class="language-select">
+            <option value="vi">🇻🇳 Tiếng Việt</option>
+            <option value="en">🇬🇧 English</option>
+        </select>
+    </div>
+
     <!-- ========== LOGIN SCREEN ========== -->
     <div id="login-screen" class="screen">
         <div class="login-hero">
-            <!-- Nút chọn ngôn ngữ ở login (hiển thị cờ) -->
-            <div class="login-lang-btn" id="loginLangToggleBtn">
-                <span id="loginLangFlag">🇻🇳</span>
-            </div>
-            <!-- Menu ngôn ngữ cho login -->
-            <div class="login-lang-menu" id="loginLangMenu">
-                <div class="lang-menu-item" data-lang="vi">🇻🇳 Tiếng Việt</div>
-                <div class="lang-menu-item" data-lang="en">🇬🇧 English</div>
-            </div>
-
             <div class="login-logo"><i class="fa-solid fa-microphone-lines"></i></div>
             <h1 data-i18n="login_title">Smart Meeting<br>Minutes AI</h1>
             <p data-i18n="login_sub">Hệ thống xử lý biên bản cuộc họp tối giản dành cho chuyên viên Sales</p>
@@ -947,8 +835,7 @@
                 <input type="text" id="userIdInput" class="modal-input" data-i18n-placeholder="userid_placeholder" placeholder="S-PM-APP-000" style="padding-left:44px;">
             </div>
 
-            <!-- Nút đăng nhập có id để gắn sự kiện -->
-            <button class="btn-primary" id="loginButton">
+            <button class="btn-primary" onclick="handleLogin()">
                 <span id="login-text" data-i18n="login_btn">Tiếp tục</span>
                 <div id="login-loader" class="loader"></div>
             </button>
@@ -966,21 +853,9 @@
                     <p data-i18n="greeting">Người dùng:</p>
                     <h2 id="user-name-display">Sales Name</h2>
                 </div>
-                <div style="display:flex; align-items:center; gap:8px; position:relative;">
-                    <!-- Nút chọn ngôn ngữ (hiển thị cờ) -->
-                    <button class="avatar-btn lang-btn" id="langToggleBtn" title="Chọn ngôn ngữ">
-                        <span id="dashboardLangFlag">🇻🇳</span>
-                    </button>
-                    <!-- Menu ngôn ngữ popup (dành cho dashboard) -->
-                    <div class="lang-menu" id="langMenu">
-                        <div class="lang-menu-item" data-lang="vi">🇻🇳 Tiếng Việt</div>
-                        <div class="lang-menu-item" data-lang="en">🇬🇧 English</div>
-                    </div>
-                    <!-- Nút đăng xuất -->
-                    <button class="avatar-btn" onclick="handleLogout()" title="Đăng xuất">
-                        <i class="fa-solid fa-arrow-right-from-bracket"></i>
-                    </button>
-                </div>
+                <button class="avatar-btn" onclick="handleLogout()" title="Đăng xuất">
+                    <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                </button>
             </div>
         </div>
 
@@ -1098,7 +973,7 @@
                             <span id="fileStatusLabel" class="control-label" data-i18n="upload_btn">Tải lên</span>
                         </div>
 
-                        <!-- Nút ghi âm (màu đỏ mờ) -->
+                        <!-- Nút ghi âm (thay thế nút nén file) -->
                         <div class="control-wrapper">
                             <button type="button" id="recordBtn" class="circle-btn">
                                 <i class="fa-solid fa-microphone"></i>
@@ -1107,8 +982,8 @@
                         </div>
                     </div>
                     <div id="fileStatus"></div>
-                    <!-- file_tip đã sửa: chỉ hỗ trợ định dạng, không dung lượng/nén -->
-                    <p class="footer-tip" data-i18n="file_tip">Hỗ trợ: <strong class="text-slate-700">mp3, m4a, wav,...</strong></p>
+                    <!-- Thêm lại dòng hỗ trợ định dạng file (đã bỏ dung lượng và nén) -->
+                    <p class="footer-tip" data-i18n="file_tip">Hỗ trợ: <strong>mp3, m4a, wav,...</strong></p>
                 </div>
 
                 <audio id="audioPlayback" controls class="hidden"></audio>
@@ -1192,6 +1067,7 @@
             cc_placeholder: 'abc@congty.com (tùy chọn)',
             file_panel_title: 'Tệp âm thanh',
             upload_btn: 'Tải lên',
+            change_file_btn: 'Đổi tệp khác',
             record_btn: 'Ghi âm',
             stop_record_btn: 'Dừng ghi',
             recording_status: 'Đang ghi...',
@@ -1261,6 +1137,7 @@
             cc_placeholder: 'abc@company.com (optional)',
             file_panel_title: 'Audio file',
             upload_btn: 'Upload',
+            change_file_btn: 'Change file',
             record_btn: 'Record',
             stop_record_btn: 'Stop recording',
             recording_status: 'Recording...',
@@ -1294,94 +1171,17 @@
     };
 
     let currentLang = localStorage.getItem('popminutes_lang') || 'vi';
+    document.getElementById('languageSelect').value = currentLang;
 
     function t(key) {
         return translations[currentLang]?.[key] || key;
     }
 
-    // ========================================================================
-    //  QUẢN LÝ NGÔN NGỮ (cho cả login và dashboard)
-    // ========================================================================
-    // Lấy các phần tử
-    const loginLangToggle = document.getElementById('loginLangToggleBtn');
-    const loginLangMenu = document.getElementById('loginLangMenu');
-    const loginLangItems = document.querySelectorAll('#loginLangMenu .lang-menu-item');
-
-    const dashLangToggle = document.getElementById('langToggleBtn');
-    const dashLangMenu = document.getElementById('langMenu');
-    const dashLangItems = document.querySelectorAll('#langMenu .lang-menu-item');
-
-    const loginFlag = document.getElementById('loginLangFlag');
-    const dashFlag = document.getElementById('dashboardLangFlag');
-
-    // Hàm cập nhật cờ trên nút
-    function updateFlagIcons(lang) {
-        const flag = lang === 'vi' ? '🇻🇳' : '🇬🇧';
-        if (loginFlag) loginFlag.textContent = flag;
-        if (dashFlag) dashFlag.textContent = flag;
-    }
-
-    // Hàm đóng tất cả menu
-    function closeAllMenus() {
-        if (loginLangMenu) loginLangMenu.classList.remove('active');
-        if (dashLangMenu) dashLangMenu.classList.remove('active');
-    }
-
-    // Mở/đóng menu login
-    if (loginLangToggle && loginLangMenu) {
-        loginLangToggle.addEventListener('click', function(e) {
-            e.stopPropagation();
-            if (dashLangMenu) dashLangMenu.classList.remove('active');
-            loginLangMenu.classList.toggle('active');
-        });
-    }
-
-    // Mở/đóng menu dashboard
-    if (dashLangToggle && dashLangMenu) {
-        dashLangToggle.addEventListener('click', function(e) {
-            e.stopPropagation();
-            if (loginLangMenu) loginLangMenu.classList.remove('active');
-            dashLangMenu.classList.toggle('active');
-        });
-    }
-
-    // Đóng menu khi click ra ngoài
-    document.addEventListener('click', function(e) {
-        const isLoginClick = loginLangToggle && (loginLangToggle.contains(e.target) || (loginLangMenu && loginLangMenu.contains(e.target)));
-        const isDashClick = dashLangToggle && (dashLangToggle.contains(e.target) || (dashLangMenu && dashLangMenu.contains(e.target)));
-        if (!isLoginClick && !isDashClick) {
-            closeAllMenus();
-        }
-    });
-
-    // Xử lý chọn ngôn ngữ từ cả hai menu
-    function handleLangSelect(lang) {
-        applyLanguage(lang);
-        closeAllMenus();
-        // Cập nhật active style cho cả hai menu
-        loginLangItems.forEach(i => i.classList.toggle('active-lang', i.dataset.lang === lang));
-        dashLangItems.forEach(i => i.classList.toggle('active-lang', i.dataset.lang === lang));
-        updateFlagIcons(lang);
-    }
-
-    loginLangItems.forEach(item => {
-        item.addEventListener('click', function() {
-            handleLangSelect(this.dataset.lang);
-        });
-    });
-
-    dashLangItems.forEach(item => {
-        item.addEventListener('click', function() {
-            handleLangSelect(this.dataset.lang);
-        });
-    });
-
-    // Hàm áp dụng ngôn ngữ chung
     function applyLanguage(lang) {
         currentLang = lang;
         localStorage.setItem('popminutes_lang', lang);
+        document.getElementById('languageSelect').value = lang;
 
-        // Cập nhật các phần tử có data-i18n
         document.querySelectorAll('[data-i18n]').forEach(el => {
             const key = el.getAttribute('data-i18n');
             const translation = t(key);
@@ -1402,7 +1202,6 @@
             }
         });
 
-        // Cập nhật các thẻ id
         const idMap = {
             'login-title': 'login_title',
             'login-sub': 'login_sub',
@@ -1465,7 +1264,7 @@
             toggleCcBtn.innerHTML = `<i class="fa-solid ${icon}"></i> ${label}`;
         }
 
-        // Cập nhật nhãn của nút ghi âm
+        // Cập nhật nhãn của nút ghi âm và trạng thái
         const recordBtn = document.getElementById('recordBtn');
         const recordLabel = document.getElementById('recordLabel');
         if (recordBtn && recordLabel) {
@@ -1473,8 +1272,13 @@
             recordLabel.textContent = isRecording ? t('stop_record_btn') : t('record_btn');
         }
 
-        // Cập nhật cờ trên nút
-        updateFlagIcons(lang);
+        // Cập nhật fileStatusLabel
+        const fileInput = document.getElementById('fileInput');
+        if (!fileInput.files.length && !selectedFileBlob) {
+            document.getElementById('fileStatusLabel').textContent = t('upload_btn');
+        } else if (selectedFileBlob) {
+            document.getElementById('fileStatusLabel').textContent = t('change_file_btn');
+        }
 
         updateDashboardDynamicText();
     }
@@ -1494,49 +1298,58 @@
         }
     }
 
-    // Áp dụng ngôn ngữ khi load
+    document.getElementById('languageSelect').addEventListener('change', function() {
+        applyLanguage(this.value);
+        const statusDiv = document.getElementById('recordStatus');
+        if (statusDiv && statusDiv.innerHTML.includes(t('status_connecting').substring(0, 10))) {
+            statusDiv.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${t('status_connecting')}`;
+        }
+        const errorMsg = document.getElementById('error-message');
+        if (!errorMsg.classList.contains('hidden')) {
+            const currentText = errorMsg.textContent;
+            const errKeys = ['err_empty', 'err_invalid', 'err_network'];
+            for (let key of errKeys) {
+                if (currentText === translations.vi[key] || currentText === translations.en[key]) {
+                    errorMsg.textContent = t(key);
+                    break;
+                }
+            }
+        }
+    });
+
     document.addEventListener('DOMContentLoaded', function() {
         applyLanguage(currentLang);
-        // Đánh dấu ngôn ngữ đang chọn trong cả hai menu
-        loginLangItems.forEach(item => {
-            item.classList.toggle('active-lang', item.dataset.lang === currentLang);
-        });
-        dashLangItems.forEach(item => {
-            item.classList.toggle('active-lang', item.dataset.lang === currentLang);
-        });
-        updateFlagIcons(currentLang);
     });
 
     // ========================================================================
-    //  XỬ LÝ ĐĂNG NHẬP (dùng addEventListener để đảm bảo)
+    //  CẤU HÌNH API
     // ========================================================================
-    const loginButton = document.getElementById('loginButton');
-    if (loginButton) {
-        loginButton.addEventListener('click', handleLogin);
-    }
+    const CLOUD_FUNCTION_URL = "https://asia-southeast1-gen-lang-client-0303222519.cloudfunctions.net/get-upload-url";
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxQ8HeKwVuV4g1yMDFgAkkStAOW2nuN0VwSk2WJiZ75FcXGXvlayQmHeH8O0Bq2ZH42/exec";
+    const AUTH_STORAGE_KEY = "popminutes_auth";
+    const SESSION_DAYS = 90;
 
-    // Thêm sự kiện Enter cho các ô input
-    document.getElementById('emailInput')?.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter') handleLogin();
-    });
-    document.getElementById('userIdInput')?.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter') handleLogin();
-    });
+    let currentEmail = "",
+        currentSalesName = "",
+        currentCompanyName = "";
 
+    // ========================================================================
+    //  ĐĂNG NHẬP
+    // ========================================================================
     async function handleLogin() {
-        try {
-            const emailInput = document.getElementById('emailInput').value.trim();
-            const userIdInput = document.getElementById('userIdInput').value.trim();
-            const errorMsg = document.getElementById('error-message');
-            if (!emailInput || !userIdInput) {
-                errorMsg.textContent = t('err_empty');
-                errorMsg.classList.remove('hidden');
-                return;
-            }
-            document.getElementById('login-text').style.display = 'none';
-            document.getElementById('login-loader').style.display = 'block';
-            errorMsg.classList.add('hidden');
+        const emailInput = document.getElementById('emailInput').value.trim();
+        const userIdInput = document.getElementById('userIdInput').value.trim();
+        const errorMsg = document.getElementById('error-message');
+        if (!emailInput || !userIdInput) {
+            errorMsg.textContent = t('err_empty');
+            errorMsg.classList.remove('hidden');
+            return;
+        }
+        document.getElementById('login-text').style.display = 'none';
+        document.getElementById('login-loader').style.display = 'block';
+        errorMsg.classList.add('hidden');
 
+        try {
             const loginUrl = `${CLOUD_FUNCTION_URL}?action=authenticateSales&email=${encodeURIComponent(emailInput)}&userId=${encodeURIComponent(userIdInput)}`;
             const response = await fetch(loginUrl);
             const result = await response.json();
@@ -1555,12 +1368,10 @@
                 document.getElementById('package-display').textContent = result.enterprise.packageId || t('undefined_package');
                 document.getElementById('expiry-display').textContent = result.enterprise.expiryDate || t('undefined_expiry');
             } else {
-                errorMsg.textContent = result.message || t('err_invalid');
+                errorMsg.textContent = t('err_invalid');
                 errorMsg.classList.remove('hidden');
             }
         } catch (e) {
-            console.error('Login error:', e);
-            const errorMsg = document.getElementById('error-message');
             errorMsg.innerHTML = `<i class='fa-solid fa-triangle-exclamation'></i> ${t('err_network')}`;
             errorMsg.classList.remove('hidden');
         } finally {
@@ -1592,19 +1403,7 @@
     }
 
     // ========================================================================
-    //  CẤU HÌNH API
-    // ========================================================================
-    const CLOUD_FUNCTION_URL = "https://asia-southeast1-gen-lang-client-0303222519.cloudfunctions.net/get-upload-url";
-    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxQ8HeKwVuV4g1yMDFgAkkStAOW2nuN0VwSk2WJiZ75FcXGXvlayQmHeH8O0Bq2ZH42/exec";
-    const AUTH_STORAGE_KEY = "popminutes_auth";
-    const SESSION_DAYS = 90;
-
-    let currentEmail = "",
-        currentSalesName = "",
-        currentCompanyName = "";
-
-    // ========================================================================
-    //  LOGIC UPLOAD & RECORD (giữ nguyên)
+    //  LOGIC UPLOAD & RECORD
     // ========================================================================
     let selectedFileBlob = null;
     let mediaRecorder = null;
@@ -1622,10 +1421,12 @@
     const recordBtn = document.getElementById('recordBtn');
     const recordLabel = document.getElementById('recordLabel');
 
+    // Hàm cập nhật trạng thái nút upload
     function updateUploadButton() {
         uploadBtn.disabled = !selectedFileBlob;
     }
 
+    // Hàm xử lý khi có file (từ upload hoặc ghi âm)
     function handleFileSelected(file) {
         selectedFileBlob = file;
         audioPlayback.src = URL.createObjectURL(file);
@@ -1635,8 +1436,10 @@
         const shortName = file.name.length > 25 ? file.name.substring(0,22)+'...' : file.name;
         document.getElementById('fileStatus').innerHTML =
             `<i class="fa-solid fa-file-audio"></i> ${shortName} (${(file.size/(1024*1024)).toFixed(2)}MB)`;
+        fileStatusLabel.textContent = t('change_file_btn');
     }
 
+    // Reset recorder state
     function resetRecorder() {
         if (mediaRecorder && isRecording) {
             mediaRecorder.stop();
@@ -1651,6 +1454,7 @@
         recordStatusDiv.innerHTML = '';
         fileInput.value = '';
         document.getElementById('fileStatus').innerHTML = '';
+        fileStatusLabel.textContent = t('upload_btn');
         document.getElementById('clientNameInput').value = '';
         const ccFields = document.getElementById('ccFields');
         if (ccFields && !ccFields.classList.contains('hidden')) {
@@ -1660,22 +1464,27 @@
         }
         if (document.getElementById('ccEmail1')) document.getElementById('ccEmail1').value = '';
         if (document.getElementById('ccEmail2')) document.getElementById('ccEmail2').value = '';
+        // Reset record button
         recordBtn.classList.remove('recording');
         recordLabel.textContent = t('record_btn');
         recordBtn.querySelector('i').className = 'fa-solid fa-microphone';
     }
 
+    // Sự kiện chọn file từ input
     fileInput.addEventListener('change', e => {
         if (e.target.files.length > 0) {
             const file = e.target.files[0];
+            // Đặt tên file gốc
             handleFileSelected(file);
         } else {
             resetRecorder();
         }
     });
 
+    // Ghi âm
     recordBtn.addEventListener('click', async function() {
         if (isRecording) {
+            // Dừng ghi
             if (mediaRecorder) {
                 mediaRecorder.stop();
             }
@@ -1686,6 +1495,7 @@
             return;
         }
 
+        // Bắt đầu ghi
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
             mediaRecorder = new MediaRecorder(stream);
@@ -1698,12 +1508,15 @@
             };
 
             mediaRecorder.onstop = () => {
+                // Tạo file từ các chunk
                 const audioBlob = new Blob(recordedChunks, { type: 'audio/webm' });
                 const fileName = `recording_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.webm`;
                 const audioFile = new File([audioBlob], fileName, { type: 'audio/webm' });
                 handleFileSelected(audioFile);
                 recordStatusDiv.innerHTML = `<span style="color:var(--success)">${t('recording_saved')}</span>`;
+                // Dừng các track
                 stream.getTracks().forEach(track => track.stop());
+                // Cập nhật label
                 recordLabel.textContent = t('record_btn');
                 recordBtn.querySelector('i').className = 'fa-solid fa-microphone';
                 recordBtn.classList.remove('recording');
@@ -1721,6 +1534,7 @@
         }
     });
 
+    // Mở modal
     openBtn.addEventListener('click', () => {
         if (!currentEmail) {
             alert(t('toast_login_required'));
@@ -1737,6 +1551,7 @@
     }
     closeModalBtn.addEventListener('click', closeModal);
 
+    // Upload
     uploadBtn.addEventListener('click', uploadAudio);
 
     let isUploading = false;
@@ -1834,6 +1649,9 @@
         });
     }
 
+    // ========================================================================
+    //  CÁC SỰ KIỆN CHO CHECKIN (NÂNG CẤP)
+    // ========================================================================
     document.getElementById('checkinBtn').addEventListener('click', () => alert(t('toast_upgrade_required')));
     document.getElementById('qrCheckinBtn').addEventListener('click', () => alert(t('toast_upgrade_required')));
 
@@ -2078,13 +1896,11 @@
     window.addEventListener('DOMContentLoaded', async () => {
         await tryAutoLogin();
         applyLanguage(currentLang);
-        loginLangItems.forEach(item => {
-            item.classList.toggle('active-lang', item.dataset.lang === currentLang);
-        });
-        dashLangItems.forEach(item => {
-            item.classList.toggle('active-lang', item.dataset.lang === currentLang);
-        });
-        updateFlagIcons(currentLang);
+        if (document.getElementById('fileInput').files.length > 0) {
+            document.getElementById('fileStatusLabel').textContent = t('change_file_btn');
+        }
+        updateDashboardDynamicText();
+        // Cập nhật trạng thái nút upload ban đầu
         updateUploadButton();
     });
 </script>
