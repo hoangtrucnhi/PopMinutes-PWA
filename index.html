@@ -84,16 +84,17 @@
             font-size: 20px;
             cursor: pointer;
             transition: all 0.2s;
-            position: relative;
             z-index: 10;
+            position: relative;
         }
         .lang-btn:hover {
-            background: rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.25);
         }
         .lang-btn:active {
             transform: scale(0.95);
         }
-        /* Menu ngôn ngữ popup - luôn hiển thị trên cùng */
+
+        /* ===== Menu ngôn ngữ popup - luôn hiển thị trên cùng ===== */
         .lang-menu {
             position: absolute;
             top: 52px;
@@ -102,8 +103,8 @@
             border-radius: 12px;
             box-shadow: 0 8px 24px rgba(0,0,0,0.25);
             padding: 8px 0;
-            min-width: 160px;
-            z-index: 99999 !important;
+            min-width: 170px;
+            z-index: 999999 !important;
             display: none;
             overflow: visible;
         }
@@ -127,6 +128,18 @@
         .lang-menu-item.active-lang {
             background: var(--navy-pale);
             color: var(--navy);
+        }
+
+        /* ===== Nút ngôn ngữ trên login ===== */
+        .login-lang-wrapper {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            z-index: 20;
+        }
+        .login-lang-wrapper .lang-menu {
+            right: 0;
+            top: 52px;
         }
 
         /* Các style khác giữ nguyên */
@@ -154,7 +167,7 @@
             background: var(--navy);
             padding: 56px 32px 72px;
             position: relative;
-            overflow: hidden;
+            overflow: visible;
         }
         .login-hero::before {
             content: '';
@@ -311,7 +324,7 @@
             justify-content: space-between;
             align-items: center;
             position: relative;
-            z-index: 5;
+            z-index: 1;
             gap: 10px;
         }
         .dash-greeting p {
@@ -865,6 +878,17 @@
     <!-- ========== LOGIN SCREEN ========== -->
     <div id="login-screen" class="screen">
         <div class="login-hero">
+            <!-- Nút ngôn ngữ trên login -->
+            <div class="login-lang-wrapper" style="position:absolute; top:16px; right:16px; z-index:20;">
+                <button class="lang-btn" id="loginLangToggleBtn" title="Chọn ngôn ngữ">
+                    <span id="loginLangFlag">🇻🇳</span>
+                </button>
+                <div class="lang-menu" id="loginLangMenu">
+                    <div class="lang-menu-item" data-lang="vi">🇻🇳 Tiếng Việt</div>
+                    <div class="lang-menu-item" data-lang="en">🇬🇧 English</div>
+                </div>
+            </div>
+
             <div class="login-logo"><i class="fa-solid fa-microphone-lines"></i></div>
             <h1 data-i18n="login_title">Smart Meeting<br>Minutes AI</h1>
             <p data-i18n="login_sub">Hệ thống xử lý biên bản cuộc họp tối giản dành cho chuyên viên Sales</p>
@@ -903,13 +927,12 @@
                     <p data-i18n="greeting">Người dùng:</p>
                     <h2 id="user-name-display">Sales Name</h2>
                 </div>
-                <div style="display:flex; align-items:center; gap:8px; position:relative; z-index: 20;">
-                    <!-- Nút ngôn ngữ hình tròn (cờ) -->
-                    <button class="lang-btn" id="langToggleBtn" title="Chọn ngôn ngữ">
+                <div style="display:flex; align-items:center; gap:8px; position:relative; z-index:1;">
+                    <!-- Nút ngôn ngữ trên dashboard -->
+                    <button class="lang-btn" id="dashLangToggleBtn" title="Chọn ngôn ngữ">
                         <span id="dashLangFlag">🇻🇳</span>
                     </button>
-                    <!-- Menu ngôn ngữ popup -->
-                    <div class="lang-menu" id="langMenu">
+                    <div class="lang-menu" id="dashLangMenu">
                         <div class="lang-menu-item" data-lang="vi">🇻🇳 Tiếng Việt</div>
                         <div class="lang-menu-item" data-lang="en">🇬🇧 English</div>
                     </div>
@@ -1158,8 +1181,7 @@
             status_uploading: 'Đang tải file lên Cloud...',
             status_processing: 'AI đang tiến hành phân tích cuộc họp...',
             recording_saved: 'Đã ghi âm xong!',
-            // Tooltip cho nút ngôn ngữ
-            lang_tooltip: 'Chọn ngôn ngữ',
+            select_language: 'Chọn ngôn ngữ',
         },
         en: {
             login_title: 'Smart Meeting Minutes AI',
@@ -1230,7 +1252,7 @@
             status_uploading: 'Uploading file to Cloud...',
             status_processing: 'AI is analyzing the meeting...',
             recording_saved: 'Recording saved!',
-            lang_tooltip: 'Select language',
+            select_language: 'Select language',
         }
     };
 
@@ -1241,42 +1263,83 @@
         return translations[currentLang]?.[key] || key;
     }
 
-    // ========== QUẢN LÝ NGÔN NGỮ (nút tròn) ==========
-    const langToggleBtn = document.getElementById('langToggleBtn');
-    const langMenu = document.getElementById('langMenu');
-    const langItems = document.querySelectorAll('.lang-menu-item');
+    // ========== QUẢN LÝ NGÔN NGỮ ==========
+    // Các nút và menu
+    const loginToggle = document.getElementById('loginLangToggleBtn');
+    const loginMenu = document.getElementById('loginLangMenu');
+    const loginItems = document.querySelectorAll('#loginLangMenu .lang-menu-item');
+
+    const dashToggle = document.getElementById('dashLangToggleBtn');
+    const dashMenu = document.getElementById('dashLangMenu');
+    const dashItems = document.querySelectorAll('#dashLangMenu .lang-menu-item');
+
+    const loginFlag = document.getElementById('loginLangFlag');
     const dashFlag = document.getElementById('dashLangFlag');
 
-    function updateFlagIcon(lang) {
-        dashFlag.textContent = lang === 'vi' ? '🇻🇳' : '🇬🇧';
-        // Cập nhật tooltip
-        if (langToggleBtn) {
-            langToggleBtn.title = t('lang_tooltip');
-        }
+    function updateFlagIcons(lang) {
+        const flag = lang === 'vi' ? '🇻🇳' : '🇬🇧';
+        if (loginFlag) loginFlag.textContent = flag;
+        if (dashFlag) dashFlag.textContent = flag;
     }
 
-    // Mở/đóng menu
-    langToggleBtn.addEventListener('click', function(e) {
-        e.stopPropagation();
-        langMenu.classList.toggle('active');
-    });
+    function updateLangTooltip(lang) {
+        const title = t('select_language');
+        if (loginToggle) loginToggle.title = title;
+        if (dashToggle) dashToggle.title = title;
+    }
 
-    // Đóng menu khi click ra ngoài
+    function closeAllMenus() {
+        if (loginMenu) loginMenu.classList.remove('active');
+        if (dashMenu) dashMenu.classList.remove('active');
+    }
+
+    // Toggle login menu
+    if (loginToggle && loginMenu) {
+        loginToggle.addEventListener('click', function(e) {
+            e.stopPropagation();
+            if (dashMenu) dashMenu.classList.remove('active');
+            loginMenu.classList.toggle('active');
+        });
+    }
+
+    // Toggle dashboard menu
+    if (dashToggle && dashMenu) {
+        dashToggle.addEventListener('click', function(e) {
+            e.stopPropagation();
+            if (loginMenu) loginMenu.classList.remove('active');
+            dashMenu.classList.toggle('active');
+        });
+    }
+
+    // Đóng menu khi click ngoài
     document.addEventListener('click', function(e) {
-        if (!langMenu.contains(e.target) && e.target !== langToggleBtn) {
-            langMenu.classList.remove('active');
+        const isLogin = loginToggle && (loginToggle.contains(e.target) || (loginMenu && loginMenu.contains(e.target)));
+        const isDash = dashToggle && (dashToggle.contains(e.target) || (dashMenu && dashMenu.contains(e.target)));
+        if (!isLogin && !isDash) {
+            closeAllMenus();
         }
     });
 
-    // Chọn ngôn ngữ
-    langItems.forEach(item => {
+    // Xử lý chọn ngôn ngữ
+    function handleLangSelect(lang) {
+        applyLanguage(lang);
+        closeAllMenus();
+        // Đánh dấu active
+        loginItems.forEach(i => i.classList.toggle('active-lang', i.dataset.lang === lang));
+        dashItems.forEach(i => i.classList.toggle('active-lang', i.dataset.lang === lang));
+        updateFlagIcons(lang);
+        updateLangTooltip(lang);
+    }
+
+    loginItems.forEach(item => {
         item.addEventListener('click', function() {
-            const lang = this.dataset.lang;
-            applyLanguage(lang);
-            langMenu.classList.remove('active');
-            langItems.forEach(i => i.classList.remove('active-lang'));
-            this.classList.add('active-lang');
-            updateFlagIcon(lang);
+            handleLangSelect(this.dataset.lang);
+        });
+    });
+
+    dashItems.forEach(item => {
+        item.addEventListener('click', function() {
+            handleLangSelect(this.dataset.lang);
         });
     });
 
@@ -1284,7 +1347,6 @@
         currentLang = lang;
         localStorage.setItem('popminutes_lang', lang);
 
-        // Cập nhật các phần tử có data-i18n
         document.querySelectorAll('[data-i18n]').forEach(el => {
             const key = el.getAttribute('data-i18n');
             const translation = t(key);
@@ -1305,7 +1367,6 @@
             }
         });
 
-        // Cập nhật các thẻ id
         const idMap = {
             'login-title': 'login_title',
             'login-sub': 'login_sub',
@@ -1367,7 +1428,7 @@
             toggleCcBtn.innerHTML = `<i class="fa-solid ${icon}"></i> ${label}`;
         }
 
-        // Cập nhật nhãn của nút ghi âm và trạng thái
+        // Cập nhật nhãn ghi âm
         const recordBtn = document.getElementById('recordBtn');
         const recordLabel = document.getElementById('recordLabel');
         if (recordBtn && recordLabel) {
@@ -1383,14 +1444,15 @@
             document.getElementById('fileStatusLabel').textContent = t('change_file_btn');
         }
 
-        // Cập nhật thông báo lỗi nếu đang hiển thị
+        // Cập nhật lỗi
         const errorMsg = document.getElementById('error-message');
         if (errorMsg && !errorMsg.classList.contains('hidden') && lastErrorKey) {
             errorMsg.textContent = t(lastErrorKey);
         }
 
         updateDashboardDynamicText();
-        updateFlagIcon(lang);
+        updateFlagIcons(lang);
+        updateLangTooltip(lang);
     }
 
     function updateDashboardDynamicText() {
@@ -1411,18 +1473,19 @@
     // Áp dụng ngôn ngữ khi load
     document.addEventListener('DOMContentLoaded', function() {
         applyLanguage(currentLang);
-        langItems.forEach(item => {
-            if (item.dataset.lang === currentLang) {
-                item.classList.add('active-lang');
-            } else {
-                item.classList.remove('active-lang');
-            }
+        // Đánh dấu active
+        loginItems.forEach(item => {
+            item.classList.toggle('active-lang', item.dataset.lang === currentLang);
         });
-        updateFlagIcon(currentLang);
+        dashItems.forEach(item => {
+            item.classList.toggle('active-lang', item.dataset.lang === currentLang);
+        });
+        updateFlagIcons(currentLang);
+        updateLangTooltip(currentLang);
     });
 
     // ========================================================================
-    //  CẤU HÌNH API (giữ nguyên)
+    //  CẤU HÌNH API
     // ========================================================================
     const CLOUD_FUNCTION_URL = "https://asia-southeast1-gen-lang-client-0303222519.cloudfunctions.net/get-upload-url";
     const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxQ8HeKwVuV4g1yMDFgAkkStAOW2nuN0VwSk2WJiZ75FcXGXvlayQmHeH8O0Bq2ZH42/exec";
@@ -1510,7 +1573,7 @@
     }
 
     // ========================================================================
-    //  LOGIC UPLOAD & RECORD (giữ nguyên, đã có từ trước)
+    //  LOGIC UPLOAD & RECORD
     // ========================================================================
     let selectedFileBlob = null;
     let mediaRecorder = null;
@@ -1798,7 +1861,7 @@
     }
 
     // ========================================================================
-    //  LỊCH SỬ (giữ nguyên)
+    //  LỊCH SỬ
     // ========================================================================
     function showToast(message, isSuccess = true) {
         let oldToast = document.getElementById('customToast');
@@ -1986,17 +2049,20 @@
     window.addEventListener('DOMContentLoaded', async () => {
         await tryAutoLogin();
         applyLanguage(currentLang);
-        langItems.forEach(item => {
-            if (item.dataset.lang === currentLang) {
-                item.classList.add('active-lang');
-            }
+        // Đánh dấu active
+        loginItems.forEach(item => {
+            item.classList.toggle('active-lang', item.dataset.lang === currentLang);
+        });
+        dashItems.forEach(item => {
+            item.classList.toggle('active-lang', item.dataset.lang === currentLang);
         });
         if (document.getElementById('fileInput').files.length > 0) {
             document.getElementById('fileStatusLabel').textContent = t('change_file_btn');
         }
         updateDashboardDynamicText();
         updateUploadButton();
-        updateFlagIcon(currentLang);
+        updateFlagIcons(currentLang);
+        updateLangTooltip(currentLang);
     });
 </script>
 </body>
