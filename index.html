@@ -1600,7 +1600,7 @@
             const processResult = await processResponse.json();
 
             if (processResult.status === 200) {
-                recordStatusDiv.innerHTML = `<div style="color:#065F46; font-weight:600;">✅ ${t('toast_upload_success')}</div>`;
+                recordStatusDiv.innerHTML = `<div style="color:#065F46; font-weight:600;">${t('toast_upload_success')}</div>`;
                 setTimeout(() => closeModal(), 3000);
             } else {
                 throw new Error(processResult.message || t('err_process_fail'));
