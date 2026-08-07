@@ -21,7 +21,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
 
     <style>
-        /* ========== TOÀN BỘ STYLE (giữ nguyên) ========== */
+        /* ========== TOÀN BỘ STYLE ========== */
         *,
         *::before,
         *::after {
@@ -275,9 +275,11 @@
             align-items: center;
             justify-content: center;
             color: #fff;
-            font-size: 15px;
+            font-size: 18px;
             cursor: pointer;
             transition: all 0.2s;
+            text-decoration: none;
+            font-weight: 400;
         }
         .avatar-btn:hover {
             background: rgba(255,255,255,0.2);
@@ -285,23 +287,25 @@
         .avatar-btn:active {
             transform: scale(0.95);
         }
-        /* Nút chọn ngôn ngữ (tròn, icon globe) */
+        /* Nút chọn ngôn ngữ (hiển thị cờ) */
         .lang-btn {
             background: rgba(255,255,255,0.1);
             border: 1px solid rgba(255,255,255,0.15);
             backdrop-filter: blur(4px);
+            font-size: 20px;
+            line-height: 1;
         }
-        /* Menu ngôn ngữ popup */
+        /* Menu ngôn ngữ popup (z-index cao) */
         .lang-menu {
             position: absolute;
             top: 50px;
             right: 10px;
             background: white;
             border-radius: 12px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
             padding: 8px 0;
-            min-width: 150px;
-            z-index: 100;
+            min-width: 160px;
+            z-index: 9999;
             display: none;
             overflow: hidden;
         }
@@ -601,19 +605,22 @@
             color: var(--navy);
             box-shadow: 0 8px 24px rgba(27,43,122,0.1);
         }
-        /* Nút ghi âm luôn có màu đỏ */
+        /* Nút ghi âm: nền đỏ mờ, viền đỏ đậm, chữ trắng */
         #recordBtn {
-            background: var(--danger);
-            border-color: #FCA5A5;
-            color: white;
-            box-shadow: 0 8px 24px rgba(239,68,68,0.25);
+            background: rgba(239, 68, 68, 0.2);
+            border-color: #EF4444;
+            color: #EF4444;
+            box-shadow: 0 8px 24px rgba(239,68,68,0.1);
+            transition: all 0.25s;
         }
         #recordBtn:hover {
-            background: #DC2626;
+            background: rgba(239, 68, 68, 0.35);
             transform: scale(1.02);
         }
         #recordBtn.recording {
             animation: pulse 1s infinite;
+            background: rgba(239, 68, 68, 0.4);
+            border-color: #DC2626;
         }
         @keyframes pulse {
             0% { transform: scale(1); }
@@ -826,12 +833,81 @@
             color: inherit;
             font-style: italic;
         }
-        /* Nút upload luôn giữ label "Tải lên" - không đổi */
+        /* Nút upload label giữ nguyên "Tải lên" */
         #fileStatusLabel {
-            pointer-events: none; /* vẫn cho phép click vào label để mở file */
+            pointer-events: none;
         }
         label.file-pick-btn {
             cursor: pointer;
+        }
+        /* Thêm style cho nút ngôn ngữ ở login */
+        .login-lang-btn {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.3);
+            backdrop-filter: blur(4px);
+            color: white;
+            font-size: 20px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+            transition: all 0.2s;
+        }
+        .login-lang-btn:hover {
+            background: rgba(255,255,255,0.25);
+        }
+        .login-lang-btn:active {
+            transform: scale(0.92);
+        }
+        /* Menu ngôn ngữ cho login (phải hiển thị phía trên) */
+        .login-lang-menu {
+            position: absolute;
+            top: 60px;
+            right: 16px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+            padding: 8px 0;
+            min-width: 160px;
+            z-index: 9999;
+            display: none;
+            overflow: hidden;
+        }
+        .login-lang-menu.active {
+            display: block;
+        }
+        .login-lang-menu .lang-menu-item {
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text);
+            transition: background 0.15s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .login-lang-menu .lang-menu-item:hover {
+            background: #F1F5F9;
+        }
+        .login-lang-menu .lang-menu-item.active-lang {
+            background: var(--navy-pale);
+            color: var(--navy);
+        }
+        /* Để menu không bị che bởi các thành phần khác */
+        .login-hero {
+            position: relative;
+        }
+        .dash-topbar .lang-menu,
+        .login-hero .login-lang-menu {
+            z-index: 9999 !important;
         }
     </style>
 </head>
@@ -841,6 +917,16 @@
     <!-- ========== LOGIN SCREEN ========== -->
     <div id="login-screen" class="screen">
         <div class="login-hero">
+            <!-- Nút chọn ngôn ngữ ở login (hiển thị cờ) -->
+            <div class="login-lang-btn" id="loginLangToggleBtn">
+                <span id="loginLangFlag">🇻🇳</span>
+            </div>
+            <!-- Menu ngôn ngữ cho login -->
+            <div class="login-lang-menu" id="loginLangMenu">
+                <div class="lang-menu-item" data-lang="vi">🇻🇳 Tiếng Việt</div>
+                <div class="lang-menu-item" data-lang="en">🇬🇧 English</div>
+            </div>
+
             <div class="login-logo"><i class="fa-solid fa-microphone-lines"></i></div>
             <h1 data-i18n="login_title">Smart Meeting<br>Minutes AI</h1>
             <p data-i18n="login_sub">Hệ thống xử lý biên bản cuộc họp tối giản dành cho chuyên viên Sales</p>
@@ -880,11 +966,11 @@
                     <h2 id="user-name-display">Sales Name</h2>
                 </div>
                 <div style="display:flex; align-items:center; gap:8px; position:relative;">
-                    <!-- Nút chọn ngôn ngữ (tròn) -->
+                    <!-- Nút chọn ngôn ngữ (hiển thị cờ) -->
                     <button class="avatar-btn lang-btn" id="langToggleBtn" title="Chọn ngôn ngữ">
-                        <i class="fa-solid fa-globe"></i>
+                        <span id="dashboardLangFlag">🇻🇳</span>
                     </button>
-                    <!-- Menu ngôn ngữ popup -->
+                    <!-- Menu ngôn ngữ popup (dành cho dashboard) -->
                     <div class="lang-menu" id="langMenu">
                         <div class="lang-menu-item" data-lang="vi">🇻🇳 Tiếng Việt</div>
                         <div class="lang-menu-item" data-lang="en">🇬🇧 English</div>
@@ -1011,7 +1097,7 @@
                             <span id="fileStatusLabel" class="control-label" data-i18n="upload_btn">Tải lên</span>
                         </div>
 
-                        <!-- Nút ghi âm (màu đỏ) -->
+                        <!-- Nút ghi âm (màu đỏ mờ) -->
                         <div class="control-wrapper">
                             <button type="button" id="recordBtn" class="circle-btn">
                                 <i class="fa-solid fa-microphone"></i>
@@ -1020,7 +1106,8 @@
                         </div>
                     </div>
                     <div id="fileStatus"></div>
-                    <!-- Đã xóa footer-tip -->
+                    <!-- Thêm dòng hỗ trợ định dạng file -->
+                    <p class="footer-tip" data-i18n="file_tip">Hỗ trợ: <strong class="text-slate-700">mp3, m4a, wav,...</strong>.<br>File tối đa: <strong class="text-slate-700">35MB</strong> (nếu quá, hãy nén bằng nút bên phải)</p>
                 </div>
 
                 <audio id="audioPlayback" controls class="hidden"></audio>
@@ -1107,6 +1194,7 @@
             record_btn: 'Ghi âm',
             stop_record_btn: 'Dừng ghi',
             recording_status: 'Đang ghi...',
+            file_tip: 'Hỗ trợ: <strong>mp3, m4a, wav,...</strong>.<br>File tối đa: <strong>35MB</strong> (nếu quá, hãy nén bằng nút bên phải)',
             consent_text: 'Bằng việc tải lên, bạn xác nhận có quyền hợp pháp và đã được sự đồng ý của những người tham gia để xử lý dữ liệu cuộc họp này.',
             start_btn: 'Bắt đầu',
             history_title_modal: 'Lịch sử xử lý',
@@ -1175,6 +1263,7 @@
             record_btn: 'Record',
             stop_record_btn: 'Stop recording',
             recording_status: 'Recording...',
+            file_tip: 'Supports: <strong>mp3, m4a, wav,...</strong>.<br>Max file size: <strong>35MB</strong> (if exceeded, use the compress button on the right)',
             consent_text: 'By uploading, you confirm that you have the legal right and have obtained consent from participants to process this meeting data.',
             start_btn: 'Start',
             history_title_modal: 'Processing History',
@@ -1210,37 +1299,81 @@
     }
 
     // ========================================================================
-    //  QUẢN LÝ NGÔN NGỮ
+    //  QUẢN LÝ NGÔN NGỮ (cho cả login và dashboard)
     // ========================================================================
-    const langToggleBtn = document.getElementById('langToggleBtn');
-    const langMenu = document.getElementById('langMenu');
-    const langItems = document.querySelectorAll('.lang-menu-item');
+    // Lấy các phần tử
+    const loginLangToggle = document.getElementById('loginLangToggleBtn');
+    const loginLangMenu = document.getElementById('loginLangMenu');
+    const loginLangItems = document.querySelectorAll('#loginLangMenu .lang-menu-item');
 
-    // Mở/đóng menu khi click nút
-    langToggleBtn.addEventListener('click', function(e) {
+    const dashLangToggle = document.getElementById('langToggleBtn');
+    const dashLangMenu = document.getElementById('langMenu');
+    const dashLangItems = document.querySelectorAll('#langMenu .lang-menu-item');
+
+    const loginFlag = document.getElementById('loginLangFlag');
+    const dashFlag = document.getElementById('dashboardLangFlag');
+
+    // Hàm cập nhật cờ trên nút
+    function updateFlagIcons(lang) {
+        const flag = lang === 'vi' ? '🇻🇳' : '🇬🇧';
+        if (loginFlag) loginFlag.textContent = flag;
+        if (dashFlag) dashFlag.textContent = flag;
+    }
+
+    // Hàm đóng tất cả menu
+    function closeAllMenus() {
+        loginLangMenu.classList.remove('active');
+        dashLangMenu.classList.remove('active');
+    }
+
+    // Mở/đóng menu login
+    loginLangToggle.addEventListener('click', function(e) {
         e.stopPropagation();
-        langMenu.classList.toggle('active');
+        // Đóng menu dashboard nếu đang mở
+        dashLangMenu.classList.remove('active');
+        loginLangMenu.classList.toggle('active');
+    });
+
+    // Mở/đóng menu dashboard
+    dashLangToggle.addEventListener('click', function(e) {
+        e.stopPropagation();
+        // Đóng menu login nếu đang mở
+        loginLangMenu.classList.remove('active');
+        dashLangMenu.classList.toggle('active');
     });
 
     // Đóng menu khi click ra ngoài
     document.addEventListener('click', function(e) {
-        if (!langMenu.contains(e.target) && e.target !== langToggleBtn) {
-            langMenu.classList.remove('active');
+        const isLoginClick = loginLangToggle.contains(e.target) || loginLangMenu.contains(e.target);
+        const isDashClick = dashLangToggle.contains(e.target) || dashLangMenu.contains(e.target);
+        if (!isLoginClick && !isDashClick) {
+            closeAllMenus();
         }
     });
 
-    // Chọn ngôn ngữ
-    langItems.forEach(item => {
+    // Xử lý chọn ngôn ngữ từ cả hai menu
+    function handleLangSelect(lang) {
+        applyLanguage(lang);
+        closeAllMenus();
+        // Cập nhật active style cho cả hai menu
+        loginLangItems.forEach(i => i.classList.toggle('active-lang', i.dataset.lang === lang));
+        dashLangItems.forEach(i => i.classList.toggle('active-lang', i.dataset.lang === lang));
+        updateFlagIcons(lang);
+    }
+
+    loginLangItems.forEach(item => {
         item.addEventListener('click', function() {
-            const lang = this.dataset.lang;
-            applyLanguage(lang);
-            langMenu.classList.remove('active');
-            // Cập nhật active style
-            langItems.forEach(i => i.classList.remove('active-lang'));
-            this.classList.add('active-lang');
+            handleLangSelect(this.dataset.lang);
         });
     });
 
+    dashLangItems.forEach(item => {
+        item.addEventListener('click', function() {
+            handleLangSelect(this.dataset.lang);
+        });
+    });
+
+    // Hàm áp dụng ngôn ngữ chung
     function applyLanguage(lang) {
         currentLang = lang;
         localStorage.setItem('popminutes_lang', lang);
@@ -1300,6 +1433,7 @@
             'file-panel-title': 'file_panel_title',
             'upload-btn-label': 'upload_btn',
             'record-btn-label': 'record_btn',
+            'file-tip': 'file_tip',
             'consent-text': 'consent_text',
             'start-btn': 'start_btn',
             'history-title-modal': 'history_title_modal',
@@ -1310,7 +1444,12 @@
         for (let id in idMap) {
             const el = document.getElementById(id);
             if (el && t(idMap[id]) !== undefined) {
-                el.textContent = t(idMap[id]);
+                // Với file-tip có thể chứa HTML, nên dùng innerHTML
+                if (id === 'file-tip') {
+                    el.innerHTML = t(idMap[id]);
+                } else {
+                    el.textContent = t(idMap[id]);
+                }
             }
         }
 
@@ -1331,8 +1470,8 @@
             recordLabel.textContent = isRecording ? t('stop_record_btn') : t('record_btn');
         }
 
-        // Nút upload luôn giữ label "Tải lên" – không đổi, nhưng cần đảm bảo data-i18n đã được áp dụng
-        // (đã áp dụng qua idMap)
+        // Cập nhật cờ trên nút
+        updateFlagIcons(lang);
 
         updateDashboardDynamicText();
     }
@@ -1355,14 +1494,14 @@
     // Áp dụng ngôn ngữ khi load
     document.addEventListener('DOMContentLoaded', function() {
         applyLanguage(currentLang);
-        // Đánh dấu ngôn ngữ đang chọn trong menu
-        langItems.forEach(item => {
-            if (item.dataset.lang === currentLang) {
-                item.classList.add('active-lang');
-            } else {
-                item.classList.remove('active-lang');
-            }
+        // Đánh dấu ngôn ngữ đang chọn trong cả hai menu
+        loginLangItems.forEach(item => {
+            item.classList.toggle('active-lang', item.dataset.lang === currentLang);
         });
+        dashLangItems.forEach(item => {
+            item.classList.toggle('active-lang', item.dataset.lang === currentLang);
+        });
+        updateFlagIcons(currentLang);
     });
 
     // ========================================================================
@@ -1941,12 +2080,14 @@
     window.addEventListener('DOMContentLoaded', async () => {
         await tryAutoLogin();
         applyLanguage(currentLang);
-        // Đánh dấu ngôn ngữ hiện tại trong menu
-        langItems.forEach(item => {
-            if (item.dataset.lang === currentLang) {
-                item.classList.add('active-lang');
-            }
+        // Đánh dấu ngôn ngữ hiện tại trong cả hai menu
+        loginLangItems.forEach(item => {
+            item.classList.toggle('active-lang', item.dataset.lang === currentLang);
         });
+        dashLangItems.forEach(item => {
+            item.classList.toggle('active-lang', item.dataset.lang === currentLang);
+        });
+        updateFlagIcons(currentLang);
         // Cập nhật trạng thái nút upload ban đầu
         updateUploadButton();
     });
