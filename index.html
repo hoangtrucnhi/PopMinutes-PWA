@@ -142,7 +142,6 @@
             top: 52px;
         }
 
-        /* Các style khác giữ nguyên */
         .loader {
             width: 20px;
             height: 20px;
@@ -317,8 +316,8 @@
             background: var(--navy);
             padding: 24px 28px 80px;
             position: relative;
-            overflow: visible; /* Đã đổi từ hidden sang visible */
-            z-index: 10;       /* Đã thêm z-index */
+            overflow: visible;
+            z-index: 10;
         }
         .dash-topbar {
             display: flex;
@@ -636,7 +635,6 @@
             color: var(--navy);
             box-shadow: 0 8px 24px rgba(27,43,122,0.1);
         }
-        /* Nút ghi âm màu đỏ (mờ) */
         #recordBtn {
             background: rgba(239, 68, 68, 0.25);
             border-color: #EF4444;
@@ -864,7 +862,6 @@
             color: inherit;
             font-style: italic;
         }
-        /* Nút upload label không đổi */
         #fileStatusLabel {
             pointer-events: none;
         }
@@ -879,7 +876,6 @@
     <!-- ========== LOGIN SCREEN ========== -->
     <div id="login-screen" class="screen">
         <div class="login-hero">
-            <!-- Nút ngôn ngữ trên login -->
             <div class="login-lang-wrapper" style="position:absolute; top:16px; right:16px; z-index:20;">
                 <button class="lang-btn" id="loginLangToggleBtn" title="Chọn ngôn ngữ">
                     <span id="loginLangFlag">🇻🇳</span>
@@ -928,9 +924,7 @@
                     <p data-i18n="greeting">Người dùng:</p>
                     <h2 id="user-name-display">Sales Name</h2>
                 </div>
-                <!-- Đã đổi z-index từ 1 sang 99 ở div này -->
                 <div style="display:flex; align-items:center; gap:8px; position:relative; z-index:99;">
-                    <!-- Nút ngôn ngữ trên dashboard -->
                     <button class="lang-btn" id="dashLangToggleBtn" title="Chọn ngôn ngữ">
                         <span id="dashLangFlag">🇻🇳</span>
                     </button>
@@ -938,7 +932,6 @@
                         <div class="lang-menu-item" data-lang="vi">🇻🇳 Tiếng Việt</div>
                         <div class="lang-menu-item" data-lang="en">🇬🇧 English</div>
                     </div>
-                    <!-- Nút đăng xuất -->
                     <button class="avatar-btn" onclick="handleLogout()" title="Đăng xuất">
                         <i class="fa-solid fa-arrow-right-from-bracket"></i>
                     </button>
@@ -1053,10 +1046,10 @@
                     <canvas id="waveformCanvas" width="400" height="64"></canvas>
 
                     <div class="dual-controls">
-                        <!-- Nút tải file lên -->
+                        <!-- Nút tải file lên (Bổ sung accept .webm) -->
                         <div class="control-wrapper">
                             <label for="fileInput" class="circle-btn file-pick-btn"><i class="fa-solid fa-folder-open"></i></label>
-                            <input type="file" id="fileInput" accept="audio/*" class="hidden">
+                            <input type="file" id="fileInput" accept="audio/*, .webm, .mp3, .m4a, .wav" class="hidden">
                             <span id="fileStatusLabel" class="control-label" data-i18n="upload_btn">Tải lên</span>
                         </div>
 
@@ -1069,7 +1062,7 @@
                         </div>
                     </div>
                     <div id="fileStatus"></div>
-                    <p class="footer-tip" data-i18n="file_tip">Hỗ trợ: <strong>mp3, m4a, wav,...</strong></p>
+                    <p class="footer-tip" data-i18n="file_tip">Hỗ trợ: <strong>mp3, m4a, wav, webm...</strong></p>
                 </div>
 
                 <audio id="audioPlayback" controls class="hidden"></audio>
@@ -1102,7 +1095,7 @@
         </div>
     </div>
 
-</div> <!-- end .app -->
+</div>
 
 <!-- BUTTON CÀI ĐẶT PWA -->
 <button id="btnInstall" style="display:none; background-color:#28a745; position:fixed; bottom:20px; right:20px; z-index:9999; padding:10px 15px; border:none; border-radius:30px; color:white; font-weight:bold; cursor:pointer;">
@@ -1156,8 +1149,8 @@
             change_file_btn: 'Đổi tệp khác',
             record_btn: 'Ghi âm',
             stop_record_btn: 'Dừng ghi',
-            recording_status: 'Đang ghi...',
-            file_tip: 'Hỗ trợ: <strong>mp3, m4a, wav,...</strong>',
+            recording_status: 'Đang ghi âm (Micro + Âm thanh Tab/Cuộc họp)...',
+            file_tip: 'Hỗ trợ: <strong>mp3, m4a, wav, webm...</strong>',
             consent_text: 'Bằng việc tải lên, bạn xác nhận có quyền hợp pháp và đã được sự đồng ý của những người tham gia để xử lý dữ liệu cuộc họp này.',
             start_btn: 'Bắt đầu',
             history_title_modal: 'Lịch sử xử lý',
@@ -1178,11 +1171,11 @@
             err_upload_init: 'Không thể lấy Signed URL',
             err_upload_fail: 'Tải file lên Cloud Storage thất bại',
             err_process_fail: 'Tải lên thất bại! AI đang lập biên bản.',
-            err_mic_permission: 'Không thể truy cập microphone. Vui lòng cấp quyền.',
+            err_mic_permission: 'Không thể truy cập Microphone hoặc Âm thanh Tab. Vui lòng cấp quyền.',
             status_connecting: 'Đang khởi tạo kết nối...',
             status_uploading: 'Đang tải file lên Cloud...',
             status_processing: 'AI đang tiến hành phân tích cuộc họp...',
-            recording_saved: 'Đã ghi âm xong!',
+            recording_saved: 'Đã hoàn tất thu âm!',
             select_language: 'Chọn ngôn ngữ',
         },
         en: {
@@ -1227,8 +1220,8 @@
             change_file_btn: 'Change file',
             record_btn: 'Record',
             stop_record_btn: 'Stop recording',
-            recording_status: 'Recording...',
-            file_tip: 'Supports: <strong>mp3, m4a, wav,...</strong>',
+            recording_status: 'Recording (Microphone + Meeting Tab Audio)...',
+            file_tip: 'Supports: <strong>mp3, m4a, wav, webm...</strong>',
             consent_text: 'By uploading, you confirm that you have the legal right and have obtained consent from participants to process this meeting data.',
             start_btn: 'Start',
             history_title_modal: 'Processing History',
@@ -1249,11 +1242,11 @@
             err_upload_init: 'Cannot get Signed URL',
             err_upload_fail: 'Upload to Cloud Storage failed',
             err_process_fail: 'Upload failed! AI is processing minutes.',
-            err_mic_permission: 'Cannot access microphone. Please grant permission.',
+            err_mic_permission: 'Cannot access Microphone or Tab Audio. Please grant permission.',
             status_connecting: 'Initializing connection...',
             status_uploading: 'Uploading file to Cloud...',
             status_processing: 'AI is analyzing the meeting...',
-            recording_saved: 'Recording saved!',
+            recording_saved: 'Recording completed!',
             select_language: 'Select language',
         }
     };
@@ -1266,7 +1259,6 @@
     }
 
     // ========== QUẢN LÝ NGÔN NGỮ ==========
-    // Các nút và menu
     const loginToggle = document.getElementById('loginLangToggleBtn');
     const loginMenu = document.getElementById('loginLangMenu');
     const loginItems = document.querySelectorAll('#loginLangMenu .lang-menu-item');
@@ -1295,7 +1287,6 @@
         if (dashMenu) dashMenu.classList.remove('active');
     }
 
-    // Toggle login menu
     if (loginToggle && loginMenu) {
         loginToggle.addEventListener('click', function(e) {
             e.stopPropagation();
@@ -1304,7 +1295,6 @@
         });
     }
 
-    // Toggle dashboard menu
     if (dashToggle && dashMenu) {
         dashToggle.addEventListener('click', function(e) {
             e.stopPropagation();
@@ -1313,7 +1303,6 @@
         });
     }
 
-    // Đóng menu khi click ngoài
     document.addEventListener('click', function(e) {
         const isLogin = loginToggle && (loginToggle.contains(e.target) || (loginMenu && loginMenu.contains(e.target)));
         const isDash = dashToggle && (dashToggle.contains(e.target) || (dashMenu && dashMenu.contains(e.target)));
@@ -1322,11 +1311,9 @@
         }
     });
 
-    // Xử lý chọn ngôn ngữ
     function handleLangSelect(lang) {
         applyLanguage(lang);
         closeAllMenus();
-        // Đánh dấu active
         loginItems.forEach(i => i.classList.toggle('active-lang', i.dataset.lang === lang));
         dashItems.forEach(i => i.classList.toggle('active-lang', i.dataset.lang === lang));
         updateFlagIcons(lang);
@@ -1421,7 +1408,6 @@
             }
         }
 
-        // Cập nhật toggle CC
         const toggleCcBtn = document.getElementById('toggleCcBtn');
         if (toggleCcBtn) {
             const isHidden = document.getElementById('ccFields').classList.contains('hidden');
@@ -1430,7 +1416,6 @@
             toggleCcBtn.innerHTML = `<i class="fa-solid ${icon}"></i> ${label}`;
         }
 
-        // Cập nhật nhãn ghi âm
         const recordBtn = document.getElementById('recordBtn');
         const recordLabel = document.getElementById('recordLabel');
         if (recordBtn && recordLabel) {
@@ -1438,7 +1423,6 @@
             recordLabel.textContent = isRecording ? t('stop_record_btn') : t('record_btn');
         }
 
-        // Cập nhật fileStatusLabel
         const fileInput = document.getElementById('fileInput');
         if (!fileInput.files.length && !selectedFileBlob) {
             document.getElementById('fileStatusLabel').textContent = t('upload_btn');
@@ -1446,7 +1430,6 @@
             document.getElementById('fileStatusLabel').textContent = t('change_file_btn');
         }
 
-        // Cập nhật lỗi
         const errorMsg = document.getElementById('error-message');
         if (errorMsg && !errorMsg.classList.contains('hidden') && lastErrorKey) {
             errorMsg.textContent = t(lastErrorKey);
@@ -1472,10 +1455,8 @@
         }
     }
 
-    // Áp dụng ngôn ngữ khi load
     document.addEventListener('DOMContentLoaded', function() {
         applyLanguage(currentLang);
-        // Đánh dấu active
         loginItems.forEach(item => {
             item.classList.toggle('active-lang', item.dataset.lang === currentLang);
         });
@@ -1575,12 +1556,14 @@
     }
 
     // ========================================================================
-    //  LOGIC UPLOAD & RECORD
+    //  LOGIC UPLOAD & GHI ÂM TỔNG HỢP (MICROPHONE + TAB AUDIO)
     // ========================================================================
     let selectedFileBlob = null;
     let mediaRecorder = null;
     let recordedChunks = [];
     let isRecording = false;
+    let activeAudioContext = null;
+    let combinedStreamTracks = [];
 
     const modal = document.getElementById('recorderModal');
     const openBtn = document.getElementById('openRecorderBtn');
@@ -1613,10 +1596,8 @@
         if (mediaRecorder && isRecording) {
             mediaRecorder.stop();
             isRecording = false;
-            recordBtn.classList.remove('recording');
-            recordLabel.textContent = t('record_btn');
-            recordBtn.querySelector('i').className = 'fa-solid fa-microphone';
         }
+        stopAllTracks();
         selectedFileBlob = null;
         audioPlayback.classList.add('hidden');
         uploadBtn.disabled = true;
@@ -1638,6 +1619,15 @@
         recordBtn.querySelector('i').className = 'fa-solid fa-microphone';
     }
 
+    function stopAllTracks() {
+        combinedStreamTracks.forEach(track => track.stop());
+        combinedStreamTracks = [];
+        if (activeAudioContext && activeAudioContext.state !== 'closed') {
+            activeAudioContext.close();
+            activeAudioContext = null;
+        }
+    }
+
     fileInput.addEventListener('change', e => {
         if (e.target.files.length > 0) {
             const file = e.target.files[0];
@@ -1647,6 +1637,7 @@
         }
     });
 
+    // XỬ LÝ NÚT GHI ÂM (KẾT HỢP MICROPHONE + CHIA SẺ ÂM THANH TAB)
     recordBtn.addEventListener('click', async function() {
         if (isRecording) {
             if (mediaRecorder) {
@@ -1660,9 +1651,42 @@
         }
 
         try {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            mediaRecorder = new MediaRecorder(stream);
+            // 1. Lấy Microphone (Giọng người dùng)
+            const micStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+            
+            // 2. Thử lấy Tab Audio (Tiếng cuộc họp online)
+            let displayStream = null;
+            try {
+                displayStream = await navigator.mediaDevices.getDisplayMedia({
+                    video: true,
+                    audio: { suppressLocalAudioPlayback: false }
+                });
+            } catch (tabErr) {
+                console.warn("Người dùng hủy hoặc không hỗ trợ chia sẻ màn hình/tab. Chuyển sang chế độ chỉ ghi âm Micro.", tabErr);
+            }
+
+            // 3. Tiến hành trộn âm thanh bằng Web Audio API
+            activeAudioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const destination = activeAudioContext.createMediaStreamDestination();
+
+            // Đưa Micro vào mixer
+            const micSource = activeAudioContext.createMediaStreamSource(micStream);
+            micSource.connect(destination);
+            combinedStreamTracks.push(...micStream.getTracks());
+
+            // Đưa Tab Audio vào mixer (nếu người dùng có chọn)
+            if (displayStream) {
+                combinedStreamTracks.push(...displayStream.getTracks());
+                if (displayStream.getAudioTracks().length > 0) {
+                    const displaySource = activeAudioContext.createMediaStreamSource(displayStream);
+                    displaySource.connect(destination);
+                }
+            }
+
+            // 4. Khởi tạo MediaRecorder trên stream đã trộn
             recordedChunks = [];
+            const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus' : 'audio/webm';
+            mediaRecorder = new MediaRecorder(destination.stream, { mimeType });
 
             mediaRecorder.ondataavailable = (event) => {
                 if (event.data.size > 0) {
@@ -1674,13 +1698,24 @@
                 const audioBlob = new Blob(recordedChunks, { type: 'audio/webm' });
                 const fileName = `recording_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.webm`;
                 const audioFile = new File([audioBlob], fileName, { type: 'audio/webm' });
+                
                 handleFileSelected(audioFile);
                 recordStatusDiv.innerHTML = `<span style="color:var(--success)">${t('recording_saved')}</span>`;
-                stream.getTracks().forEach(track => track.stop());
+                
+                stopAllTracks();
                 recordLabel.textContent = t('record_btn');
                 recordBtn.querySelector('i').className = 'fa-solid fa-microphone';
                 recordBtn.classList.remove('recording');
             };
+
+            // Tự động dừng nếu người dùng bấm "Stop sharing" trên thanh công cụ của trình duyệt
+            if (displayStream) {
+                displayStream.getVideoTracks()[0].onended = () => {
+                    if (isRecording && mediaRecorder) {
+                        recordBtn.click();
+                    }
+                };
+            }
 
             mediaRecorder.start();
             isRecording = true;
@@ -1688,9 +1723,11 @@
             recordLabel.textContent = t('stop_record_btn');
             this.querySelector('i').className = 'fa-solid fa-stop';
             recordStatusDiv.innerHTML = `<span style="color:var(--danger)">${t('recording_status')}</span>`;
+
         } catch (err) {
-            console.error('Microphone error:', err);
+            console.error('Lỗi khi khởi chạy Microphone/Tab Audio:', err);
             recordStatusDiv.innerHTML = `<span style="color:var(--danger)">${t('err_mic_permission')}</span>`;
+            stopAllTracks();
         }
     });
 
@@ -1741,8 +1778,8 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     action: 'getSignedUrl',
-                    filename: blobToUpload.name || 'recording.mp3',
-                    contentType: blobToUpload.type || 'audio/mpeg'
+                    filename: blobToUpload.name || 'recording.webm',
+                    contentType: blobToUpload.type || 'audio/webm'
                 })
             });
             const urlResult = await getUrlResponse.json();
@@ -1753,7 +1790,7 @@
             recordStatusDiv.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${t('status_uploading')}`;
             const uploadResponse = await fetch(uploadUrl, {
                 method: 'PUT',
-                headers: { 'Content-Type': blobToUpload.type || 'audio/mpeg' },
+                headers: { 'Content-Type': blobToUpload.type || 'audio/webm' },
                 body: blobToUpload
             });
             if (!uploadResponse.ok) throw new Error(t('err_upload_fail'));
@@ -2051,7 +2088,6 @@
     window.addEventListener('DOMContentLoaded', async () => {
         await tryAutoLogin();
         applyLanguage(currentLang);
-        // Đánh dấu active
         loginItems.forEach(item => {
             item.classList.toggle('active-lang', item.dataset.lang === currentLang);
         });
