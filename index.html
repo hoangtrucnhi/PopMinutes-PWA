@@ -21,7 +21,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
 
     <style>
-        /* ========== TOÀN BỘ STYLE ========== */
+        /* ========== TOÀN BỘ STYLE (giữ nguyên như cũ) ========== */
         *,
         *::before,
         *::after {
@@ -68,23 +68,16 @@
             box-shadow: var(--shadow-lg);
             margin: 0 auto;
         }
-        .status-bar {
+
+        /* ----- Thanh chọn ngôn ngữ (chỉ dropdown, không giờ/pin/wifi) ----- */
+        .lang-bar {
             background: var(--navy-deep);
-            padding: 14px 24px 10px;
+            padding: 10px 24px;
             display: flex;
-            justify-content: space-between;
+            justify-content: flex-end;
             align-items: center;
-            font-size: 13px;
-            font-weight: 600;
-            color: rgba(255, 255, 255, 0.9);
-            letter-spacing: 0.2px;
             z-index: 10;
             position: relative;
-        }
-        .status-bar-left {
-            display: flex;
-            align-items: center;
-            gap: 16px;
         }
         .language-select {
             background: rgba(255,255,255,0.12);
@@ -102,12 +95,8 @@
             background: #1B2B7A;
             color: white;
         }
-        .status-bar-icons {
-            display: flex;
-            gap: 7px;
-            align-items: center;
-            font-size: 12px;
-        }
+
+        /* Các style còn lại giữ nguyên */
         .loader {
             width: 20px;
             height: 20px;
@@ -343,7 +332,7 @@
             align-items: baseline;
             justify-content: space-between;
             gap: 8px;
-            margin-bottom: 12px;
+            margin-bottom: 0;
         }
         .hours-number {
             font-size: 56px;
@@ -353,9 +342,7 @@
             letter-spacing: -2px;
         }
         .hours-unit {
-            font-size: 16px;
-            font-weight: 700;
-            color: var(--muted);
+            display: none;
         }
         .hours-meta {
             display: flex;
@@ -364,6 +351,7 @@
             font-size: 13px;
             color: var(--muted);
             font-weight: 600;
+            margin-top: 4px;
         }
         .hours-bar-track {
             width: 100%;
@@ -878,24 +866,15 @@
 <body>
 <div class="app">
 
-    <!-- ==================== STATUS BAR ==================== -->
-    <div class="status-bar">
-        <div class="status-bar-left">
-            <span id="clock-login"></span>
-        </div>
-        <div style="display:flex; align-items:center; gap:12px;">
-            <select id="languageSelect" class="language-select">
-                <option value="vi">🇻🇳 Tiếng Việt</option>
-                <option value="en">🇬🇧 English</option>
-            </select>
-            <div class="status-bar-icons">
-                <i class="fa-solid fa-wifi"></i>
-                <i class="fa-solid fa-battery-three-quarters"></i>
-            </div>
-        </div>
+    <!-- ========== THANH CHỌN NGÔN NGỮ ========== -->
+    <div class="lang-bar">
+        <select id="languageSelect" class="language-select">
+            <option value="vi">🇻🇳 Tiếng Việt</option>
+            <option value="en">🇬🇧 English</option>
+        </select>
     </div>
 
-    <!-- ==================== LOGIN SCREEN ==================== -->
+    <!-- ========== LOGIN SCREEN ========== -->
     <div id="login-screen" class="screen">
         <div class="login-hero">
             <div class="login-logo"><i class="fa-solid fa-microphone-lines"></i></div>
@@ -928,7 +907,7 @@
         </div>
     </div>
 
-    <!-- ==================== DASHBOARD ==================== -->
+    <!-- ========== DASHBOARD ========== -->
     <div id="dashboard-screen" class="hidden screen">
         <div class="dash-header">
             <div class="dash-topbar">
@@ -947,7 +926,7 @@
             <div class="hero-card-company" id="company-name-display">Tên Công Ty</div>
             <div class="hours-row">
                 <div class="hours-number" id="remaining-hours-display">--</div>
-                <div class="hours-unit" data-i18n="hours_unit">Giờ sử dụng tại quán cafe</div>
+                <div class="hours-unit"></div>
             </div>
             <div class="hours-meta" style="margin-top:4px;">
                 <i class="fa-solid fa-coffee" style="color:var(--navy-light)"></i>
@@ -1007,7 +986,7 @@
         </div>
     </div>
 
-    <!-- ==================== RECORDER MODAL ==================== -->
+    <!-- ========== RECORDER MODAL ========== -->
     <div id="recorderModal">
         <div class="modal-sheet">
             <div class="modal-handle"><div class="modal-handle-bar"></div></div>
@@ -1082,7 +1061,7 @@
         </div>
     </div>
 
-    <!-- ==================== WARNING MODAL (COMPRESS) ==================== -->
+    <!-- ========== WARNING MODAL (COMPRESS) ========== -->
     <div id="compressWarningModal" class="warning-modal">
         <div class="warning-modal-content">
             <h3><i class="fa-solid fa-triangle-exclamation"></i> <span data-i18n="warning_title">Cảnh báo</span></h3>
@@ -1098,7 +1077,7 @@
         </div>
     </div>
 
-    <!-- ==================== HISTORY MODAL ==================== -->
+    <!-- ========== HISTORY MODAL ========== -->
     <div id="historyModal" class="history-modal">
         <div class="history-container">
             <div class="history-header">
@@ -1120,7 +1099,7 @@
 
 <script>
     // ========================================================================
-    //  I18N – ĐA NGÔN NGỮ
+    //  I18N – ĐA NGÔN NGỮ (ĐẦY ĐỦ)
     // ========================================================================
     const translations = {
         vi: {
@@ -1162,6 +1141,7 @@
             cc_placeholder: 'abc@congty.com (tùy chọn)',
             file_panel_title: 'Tệp âm thanh',
             upload_btn: 'Tải lên',
+            change_file_btn: 'Đổi tệp khác',
             compress_btn: 'Nén file (bên thứ 3)',
             file_tip: 'Hỗ trợ: <strong>mp3, m4a, wav,...</strong>.<br>File tối đa: <strong>35MB</strong> (nếu quá, hãy nén bằng nút bên phải)',
             consent_text: 'Bằng việc tải lên, bạn xác nhận có quyền hợp pháp và đã được sự đồng ý của những người tham gia để xử lý dữ liệu cuộc họp này.',
@@ -1233,6 +1213,7 @@
             cc_placeholder: 'abc@company.com (optional)',
             file_panel_title: 'Audio file',
             upload_btn: 'Upload',
+            change_file_btn: 'Change file',
             compress_btn: 'Compress (3rd party)',
             file_tip: 'Supports: <strong>mp3, m4a, wav,...</strong>.<br>Max file size: <strong>35MB</strong> (if exceeded, use the compress button on the right)',
             consent_text: 'By uploading, you confirm that you have the legal right and have obtained consent from participants to process this meeting data.',
@@ -1270,23 +1251,20 @@
     // Đồng bộ dropdown
     document.getElementById('languageSelect').value = currentLang;
 
-    // Hàm lấy bản dịch
     function t(key) {
         return translations[currentLang]?.[key] || key;
     }
 
-    // Hàm áp dụng ngôn ngữ cho toàn bộ giao diện
     function applyLanguage(lang) {
         currentLang = lang;
         localStorage.setItem('popminutes_lang', lang);
         document.getElementById('languageSelect').value = lang;
 
-        // Cập nhật các phần tử có data-i18n
+        // Dịch các phần tử có data-i18n
         document.querySelectorAll('[data-i18n]').forEach(el => {
             const key = el.getAttribute('data-i18n');
             const translation = t(key);
             if (translation !== undefined) {
-                // Nếu có thẻ HTML bên trong, dùng innerHTML, ngược lại textContent
                 if (el.innerHTML.includes('<')) {
                     el.innerHTML = translation;
                 } else {
@@ -1295,7 +1273,7 @@
             }
         });
 
-        // Cập nhật placeholder
+        // Dịch placeholder
         document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
             const key = el.getAttribute('data-i18n-placeholder');
             const translation = t(key);
@@ -1304,7 +1282,7 @@
             }
         });
 
-        // Cập nhật các thẻ đặc biệt (id)
+        // Cập nhật các thẻ theo id (để đảm bảo)
         const idMap = {
             'login-title': 'login_title',
             'login-sub': 'login_sub',
@@ -1357,7 +1335,7 @@
             }
         }
 
-        // Cập nhật nút toggle CC (vì có icon)
+        // Cập nhật toggle CC
         const toggleCcBtn = document.getElementById('toggleCcBtn');
         if (toggleCcBtn) {
             const isHidden = document.getElementById('ccFields').classList.contains('hidden');
@@ -1366,19 +1344,23 @@
             toggleCcBtn.innerHTML = `<i class="fa-solid ${icon}"></i> ${label}`;
         }
 
-        // Cập nhật text cho fileStatusLabel nếu chưa có file (để giữ nguyên logic)
-        // Không ghi đè nếu đã có file, chỉ cập nhật khi chưa có file
-        if (!document.getElementById('fileInput').files.length) {
+        // Cập nhật fileStatusLabel (nếu chưa có file, hiển thị "Tải lên" / "Upload")
+        // Nếu đã có file, sẽ được xử lý trong event change của fileInput
+        const fileInput = document.getElementById('fileInput');
+        if (!fileInput.files.length) {
             document.getElementById('fileStatusLabel').textContent = t('upload_btn');
+        } else {
+            // Nếu có file, giữ nguyên "Đổi tệp khác" hoặc "Change file"
+            document.getElementById('fileStatusLabel').textContent = t('change_file_btn');
         }
     }
 
     // Lắng nghe sự kiện thay đổi ngôn ngữ
     document.getElementById('languageSelect').addEventListener('change', function() {
         applyLanguage(this.value);
-        // Cập nhật lại các thông báo trạng thái nếu có
+        // Nếu đang hiển thị trạng thái kết nối, cập nhật lại
         const statusDiv = document.getElementById('recordStatus');
-        if (statusDiv && statusDiv.innerHTML.includes('Đang khởi tạo')) {
+        if (statusDiv && statusDiv.innerHTML.includes(t('status_connecting').substring(0, 10))) {
             statusDiv.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${t('status_connecting')}`;
         }
     });
@@ -1386,19 +1368,18 @@
     // Áp dụng ngôn ngữ khi trang load
     document.addEventListener('DOMContentLoaded', function() {
         applyLanguage(currentLang);
+        // Cập nhật lại các thông báo lỗi nếu đang hiển thị
+        const errorMsg = document.getElementById('error-message');
+        if (!errorMsg.classList.contains('hidden')) {
+            // Nếu lỗi đang hiển thị, có thể cập nhật lại bằng cách lấy text hiện tại so với key
+            // Nhưng tạm thời không làm gì vì lỗi sẽ do logic đặt.
+        }
     });
 
     // ========================================================================
     //  CÁC HÀM TIỆN ÍCH
     // ========================================================================
-    function updateClock() {
-        const t = new Date();
-        const s = t.getHours().toString().padStart(2,'0') + ':' + t.getMinutes().toString().padStart(2,'0');
-        const cl = document.getElementById('clock-login');
-        if (cl) cl.textContent = s;
-    }
-    updateClock();
-    setInterval(updateClock, 30000);
+    // Không cần đồng hồ nữa
 
     // ========================================================================
     //  CẤU HÌNH API
@@ -1544,7 +1525,7 @@
             const shortName = selectedFileBlob.name.length > 25 ? selectedFileBlob.name.substring(0,22)+'...' : selectedFileBlob.name;
             document.getElementById('fileStatus').innerHTML =
                 `<i class="fa-solid fa-file-audio"></i> ${shortName} (${(selectedFileBlob.size/(1024*1024)).toFixed(2)}MB)`;
-            fileStatusLabel.textContent = t('upload_btn') + ' (đổi)';
+            fileStatusLabel.textContent = t('change_file_btn');
         } else {
             selectedFileBlob = null;
             audioPlayback.classList.add('hidden');
@@ -1668,6 +1649,9 @@
         });
     }
 
+    // ========================================================================
+    //  CÁC SỰ KIỆN CHO CHECKIN (NÂNG CẤP)
+    // ========================================================================
     document.getElementById('checkinBtn').addEventListener('click', () => alert(t('toast_upgrade_required')));
     document.getElementById('qrCheckinBtn').addEventListener('click', () => alert(t('toast_upgrade_required')));
 
@@ -1785,7 +1769,7 @@
                 if (record.status === 'Done') statusClass = 'status-Done';
                 else if (record.status === 'Processing') statusClass = 'status-Processing';
                 else statusClass = 'status-Uploaded';
-                const clientName = escapeHtml(record.clientName || 'Khách hàng');
+                const clientName = escapeHtml(record.clientName || t('customer_label'));
                 const createdAt = record.createdAt || 'N/A';
                 const statusText = record.status || 'Chưa rõ';
                 const expediteLabel = t('expedite_btn');
@@ -1913,6 +1897,10 @@
         await tryAutoLogin();
         // Đảm bảo áp dụng ngôn ngữ sau khi login (nếu có thể)
         applyLanguage(currentLang);
+        // Cập nhật nút file nếu đã có file (trường hợp đặc biệt)
+        if (document.getElementById('fileInput').files.length > 0) {
+            document.getElementById('fileStatusLabel').textContent = t('change_file_btn');
+        }
     });
 </script>
 </body>
