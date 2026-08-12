@@ -1472,7 +1472,7 @@
     // ========================================================================
     //  CẤU HÌNH API
     // ========================================================================
-    const CLOUD_FUNCTION_URL = "https://asia-southeast1-gen-lang-client-0303222519.cloudfunctions.net/get-upload-url";
+    const CLOUD_FUNCTION_URL = "https://pophubly-audio-service-2zcxkyyteq-as.a.run.app";
     const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxQ8HeKwVuV4g1yMDFgAkkStAOW2nuN0VwSk2WJiZ75FcXGXvlayQmHeH8O0Bq2ZH42/exec";
     const AUTH_STORAGE_KEY = "popminutes_auth";
     const SESSION_DAYS = 90;
@@ -1775,7 +1775,7 @@
         recordStatusDiv.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${t('status_connecting')}`;
 
         try {
-            const getUrlResponse = await fetch('https://asia-southeast1-gen-lang-client-0303222519.cloudfunctions.net/get-upload-url', {
+            const getUrlResponse = await fetch('https://pophubly-audio-service-2zcxkyyteq-as.a.run.app', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -1799,7 +1799,7 @@
 
             recordStatusDiv.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${t('status_processing')}`;
 
-            const processResponse = await fetch('https://asia-southeast1-gen-lang-client-0303222519.cloudfunctions.net/get-upload-url', {
+            const processResponse = await fetch('https://pophubly-audio-service-2zcxkyyteq-as.a.run.app', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
