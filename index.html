@@ -314,7 +314,7 @@
         }
         .dash-header {
             background: var(--navy);
-            padding: 24px 28px 100px; /* Tăng padding-bottom để không che chữ */
+            padding: 24px 28px 100px;
             position: relative;
             overflow: visible;
             z-index: 10;
@@ -363,7 +363,7 @@
         .hero-card {
             background: var(--white);
             border-radius: var(--radius-xl);
-            margin: -20px 24px 0; /* Giảm margin-top để chữ xuống dưới */
+            margin: -20px 24px 0;
             padding: 28px 24px 24px;
             box-shadow: var(--shadow-md);
             position: relative;
@@ -735,6 +735,17 @@
             text-align: center;
             font-size: 14px;
             line-height: 1.5;
+            font-weight: 600;
+            color: var(--text);
+        }
+        .status-loading {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--navy);
+        }
+        .status-loading i {
+            font-size: 16px;
         }
         #fileStatus {
             font-size: 13px;
@@ -1024,7 +1035,22 @@
                         <span class="input-tip"><i class="fas fa-info-circle" style="margin-top:2px;"></i> <span data-i18n="client_tip">Điền tên của đối tác / khách hàng bạn gặp.</span></span>
                     </div>
 
-                    <!-- ===== PHẦN CHỌN NGÔN NGỮ BIÊN BẢN (ĐÃ TỐI GIẢN) ===== -->
+                    <div>
+                        <label class="field-label" data-i18n="email_label_modal">Email nhận biên bản</label>
+                        <input type="email" id="salesEmailDisplay" disabled class="modal-input">
+                    </div>
+
+                    <div>
+                        <button id="toggleCcBtn" type="button" style="color:var(--navy-light); font-size:13px; font-weight:700; background:none; border:none; cursor:pointer; display:inline-flex; align-items:center; gap:6px; padding:4px 0;">
+                            <i class="fa-solid fa-circle-plus"></i> <span data-i18n="add_cc_btn">Thêm người nhận</span>
+                        </button>
+                        <div id="ccFields" class="hidden flex flex-col gap-3 mt-3">
+                            <input type="email" id="ccEmail1" class="modal-input" data-i18n-placeholder="cc_placeholder" placeholder="abc@congty.com (tùy chọn)">
+                            <input type="email" id="ccEmail2" class="modal-input" data-i18n-placeholder="cc_placeholder" placeholder="abc@congty.com (tùy chọn)">
+                        </div>
+                    </div>
+
+                    <!-- ===== PHẦN CHỌN NGÔN NGỮ BIÊN BẢN (ĐÃ TỐI GIẢN & SẮP XẾP) ===== -->
                     <div>
                         <label class="field-label" data-i18n="language_mode_label">Chế độ ngôn ngữ</label>
                         <select id="outputMode" class="modal-input" onchange="toggleLanguageTarget()">
@@ -1035,12 +1061,12 @@
                     </div>
                     <!-- Ngôn ngữ gốc (chỉ hiển thị khi chọn Song ngữ) -->
                     <div id="sourceLangDiv" style="display:none;">
-                        <label class="field-label">Ngôn ngữ gốc</label>
+                        <label class="field-label" data-i18n="source_lang_label">Ngôn ngữ 1: ngôn ngữ gốc</label>
                         <input type="text" id="sourceLangDisplay" class="modal-input" disabled value="Đang phát hiện...">
                     </div>
                     <!-- Ngôn ngữ đích (hiển thị khi chọn Dịch sang hoặc Song ngữ) -->
                     <div id="targetLangDiv" style="display:none;">
-                        <label class="field-label" data-i18n="language_target_label">Ngôn ngữ đích</label>
+                        <label class="field-label" data-i18n="target_lang_label">Ngôn ngữ 2:</label>
                         <select id="outputTargetLang" class="modal-input">
                             <!-- Ưu tiên tiếng Việt lên đầu -->
                             <option value="vi" data-i18n="lang_vi">🇻🇳 Tiếng Việt</option>
@@ -1070,20 +1096,6 @@
                         </select>
                     </div>
                     <!-- ===== KẾT THÚC ===== -->
-
-                    <div>
-                        <label class="field-label" data-i18n="email_label_modal">Email nhận biên bản</label>
-                        <input type="email" id="salesEmailDisplay" disabled class="modal-input">
-                    </div>
-                    <div>
-                        <button id="toggleCcBtn" type="button" style="color:var(--navy-light); font-size:13px; font-weight:700; background:none; border:none; cursor:pointer; display:inline-flex; align-items:center; gap:6px; padding:4px 0;">
-                            <i class="fa-solid fa-circle-plus"></i> <span data-i18n="add_cc_btn">Thêm người nhận</span>
-                        </button>
-                        <div id="ccFields" class="hidden flex flex-col gap-3 mt-3">
-                            <input type="email" id="ccEmail1" class="modal-input" data-i18n-placeholder="cc_placeholder" placeholder="abc@congty.com (tùy chọn)">
-                            <input type="email" id="ccEmail2" class="modal-input" data-i18n-placeholder="cc_placeholder" placeholder="abc@congty.com (tùy chọn)">
-                        </div>
-                    </div>
                 </div>
 
                 <div class="record-panel">
@@ -1197,7 +1209,7 @@
             change_file_btn: 'Đổi tệp khác',
             record_btn: 'Ghi âm',
             stop_record_btn: 'Dừng ghi',
-            recording_status: 'Đang ghi âm (Micro + Âm thanh Tab/Cuộc họp)...',
+            recording_status: 'Đang ghi âm',
             file_tip: 'Hỗ trợ: <strong>mp3, m4a, wav, webm...</strong>',
             consent_text: 'Bằng việc tải lên, bạn xác nhận có quyền hợp pháp và đã được sự đồng ý của những người tham gia để xử lý dữ liệu cuộc họp này.',
             start_btn: 'Bắt đầu',
@@ -1225,13 +1237,13 @@
             status_processing: 'AI đang tiến hành phân tích cuộc họp...',
             recording_saved: 'Đã hoàn tất thu âm!',
             select_language: 'Chọn ngôn ngữ',
-            // ===== NGÔN NGỮ BIÊN BẢN (ĐÃ TỐI GIẢN) =====
+            // ===== NGÔN NGỮ BIÊN BẢN =====
             language_mode_label: 'Chế độ ngôn ngữ',
             lang_mode_auto: 'Ngôn ngữ gốc',
             lang_mode_translate: 'Dịch sang',
             lang_mode_bilingual: 'Song ngữ',
-            language_target_label: 'Ngôn ngữ đích',
-            // Ngôn ngữ mới
+            source_lang_label: 'Ngôn ngữ 1: ngôn ngữ gốc',
+            target_lang_label: 'Ngôn ngữ 2:',
             lang_en: '🇬🇧 English',
             lang_vi: '🇻🇳 Tiếng Việt',
             lang_id: '🇮🇩 Indonesia',
@@ -1296,7 +1308,7 @@
             change_file_btn: 'Change file',
             record_btn: 'Record',
             stop_record_btn: 'Stop recording',
-            recording_status: 'Recording (Microphone + Meeting Tab Audio)...',
+            recording_status: 'Recording...',
             file_tip: 'Supports: <strong>mp3, m4a, wav, webm...</strong>',
             consent_text: 'By uploading, you confirm that you have the legal right and have obtained consent from participants to process this meeting data.',
             start_btn: 'Start',
@@ -1324,12 +1336,13 @@
             status_processing: 'AI is analyzing the meeting...',
             recording_saved: 'Recording completed!',
             select_language: 'Select language',
-            // ===== MINUTES LANGUAGE (CLEAN) =====
+            // ===== MINUTES LANGUAGE =====
             language_mode_label: 'Language mode',
             lang_mode_auto: 'Original language',
             lang_mode_translate: 'Translate to',
             lang_mode_bilingual: 'Bilingual',
-            language_target_label: 'Target language',
+            source_lang_label: 'Language 1: original language',
+            target_lang_label: 'Language 2:',
             lang_en: '🇬🇧 English',
             lang_vi: '🇻🇳 Vietnamese',
             lang_id: '🇮🇩 Indonesian',
@@ -1791,6 +1804,8 @@
             this.classList.remove('recording');
             recordLabel.textContent = t('record_btn');
             this.querySelector('i').className = 'fa-solid fa-microphone';
+            // Reset status text
+            recordStatusDiv.innerHTML = '';
             return;
         }
 
@@ -1857,7 +1872,9 @@
             this.classList.add('recording');
             recordLabel.textContent = t('stop_record_btn');
             this.querySelector('i').className = 'fa-solid fa-stop';
-            recordStatusDiv.innerHTML = `<span style="color:var(--danger)">${t('recording_status')}</span>`;
+            
+            // Hiển thị spinner + "Đang ghi âm"
+            recordStatusDiv.innerHTML = `<span class="status-loading"><i class="fa-solid fa-spinner fa-spin"></i> ${t('recording_status')}</span>`;
 
         } catch (err) {
             console.error('Lỗi khi khởi chạy Microphone/Tab Audio:', err);
@@ -1920,7 +1937,7 @@
 
         isUploading = true;
         uploadBtn.disabled = true;
-        recordStatusDiv.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${t('status_connecting')}`;
+        recordStatusDiv.innerHTML = `<span class="status-loading"><i class="fa-solid fa-spinner fa-spin"></i> ${t('status_connecting')}</span>`;
 
         try {
             const getUrlResponse = await fetch('https://asia-southeast1-gen-lang-client-0303222519.cloudfunctions.net/get-upload-url', {
@@ -1937,7 +1954,7 @@
 
             const { uploadUrl, filePath } = urlResult;
 
-            recordStatusDiv.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${t('status_uploading')}`;
+            recordStatusDiv.innerHTML = `<span class="status-loading"><i class="fa-solid fa-spinner fa-spin"></i> ${t('status_uploading')}</span>`;
             const uploadResponse = await fetch(uploadUrl, {
                 method: 'PUT',
                 headers: { 'Content-Type': blobToUpload.type || 'audio/webm' },
@@ -1945,7 +1962,7 @@
             });
             if (!uploadResponse.ok) throw new Error(t('err_upload_fail'));
 
-            recordStatusDiv.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${t('status_processing')}`;
+            recordStatusDiv.innerHTML = `<span class="status-loading"><i class="fa-solid fa-spinner fa-spin"></i> ${t('status_processing')}</span>`;
 
             const processResponse = await fetch('https://asia-southeast1-gen-lang-client-0303222519.cloudfunctions.net/get-upload-url', {
                 method: 'POST',
