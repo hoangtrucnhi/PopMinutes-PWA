@@ -314,7 +314,7 @@
         }
         .dash-header {
             background: var(--navy);
-            padding: 24px 28px 100px;
+            padding: 32px 28px 100px; /* Tăng padding-top để đẩy tên xuống */
             position: relative;
             overflow: visible;
             z-index: 10;
@@ -1059,10 +1059,10 @@
                             <option value="bilingual" data-i18n="lang_mode_bilingual">Song ngữ</option>
                         </select>
                     </div>
-                    <!-- Ngôn ngữ gốc (chỉ hiển thị khi chọn Song ngữ) -->
+                    <!-- Ngôn ngữ 1: (chỉ hiển thị khi chọn Song ngữ) -->
                     <div id="sourceLangDiv" style="display:none;">
-                        <label class="field-label">Ngôn ngữ 1: ngôn ngữ gốc</label>
-                        <input type="text" id="sourceLangDisplay" class="modal-input" disabled value="Đang phát hiện...">
+                        <label class="field-label">Ngôn ngữ 1:</label>
+                        <input type="text" id="sourceLangDisplay" class="modal-input" disabled placeholder="" value="">
                     </div>
                     <!-- Ngôn ngữ đích (hiển thị khi chọn Dịch sang hoặc Song ngữ) -->
                     <div id="targetLangDiv" style="display:none;">
@@ -1725,12 +1725,10 @@
         } else if (mode === 'translate') {
             targetDiv.style.display = 'block';
             sourceDiv.style.display = 'none';
-            // Đổi nhãn thành "Ngôn ngữ đích"
             targetLabel.textContent = t('target_lang_label') || 'Ngôn ngữ đích';
         } else if (mode === 'bilingual') {
             targetDiv.style.display = 'block';
             sourceDiv.style.display = 'block';
-            // Đổi nhãn thành "Ngôn ngữ 2:"
             targetLabel.textContent = 'Ngôn ngữ 2:';
         }
     }
@@ -1777,7 +1775,7 @@
         recordLabel.textContent = t('record_btn');
         recordBtn.querySelector('i').className = 'fa-solid fa-microphone';
         // Reset source language display
-        document.getElementById('sourceLangDisplay').value = 'Đang phát hiện...';
+        document.getElementById('sourceLangDisplay').value = '';
     }
 
     function stopAllTracks() {
@@ -1808,7 +1806,6 @@
             this.classList.remove('recording');
             recordLabel.textContent = t('record_btn');
             this.querySelector('i').className = 'fa-solid fa-microphone';
-            // Reset status text
             recordStatusDiv.innerHTML = '';
             return;
         }
@@ -1877,7 +1874,6 @@
             recordLabel.textContent = t('stop_record_btn');
             this.querySelector('i').className = 'fa-solid fa-stop';
             
-            // Hiển thị spinner + "Đang ghi âm"
             recordStatusDiv.innerHTML = `<span class="status-loading"><i class="fa-solid fa-spinner fa-spin"></i> ${t('recording_status')}</span>`;
 
         } catch (err) {
@@ -1895,14 +1891,13 @@
         updateModalSalesInfo();
         modal.classList.add('flex');
         resetRecorder();
-        // Khôi phục lựa chọn ngôn ngữ đã lưu
         const savedMode = localStorage.getItem('popminutes_output_mode') || 'auto';
         const savedTarget = localStorage.getItem('popminutes_output_target') || 'vi';
         document.getElementById('outputMode').value = savedMode;
         document.getElementById('outputTargetLang').value = savedTarget;
         toggleLanguageTarget();
-        // Thực tế sẽ detect sau, để placeholder
-        document.getElementById('sourceLangDisplay').value = 'Đang phát hiện...';
+        // Không set giá trị sourceLangDisplay vì không detect
+        document.getElementById('sourceLangDisplay').value = '';
     });
 
     function closeModal() {
@@ -1932,10 +1927,8 @@
         const ccEmail1 = document.getElementById('ccEmail1') ? document.getElementById('ccEmail1').value.trim() : '';
         const ccEmail2 = document.getElementById('ccEmail2') ? document.getElementById('ccEmail2').value.trim() : '';
 
-        // Lấy cài đặt ngôn ngữ
         const outputMode = document.getElementById('outputMode').value;
         const outputTargetLang = document.getElementById('outputTargetLang').value;
-        // Lưu vào localStorage
         localStorage.setItem('popminutes_output_mode', outputMode);
         localStorage.setItem('popminutes_output_target', outputTargetLang);
 
@@ -2274,7 +2267,6 @@
         updateUploadButton();
         updateFlagIcons(currentLang);
         updateLangTooltip(currentLang);
-        // Khôi phục lựa chọn ngôn ngữ
         const savedMode = localStorage.getItem('popminutes_output_mode') || 'auto';
         const savedTarget = localStorage.getItem('popminutes_output_target') || 'vi';
         document.getElementById('outputMode').value = savedMode;
