@@ -1050,7 +1050,7 @@
                         </div>
                     </div>
 
-                    <!-- ===== PHẦN CHỌN NGÔN NGỮ BIÊN BẢN (ĐÃ TỐI GIẢN & SẮP XẾP) ===== -->
+                    <!-- ===== PHẦN CHỌN NGÔN NGỮ BIÊN BẢN ===== -->
                     <div>
                         <label class="field-label" data-i18n="language_mode_label">Chế độ ngôn ngữ</label>
                         <select id="outputMode" class="modal-input" onchange="toggleLanguageTarget()">
@@ -1061,12 +1061,12 @@
                     </div>
                     <!-- Ngôn ngữ gốc (chỉ hiển thị khi chọn Song ngữ) -->
                     <div id="sourceLangDiv" style="display:none;">
-                        <label class="field-label" data-i18n="source_lang_label">Ngôn ngữ 1: ngôn ngữ gốc</label>
+                        <label class="field-label">Ngôn ngữ 1: ngôn ngữ gốc</label>
                         <input type="text" id="sourceLangDisplay" class="modal-input" disabled value="Đang phát hiện...">
                     </div>
                     <!-- Ngôn ngữ đích (hiển thị khi chọn Dịch sang hoặc Song ngữ) -->
                     <div id="targetLangDiv" style="display:none;">
-                        <label class="field-label" data-i18n="target_lang_label">Ngôn ngữ 2:</label>
+                        <label class="field-label" id="targetLabel">Ngôn ngữ đích</label>
                         <select id="outputTargetLang" class="modal-input">
                             <!-- Ưu tiên tiếng Việt lên đầu -->
                             <option value="vi" data-i18n="lang_vi">🇻🇳 Tiếng Việt</option>
@@ -1242,8 +1242,7 @@
             lang_mode_auto: 'Ngôn ngữ gốc',
             lang_mode_translate: 'Dịch sang',
             lang_mode_bilingual: 'Song ngữ',
-            source_lang_label: 'Ngôn ngữ 1: ngôn ngữ gốc',
-            target_lang_label: 'Ngôn ngữ 2:',
+            target_lang_label: 'Ngôn ngữ đích',
             lang_en: '🇬🇧 English',
             lang_vi: '🇻🇳 Tiếng Việt',
             lang_id: '🇮🇩 Indonesia',
@@ -1341,8 +1340,7 @@
             lang_mode_auto: 'Original language',
             lang_mode_translate: 'Translate to',
             lang_mode_bilingual: 'Bilingual',
-            source_lang_label: 'Language 1: original language',
-            target_lang_label: 'Language 2:',
+            target_lang_label: 'Target language',
             lang_en: '🇬🇧 English',
             lang_vi: '🇻🇳 Vietnamese',
             lang_id: '🇮🇩 Indonesian',
@@ -1719,15 +1717,21 @@
         const mode = document.getElementById('outputMode').value;
         const targetDiv = document.getElementById('targetLangDiv');
         const sourceDiv = document.getElementById('sourceLangDiv');
+        const targetLabel = document.getElementById('targetLabel');
+
         if (mode === 'auto') {
             targetDiv.style.display = 'none';
             sourceDiv.style.display = 'none';
         } else if (mode === 'translate') {
             targetDiv.style.display = 'block';
             sourceDiv.style.display = 'none';
+            // Đổi nhãn thành "Ngôn ngữ đích"
+            targetLabel.textContent = t('target_lang_label') || 'Ngôn ngữ đích';
         } else if (mode === 'bilingual') {
             targetDiv.style.display = 'block';
             sourceDiv.style.display = 'block';
+            // Đổi nhãn thành "Ngôn ngữ 2:"
+            targetLabel.textContent = 'Ngôn ngữ 2:';
         }
     }
 
@@ -1897,8 +1901,8 @@
         document.getElementById('outputMode').value = savedMode;
         document.getElementById('outputTargetLang').value = savedTarget;
         toggleLanguageTarget();
-        // (Giả lập phát hiện ngôn ngữ gốc - sau này sẽ thay bằng API)
-        document.getElementById('sourceLangDisplay').value = 'Tiếng Việt';
+        // Thực tế sẽ detect sau, để placeholder
+        document.getElementById('sourceLangDisplay').value = 'Đang phát hiện...';
     });
 
     function closeModal() {
