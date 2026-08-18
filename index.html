@@ -314,7 +314,7 @@
         }
         .dash-header {
             background: var(--navy);
-            padding: 28px 28px 28px; /* Tăng padding-top để đẩy tên xuống */
+            padding: 28px 28px 28px;
             position: relative;
             overflow: visible;
             z-index: 10;
@@ -1692,7 +1692,7 @@
     }
 
     // ========================================================================
-    //  LOGIC UPLOAD & GHI ÂM TỔNG HỢP
+    //  LOGIC UPLOAD & GHI ÂM TỔNG HỢP (ĐÃ SỬA LỖI)
     // ========================================================================
     let selectedFileBlob = null;
     let mediaRecorder = null;
@@ -1778,6 +1778,7 @@
         document.getElementById('sourceLangDisplay').value = 'Ngôn ngữ gốc';
     }
 
+    // Hàm dừng tất cả track và đóng AudioContext
     function stopAllTracks() {
         combinedStreamTracks.forEach(track => track.stop());
         combinedStreamTracks = [];
@@ -1796,8 +1797,9 @@
         }
     });
 
-    // XỬ LÝ NÚT GHI ÂM
+    // ======== XỬ LÝ NÚT GHI ÂM (ĐÃ SỬA) ========
     recordBtn.addEventListener('click', async function() {
+        // Nếu đang ghi -> dừng
         if (isRecording) {
             if (mediaRecorder) {
                 mediaRecorder.stop();
@@ -1807,10 +1809,13 @@
             recordLabel.textContent = t('record_btn');
             this.querySelector('i').className = 'fa-solid fa-microphone';
             recordStatusDiv.innerHTML = '';
+            // Đóng AudioContext ngay lập tức
+            stopAllTracks();
             return;
         }
 
         try {
+            // 1. Lấy micro
             const micStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
             let displayStream = null;
             try {
@@ -1820,10 +1825,14 @@
                 });
             } catch (tabErr) {
                 console.warn("Không hỗ trợ chia sẻ màn hình/tab. Chỉ ghi âm Micro.", tabErr);
+                recordStatusDiv.innerHTML = `<span style="color:var(--muted)">⚠️ Chỉ ghi âm micro (không có âm thanh tab)</span>`;
+                // Vẫn tiếp tục với micro
             }
 
+            // 2. Tạo AudioContext và kết nối
             activeAudioContext = new (window.AudioContext || window.webkitAudioContext)();
             const destination = activeAudioContext.createMediaStreamDestination();
+
             const micSource = activeAudioContext.createMediaStreamSource(micStream);
             micSource.connect(destination);
             combinedStreamTracks.push(...micStream.getTracks());
@@ -1833,9 +1842,24 @@
                 if (displayStream.getAudioTracks().length > 0) {
                     const displaySource = activeAudioContext.createMediaStreamSource(displayStream);
                     displaySource.connect(destination);
+                } else {
+                    recordStatusDiv.innerHTML = `<span style="color:var(--muted)">ℹ️ Tab được chọn không có âm thanh</span>`;
+                }
+                // Nếu video track kết thúc (người dùng tắt tab), tự động dừng ghi
+                const videoTrack = displayStream.getVideoTracks()[0];
+                if (videoTrack) {
+                    videoTrack.onended = () => {
+                        if (isRecording && mediaRecorder) {
+                            recordBtn.click(); // tự động dừng
+                        }
+                    };
                 }
             }
 
+            // *** QUAN TRỌNG: resume AudioContext ***
+            await activeAudioContext.resume();
+
+            // 3. Tạo MediaRecorder
             recordedChunks = [];
             const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus' : 'audio/webm';
             mediaRecorder = new MediaRecorder(destination.stream, { mimeType });
@@ -1850,36 +1874,30 @@
                 const audioBlob = new Blob(recordedChunks, { type: 'audio/webm' });
                 const fileName = `recording_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.webm`;
                 const audioFile = new File([audioBlob], fileName, { type: 'audio/webm' });
-                
                 handleFileSelected(audioFile);
                 recordStatusDiv.innerHTML = `<span style="color:var(--success)">${t('recording_saved')}</span>`;
-                
+                // Dọn dẹp
                 stopAllTracks();
                 recordLabel.textContent = t('record_btn');
                 recordBtn.querySelector('i').className = 'fa-solid fa-microphone';
                 recordBtn.classList.remove('recording');
             };
 
-            if (displayStream) {
-                displayStream.getVideoTracks()[0].onended = () => {
-                    if (isRecording && mediaRecorder) {
-                        recordBtn.click();
-                    }
-                };
-            }
-
             mediaRecorder.start();
             isRecording = true;
             this.classList.add('recording');
             recordLabel.textContent = t('stop_record_btn');
             this.querySelector('i').className = 'fa-solid fa-stop';
-            
             recordStatusDiv.innerHTML = `<span class="status-loading"><i class="fa-solid fa-spinner fa-spin"></i> ${t('recording_status')}</span>`;
 
         } catch (err) {
             console.error('Lỗi khi khởi chạy Microphone/Tab Audio:', err);
             recordStatusDiv.innerHTML = `<span style="color:var(--danger)">${t('err_mic_permission')}</span>`;
             stopAllTracks();
+            this.classList.remove('recording');
+            recordLabel.textContent = t('record_btn');
+            this.querySelector('i').className = 'fa-solid fa-microphone';
+            isRecording = false;
         }
     });
 
