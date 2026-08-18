@@ -1209,7 +1209,7 @@
             change_file_btn: 'Đổi tệp khác',
             record_btn: 'Ghi âm',
             stop_record_btn: 'Dừng ghi',
-            recording_status: 'Đang ghi âm',
+            recording_status: 'Đang ghi âm (Micro + Âm thanh Tab)...',
             file_tip: 'Hỗ trợ: <strong>mp3, m4a, wav, webm...</strong>',
             consent_text: 'Bằng việc tải lên, bạn xác nhận có quyền hợp pháp và đã được sự đồng ý của những người tham gia để xử lý dữ liệu cuộc họp này.',
             start_btn: 'Bắt đầu',
@@ -1307,7 +1307,7 @@
             change_file_btn: 'Change file',
             record_btn: 'Record',
             stop_record_btn: 'Stop recording',
-            recording_status: 'Recording...',
+            recording_status: 'Recording (Microphone + Tab Audio)...',
             file_tip: 'Supports: <strong>mp3, m4a, wav, webm...</strong>',
             consent_text: 'By uploading, you confirm that you have the legal right and have obtained consent from participants to process this meeting data.',
             start_btn: 'Start',
@@ -1692,7 +1692,7 @@
     }
 
     // ========================================================================
-    //  LOGIC UPLOAD & GHI ÂM TỔNG HỢP (ĐÃ SỬA LỖI)
+    //  LOGIC UPLOAD & GHI ÂM TỔNG HỢP (ĐÃ SỬA LỖI - BỔ SUNG resume)
     // ========================================================================
     let selectedFileBlob = null;
     let mediaRecorder = null;
@@ -1797,7 +1797,7 @@
         }
     });
 
-    // ======== XỬ LÝ NÚT GHI ÂM (ĐÃ SỬA) ========
+    // ======== XỬ LÝ NÚT GHI ÂM (ĐÃ SỬA - CÓ resume VÀ THÔNG BÁO) ========
     recordBtn.addEventListener('click', async function() {
         // Nếu đang ghi -> dừng
         if (isRecording) {
