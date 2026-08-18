@@ -314,7 +314,7 @@
         }
         .dash-header {
             background: var(--navy);
-            padding: 32px 28px 100px; /* Tăng padding-top để đẩy tên xuống */
+            padding: 48px 28px 100px; /* Tăng padding-top để đẩy tên xuống */
             position: relative;
             overflow: visible;
             z-index: 10;
@@ -1062,7 +1062,7 @@
                     <!-- Ngôn ngữ 1: (chỉ hiển thị khi chọn Song ngữ) -->
                     <div id="sourceLangDiv" style="display:none;">
                         <label class="field-label">Ngôn ngữ 1:</label>
-                        <input type="text" id="sourceLangDisplay" class="modal-input" disabled placeholder="" value="">
+                        <input type="text" id="sourceLangDisplay" class="modal-input" disabled value="Ngôn ngữ gốc">
                     </div>
                     <!-- Ngôn ngữ đích (hiển thị khi chọn Dịch sang hoặc Song ngữ) -->
                     <div id="targetLangDiv" style="display:none;">
@@ -1774,8 +1774,8 @@
         recordBtn.classList.remove('recording');
         recordLabel.textContent = t('record_btn');
         recordBtn.querySelector('i').className = 'fa-solid fa-microphone';
-        // Reset source language display
-        document.getElementById('sourceLangDisplay').value = '';
+        // Reset source language display to default
+        document.getElementById('sourceLangDisplay').value = 'Ngôn ngữ gốc';
     }
 
     function stopAllTracks() {
@@ -1896,8 +1896,7 @@
         document.getElementById('outputMode').value = savedMode;
         document.getElementById('outputTargetLang').value = savedTarget;
         toggleLanguageTarget();
-        // Không set giá trị sourceLangDisplay vì không detect
-        document.getElementById('sourceLangDisplay').value = '';
+        document.getElementById('sourceLangDisplay').value = 'Ngôn ngữ gốc';
     });
 
     function closeModal() {
