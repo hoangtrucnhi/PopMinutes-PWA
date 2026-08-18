@@ -314,7 +314,7 @@
         }
         .dash-header {
             background: var(--navy);
-            padding: 24px 28px 90px; /* Tăng padding-bottom để không che chữ */
+            padding: 24px 28px 100px; /* Tăng padding-bottom để không che chữ */
             position: relative;
             overflow: visible;
             z-index: 10;
@@ -363,7 +363,7 @@
         .hero-card {
             background: var(--white);
             border-radius: var(--radius-xl);
-            margin: -30px 24px 0; /* Giảm margin-top để hiển thị chữ "Khách Hàng" */
+            margin: -20px 24px 0; /* Giảm margin-top để chữ xuống dưới */
             padding: 28px 24px 24px;
             box-shadow: var(--shadow-md);
             position: relative;
@@ -1024,23 +1024,49 @@
                         <span class="input-tip"><i class="fas fa-info-circle" style="margin-top:2px;"></i> <span data-i18n="client_tip">Điền tên của đối tác / khách hàng bạn gặp.</span></span>
                     </div>
 
-                    <!-- ===== PHẦN CHỌN NGÔN NGỮ BIÊN BẢN (MỚI) ===== -->
+                    <!-- ===== PHẦN CHỌN NGÔN NGỮ BIÊN BẢN ===== -->
                     <div>
                         <label class="field-label" data-i18n="language_mode_label">Chế độ ngôn ngữ</label>
                         <select id="outputMode" class="modal-input" onchange="toggleLanguageTarget()">
-                            <option value="auto" data-i18n="lang_mode_auto">Tự động (ngôn ngữ gốc)</option>
-                            <option value="translate" data-i18n="lang_mode_translate">Dịch sang</option>
-                            <option value="bilingual" data-i18n="lang_mode_bilingual">Song ngữ</option>
+                            <option value="auto" data-i18n="lang_mode_auto">🔁 Tự động (ngôn ngữ gốc)</option>
+                            <option value="translate" data-i18n="lang_mode_translate">➡️ Dịch sang</option>
+                            <option value="bilingual" data-i18n="lang_mode_bilingual">🌐 Song ngữ (gốc + đích)</option>
                         </select>
                     </div>
-                    <div id="languageTargetDiv" style="display:none;">
+                    <!-- Ngôn ngữ gốc (tự động detect, không sửa) -->
+                    <div id="sourceLangDiv">
+                        <label class="field-label">Ngôn ngữ gốc (tự động)</label>
+                        <input type="text" id="sourceLangDisplay" class="modal-input" disabled value="Đang phát hiện...">
+                    </div>
+                    <!-- Ngôn ngữ đích (cho phép chọn) -->
+                    <div id="targetLangDiv" style="display:none;">
                         <label class="field-label" data-i18n="language_target_label">Ngôn ngữ đích</label>
                         <select id="outputTargetLang" class="modal-input">
+                            <!-- Đông Nam Á -->
                             <option value="en" data-i18n="lang_en">🇬🇧 English</option>
                             <option value="vi" data-i18n="lang_vi">🇻🇳 Tiếng Việt</option>
+                            <option value="id" data-i18n="lang_id">🇮🇩 Bahasa Indonesia</option>
+                            <option value="ms" data-i18n="lang_ms">🇲🇾 Bahasa Malaysia</option>
+                            <option value="tl" data-i18n="lang_tl">🇵🇭 Filipino</option>
+                            <option value="th" data-i18n="lang_th">🇹🇭 ภาษาไทย</option>
+                            <option value="km" data-i18n="lang_km">🇰🇭 ភាសាខ្មែរ</option>
+                            <option value="lo" data-i18n="lang_lo">🇱🇦 ພາສາລາວ</option>
+                            <option value="my" data-i18n="lang_my">🇲🇲 မြန်မာစာ</option>
+                            <!-- Châu Á khác -->
                             <option value="zh" data-i18n="lang_zh">🇨🇳 中文</option>
                             <option value="ja" data-i18n="lang_ja">🇯🇵 日本語</option>
                             <option value="ko" data-i18n="lang_ko">🇰🇷 한국어</option>
+                            <option value="hi" data-i18n="lang_hi">🇮🇳 हिन्दी</option>
+                            <!-- Châu Âu -->
+                            <option value="es" data-i18n="lang_es">🇪🇸 Español</option>
+                            <option value="fr" data-i18n="lang_fr">🇫🇷 Français</option>
+                            <option value="de" data-i18n="lang_de">🇩🇪 Deutsch</option>
+                            <option value="it" data-i18n="lang_it">🇮🇹 Italiano</option>
+                            <option value="pt" data-i18n="lang_pt">🇵🇹 Português</option>
+                            <option value="ru" data-i18n="lang_ru">🇷🇺 Русский</option>
+                            <!-- Khác -->
+                            <option value="ar" data-i18n="lang_ar">🇸🇦 العربية</option>
+                            <option value="tr" data-i18n="lang_tr">🇹🇷 Türkçe</option>
                         </select>
                     </div>
                     <!-- ===== KẾT THÚC ===== -->
@@ -1199,17 +1225,34 @@
             status_processing: 'AI đang tiến hành phân tích cuộc họp...',
             recording_saved: 'Đã hoàn tất thu âm!',
             select_language: 'Chọn ngôn ngữ',
-            // ===== THÊM CÁC KEY NGÔN NGỮ BIÊN BẢN =====
+            // ===== NGÔN NGỮ BIÊN BẢN =====
             language_mode_label: 'Chế độ ngôn ngữ',
-            lang_mode_auto: 'Tự động (ngôn ngữ gốc)',
-            lang_mode_translate: 'Dịch sang',
-            lang_mode_bilingual: 'Song ngữ',
+            lang_mode_auto: '🔁 Tự động (ngôn ngữ gốc)',
+            lang_mode_translate: '➡️ Dịch sang',
+            lang_mode_bilingual: '🌐 Song ngữ (gốc + đích)',
             language_target_label: 'Ngôn ngữ đích',
+            // Ngôn ngữ mới
             lang_en: '🇬🇧 English',
             lang_vi: '🇻🇳 Tiếng Việt',
+            lang_id: '🇮🇩 Bahasa Indonesia',
+            lang_ms: '🇲🇾 Bahasa Malaysia',
+            lang_tl: '🇵🇭 Filipino',
+            lang_th: '🇹🇭 ภาษาไทย',
+            lang_km: '🇰🇭 ភាសាខ្មែរ',
+            lang_lo: '🇱🇦 ພາສາລາວ',
+            lang_my: '🇲🇲 မြန်မာစာ',
             lang_zh: '🇨🇳 中文',
             lang_ja: '🇯🇵 日本語',
             lang_ko: '🇰🇷 한국어',
+            lang_hi: '🇮🇳 हिन्दी',
+            lang_es: '🇪🇸 Español',
+            lang_fr: '🇫🇷 Français',
+            lang_de: '🇩🇪 Deutsch',
+            lang_it: '🇮🇹 Italiano',
+            lang_pt: '🇵🇹 Português',
+            lang_ru: '🇷🇺 Русский',
+            lang_ar: '🇸🇦 العربية',
+            lang_tr: '🇹🇷 Türkçe',
         },
         en: {
             login_title: 'Smart Meeting Minutes AI',
@@ -1281,17 +1324,33 @@
             status_processing: 'AI is analyzing the meeting...',
             recording_saved: 'Recording completed!',
             select_language: 'Select language',
-            // ===== THÊM CÁC KEY NGÔN NGỮ BIÊN BẢN =====
+            // ===== MINUTES LANGUAGE =====
             language_mode_label: 'Language mode',
-            lang_mode_auto: 'Auto (original language)',
-            lang_mode_translate: 'Translate to',
-            lang_mode_bilingual: 'Bilingual',
+            lang_mode_auto: '🔁 Auto (original language)',
+            lang_mode_translate: '➡️ Translate to',
+            lang_mode_bilingual: '🌐 Bilingual (original + target)',
             language_target_label: 'Target language',
             lang_en: '🇬🇧 English',
             lang_vi: '🇻🇳 Vietnamese',
+            lang_id: '🇮🇩 Indonesian',
+            lang_ms: '🇲🇾 Malay',
+            lang_tl: '🇵🇭 Filipino',
+            lang_th: '🇹🇭 Thai',
+            lang_km: '🇰🇭 Khmer',
+            lang_lo: '🇱🇦 Lao',
+            lang_my: '🇲🇲 Burmese',
             lang_zh: '🇨🇳 Chinese',
             lang_ja: '🇯🇵 Japanese',
             lang_ko: '🇰🇷 Korean',
+            lang_hi: '🇮🇳 Hindi',
+            lang_es: '🇪🇸 Spanish',
+            lang_fr: '🇫🇷 French',
+            lang_de: '🇩🇪 German',
+            lang_it: '🇮🇹 Italian',
+            lang_pt: '🇵🇹 Portuguese',
+            lang_ru: '🇷🇺 Russian',
+            lang_ar: '🇸🇦 Arabic',
+            lang_tr: '🇹🇷 Turkish',
         }
     };
 
@@ -1303,7 +1362,7 @@
     }
 
     // ========================================================================
-    //  QUẢN LÝ NGÔN NGỮ
+    //  QUẢN LÝ NGÔN NGỮ GIAO DIỆN
     // ========================================================================
     const loginToggle = document.getElementById('loginLangToggleBtn');
     const loginMenu = document.getElementById('loginLangMenu');
@@ -1481,7 +1540,7 @@
             errorMsg.textContent = t(lastErrorKey);
         }
 
-        // Cập nhật nội dung dropdown ngôn ngữ đích nếu có
+        // Cập nhật nội dung các dropdown ngôn ngữ
         const targetLangSelect = document.getElementById('outputTargetLang');
         if (targetLangSelect) {
             const options = targetLangSelect.options;
@@ -1523,13 +1582,14 @@
         });
         updateFlagIcons(currentLang);
         updateLangTooltip(currentLang);
-        // Hiển thị đúng trạng thái ban đầu của language target
+        // Khởi tạo trạng thái language target
         toggleLanguageTarget();
         // Khôi phục lựa chọn ngôn ngữ đã lưu
-        const savedLang = localStorage.getItem('popminutes_output_lang');
-        if (savedLang) {
-            document.getElementById('outputTargetLang').value = savedLang;
-        }
+        const savedLang = localStorage.getItem('popminutes_output_target') || 'en';
+        document.getElementById('outputTargetLang').value = savedLang;
+        const savedMode = localStorage.getItem('popminutes_output_mode') || 'auto';
+        document.getElementById('outputMode').value = savedMode;
+        toggleLanguageTarget();
     });
 
     // ========================================================================
@@ -1621,7 +1681,7 @@
     }
 
     // ========================================================================
-    //  LOGIC UPLOAD & GHI ÂM TỔNG HỢP (MICROPHONE + TAB AUDIO)
+    //  LOGIC UPLOAD & GHI ÂM TỔNG HỢP
     // ========================================================================
     let selectedFileBlob = null;
     let mediaRecorder = null;
@@ -1644,12 +1704,16 @@
     // ===== HÀM HIỂN THỊ/ẨN DROPDOWN NGÔN NGỮ ĐÍCH =====
     function toggleLanguageTarget() {
         const mode = document.getElementById('outputMode').value;
-        const targetDiv = document.getElementById('languageTargetDiv');
+        const targetDiv = document.getElementById('targetLangDiv');
+        const sourceDiv = document.getElementById('sourceLangDiv');
         if (mode === 'auto') {
             targetDiv.style.display = 'none';
+            sourceDiv.style.display = 'block';
         } else {
             targetDiv.style.display = 'block';
+            sourceDiv.style.display = 'block';
         }
+        // Nếu là song ngữ, hiển thị cả hai, nhưng vẫn cho chọn ngôn ngữ đích
     }
 
     function updateUploadButton() {
@@ -1693,6 +1757,8 @@
         recordBtn.classList.remove('recording');
         recordLabel.textContent = t('record_btn');
         recordBtn.querySelector('i').className = 'fa-solid fa-microphone';
+        // Reset source language display
+        document.getElementById('sourceLangDisplay').value = 'Đang phát hiện...';
     }
 
     function stopAllTracks() {
@@ -1713,7 +1779,7 @@
         }
     });
 
-    // XỬ LÝ NÚT GHI ÂM (KẾT HỢP MICROPHONE + CHIA SẺ ÂM THANH TAB)
+    // XỬ LÝ NÚT GHI ÂM
     recordBtn.addEventListener('click', async function() {
         if (isRecording) {
             if (mediaRecorder) {
@@ -1727,10 +1793,7 @@
         }
 
         try {
-            // 1. Lấy Microphone (Giọng người dùng)
             const micStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
-            
-            // 2. Thử lấy Tab Audio (Tiếng cuộc họp online)
             let displayStream = null;
             try {
                 displayStream = await navigator.mediaDevices.getDisplayMedia({
@@ -1738,19 +1801,15 @@
                     audio: { suppressLocalAudioPlayback: false }
                 });
             } catch (tabErr) {
-                console.warn("Người dùng hủy hoặc không hỗ trợ chia sẻ màn hình/tab. Chuyển sang chế độ chỉ ghi âm Micro.", tabErr);
+                console.warn("Không hỗ trợ chia sẻ màn hình/tab. Chỉ ghi âm Micro.", tabErr);
             }
 
-            // 3. Tiến hành trộn âm thanh bằng Web Audio API
             activeAudioContext = new (window.AudioContext || window.webkitAudioContext)();
             const destination = activeAudioContext.createMediaStreamDestination();
-
-            // Đưa Micro vào mixer
             const micSource = activeAudioContext.createMediaStreamSource(micStream);
             micSource.connect(destination);
             combinedStreamTracks.push(...micStream.getTracks());
 
-            // Đưa Tab Audio vào mixer (nếu người dùng có chọn)
             if (displayStream) {
                 combinedStreamTracks.push(...displayStream.getTracks());
                 if (displayStream.getAudioTracks().length > 0) {
@@ -1759,7 +1818,6 @@
                 }
             }
 
-            // 4. Khởi tạo MediaRecorder trên stream đã trộn
             recordedChunks = [];
             const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus' : 'audio/webm';
             mediaRecorder = new MediaRecorder(destination.stream, { mimeType });
@@ -1784,7 +1842,6 @@
                 recordBtn.classList.remove('recording');
             };
 
-            // Tự động dừng nếu người dùng bấm "Stop sharing" trên thanh công cụ của trình duyệt
             if (displayStream) {
                 displayStream.getVideoTracks()[0].onended = () => {
                     if (isRecording && mediaRecorder) {
@@ -1821,6 +1878,8 @@
         document.getElementById('outputMode').value = savedMode;
         document.getElementById('outputTargetLang').value = savedTarget;
         toggleLanguageTarget();
+        // (Giả lập phát hiện ngôn ngữ gốc - sau này sẽ thay bằng API)
+        document.getElementById('sourceLangDisplay').value = 'Tiếng Việt (dự kiến)';
     });
 
     function closeModal() {
@@ -1898,8 +1957,8 @@
                     filePath: filePath,
                     clientEmail: ccEmail1,
                     managerEmail: ccEmail2,
-                    outputMode: outputMode,         // <-- GỬI CHẾ ĐỘ
-                    outputTargetLang: outputTargetLang // <-- GỬI NGÔN NGỮ ĐÍCH
+                    outputMode: outputMode,
+                    outputTargetLang: outputTargetLang
                 })
             });
             const processResult = await processResponse.json();
