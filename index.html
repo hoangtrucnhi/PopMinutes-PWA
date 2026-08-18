@@ -1024,35 +1024,35 @@
                         <span class="input-tip"><i class="fas fa-info-circle" style="margin-top:2px;"></i> <span data-i18n="client_tip">Điền tên của đối tác / khách hàng bạn gặp.</span></span>
                     </div>
 
-                    <!-- ===== PHẦN CHỌN NGÔN NGỮ BIÊN BẢN ===== -->
+                    <!-- ===== PHẦN CHỌN NGÔN NGỮ BIÊN BẢN (ĐÃ TỐI GIẢN) ===== -->
                     <div>
                         <label class="field-label" data-i18n="language_mode_label">Chế độ ngôn ngữ</label>
                         <select id="outputMode" class="modal-input" onchange="toggleLanguageTarget()">
-                            <option value="auto" data-i18n="lang_mode_auto">🔁 Tự động (ngôn ngữ gốc)</option>
-                            <option value="translate" data-i18n="lang_mode_translate">➡️ Dịch sang</option>
-                            <option value="bilingual" data-i18n="lang_mode_bilingual">🌐 Song ngữ (gốc + đích)</option>
+                            <option value="auto" data-i18n="lang_mode_auto">Ngôn ngữ gốc</option>
+                            <option value="translate" data-i18n="lang_mode_translate">Dịch sang</option>
+                            <option value="bilingual" data-i18n="lang_mode_bilingual">Song ngữ</option>
                         </select>
                     </div>
-                    <!-- Ngôn ngữ gốc (tự động detect, không sửa) -->
-                    <div id="sourceLangDiv">
-                        <label class="field-label">Ngôn ngữ gốc (tự động)</label>
+                    <!-- Ngôn ngữ gốc (chỉ hiển thị khi chọn Song ngữ) -->
+                    <div id="sourceLangDiv" style="display:none;">
+                        <label class="field-label">Ngôn ngữ gốc</label>
                         <input type="text" id="sourceLangDisplay" class="modal-input" disabled value="Đang phát hiện...">
                     </div>
-                    <!-- Ngôn ngữ đích (cho phép chọn) -->
+                    <!-- Ngôn ngữ đích (hiển thị khi chọn Dịch sang hoặc Song ngữ) -->
                     <div id="targetLangDiv" style="display:none;">
                         <label class="field-label" data-i18n="language_target_label">Ngôn ngữ đích</label>
                         <select id="outputTargetLang" class="modal-input">
-                            <!-- Đông Nam Á -->
-                            <option value="en" data-i18n="lang_en">🇬🇧 English</option>
+                            <!-- Ưu tiên tiếng Việt lên đầu -->
                             <option value="vi" data-i18n="lang_vi">🇻🇳 Tiếng Việt</option>
-                            <option value="id" data-i18n="lang_id">🇮🇩 Bahasa Indonesia</option>
-                            <option value="ms" data-i18n="lang_ms">🇲🇾 Bahasa Malaysia</option>
+                            <!-- Châu Á -->
+                            <option value="en" data-i18n="lang_en">🇬🇧 English</option>
+                            <option value="id" data-i18n="lang_id">🇮🇩 Indonesia</option>
+                            <option value="ms" data-i18n="lang_ms">🇲🇾 Malaysia</option>
                             <option value="tl" data-i18n="lang_tl">🇵🇭 Filipino</option>
                             <option value="th" data-i18n="lang_th">🇹🇭 ภาษาไทย</option>
                             <option value="km" data-i18n="lang_km">🇰🇭 ភាសាខ្មែរ</option>
                             <option value="lo" data-i18n="lang_lo">🇱🇦 ພາສາລາວ</option>
                             <option value="my" data-i18n="lang_my">🇲🇲 မြန်မာစာ</option>
-                            <!-- Châu Á khác -->
                             <option value="zh" data-i18n="lang_zh">🇨🇳 中文</option>
                             <option value="ja" data-i18n="lang_ja">🇯🇵 日本語</option>
                             <option value="ko" data-i18n="lang_ko">🇰🇷 한국어</option>
@@ -1064,7 +1064,7 @@
                             <option value="it" data-i18n="lang_it">🇮🇹 Italiano</option>
                             <option value="pt" data-i18n="lang_pt">🇵🇹 Português</option>
                             <option value="ru" data-i18n="lang_ru">🇷🇺 Русский</option>
-                            <!-- Khác -->
+                            <!-- Các ngôn ngữ khác -->
                             <option value="ar" data-i18n="lang_ar">🇸🇦 العربية</option>
                             <option value="tr" data-i18n="lang_tr">🇹🇷 Türkçe</option>
                         </select>
@@ -1152,7 +1152,7 @@
 
 <script>
     // ========================================================================
-    //  I18N – ĐA NGÔN NGỮ
+    //  I18N – ĐA NGÔN NGỮ GIAO DIỆN
     // ========================================================================
     const translations = {
         vi: {
@@ -1225,17 +1225,17 @@
             status_processing: 'AI đang tiến hành phân tích cuộc họp...',
             recording_saved: 'Đã hoàn tất thu âm!',
             select_language: 'Chọn ngôn ngữ',
-            // ===== NGÔN NGỮ BIÊN BẢN =====
+            // ===== NGÔN NGỮ BIÊN BẢN (ĐÃ TỐI GIẢN) =====
             language_mode_label: 'Chế độ ngôn ngữ',
-            lang_mode_auto: '🔁 Tự động (ngôn ngữ gốc)',
-            lang_mode_translate: '➡️ Dịch sang',
-            lang_mode_bilingual: '🌐 Song ngữ (gốc + đích)',
+            lang_mode_auto: 'Ngôn ngữ gốc',
+            lang_mode_translate: 'Dịch sang',
+            lang_mode_bilingual: 'Song ngữ',
             language_target_label: 'Ngôn ngữ đích',
             // Ngôn ngữ mới
             lang_en: '🇬🇧 English',
             lang_vi: '🇻🇳 Tiếng Việt',
-            lang_id: '🇮🇩 Bahasa Indonesia',
-            lang_ms: '🇲🇾 Bahasa Malaysia',
+            lang_id: '🇮🇩 Indonesia',
+            lang_ms: '🇲🇾 Malaysia',
             lang_tl: '🇵🇭 Filipino',
             lang_th: '🇹🇭 ภาษาไทย',
             lang_km: '🇰🇭 ភាសាខ្មែរ',
@@ -1324,11 +1324,11 @@
             status_processing: 'AI is analyzing the meeting...',
             recording_saved: 'Recording completed!',
             select_language: 'Select language',
-            // ===== MINUTES LANGUAGE =====
+            // ===== MINUTES LANGUAGE (CLEAN) =====
             language_mode_label: 'Language mode',
-            lang_mode_auto: '🔁 Auto (original language)',
-            lang_mode_translate: '➡️ Translate to',
-            lang_mode_bilingual: '🌐 Bilingual (original + target)',
+            lang_mode_auto: 'Original language',
+            lang_mode_translate: 'Translate to',
+            lang_mode_bilingual: 'Bilingual',
             language_target_label: 'Target language',
             lang_en: '🇬🇧 English',
             lang_vi: '🇻🇳 Vietnamese',
@@ -1585,7 +1585,7 @@
         // Khởi tạo trạng thái language target
         toggleLanguageTarget();
         // Khôi phục lựa chọn ngôn ngữ đã lưu
-        const savedLang = localStorage.getItem('popminutes_output_target') || 'en';
+        const savedLang = localStorage.getItem('popminutes_output_target') || 'vi';
         document.getElementById('outputTargetLang').value = savedLang;
         const savedMode = localStorage.getItem('popminutes_output_mode') || 'auto';
         document.getElementById('outputMode').value = savedMode;
@@ -1701,19 +1701,21 @@
     const recordBtn = document.getElementById('recordBtn');
     const recordLabel = document.getElementById('recordLabel');
 
-    // ===== HÀM HIỂN THỊ/ẨN DROPDOWN NGÔN NGỮ ĐÍCH =====
+    // ===== HÀM HIỂN THỊ/ẨN CÁC TRƯỜNG NGÔN NGỮ =====
     function toggleLanguageTarget() {
         const mode = document.getElementById('outputMode').value;
         const targetDiv = document.getElementById('targetLangDiv');
         const sourceDiv = document.getElementById('sourceLangDiv');
         if (mode === 'auto') {
             targetDiv.style.display = 'none';
-            sourceDiv.style.display = 'block';
-        } else {
+            sourceDiv.style.display = 'none';
+        } else if (mode === 'translate') {
+            targetDiv.style.display = 'block';
+            sourceDiv.style.display = 'none';
+        } else if (mode === 'bilingual') {
             targetDiv.style.display = 'block';
             sourceDiv.style.display = 'block';
         }
-        // Nếu là song ngữ, hiển thị cả hai, nhưng vẫn cho chọn ngôn ngữ đích
     }
 
     function updateUploadButton() {
@@ -1874,12 +1876,12 @@
         resetRecorder();
         // Khôi phục lựa chọn ngôn ngữ đã lưu
         const savedMode = localStorage.getItem('popminutes_output_mode') || 'auto';
-        const savedTarget = localStorage.getItem('popminutes_output_target') || 'en';
+        const savedTarget = localStorage.getItem('popminutes_output_target') || 'vi';
         document.getElementById('outputMode').value = savedMode;
         document.getElementById('outputTargetLang').value = savedTarget;
         toggleLanguageTarget();
         // (Giả lập phát hiện ngôn ngữ gốc - sau này sẽ thay bằng API)
-        document.getElementById('sourceLangDisplay').value = 'Tiếng Việt (dự kiến)';
+        document.getElementById('sourceLangDisplay').value = 'Tiếng Việt';
     });
 
     function closeModal() {
@@ -2253,7 +2255,7 @@
         updateLangTooltip(currentLang);
         // Khôi phục lựa chọn ngôn ngữ
         const savedMode = localStorage.getItem('popminutes_output_mode') || 'auto';
-        const savedTarget = localStorage.getItem('popminutes_output_target') || 'en';
+        const savedTarget = localStorage.getItem('popminutes_output_target') || 'vi';
         document.getElementById('outputMode').value = savedMode;
         document.getElementById('outputTargetLang').value = savedTarget;
         toggleLanguageTarget();
