@@ -21,7 +21,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
 
     <style>
-        /* ========== TOÀN BỘ STYLE (giữ nguyên) ========== */
+        /* ========== TOÀN BỘ STYLE (GIỮ NGUYÊN) ========== */
         *,
         *::before,
         *::after {
@@ -1692,14 +1692,13 @@
     }
 
     // ========================================================================
-    //  LOGIC UPLOAD & GHI ÂM TỔNG HỢP (ĐÃ SỬA LỖI - HỖ TRỢ IOS)
+    //  LOGIC UPLOAD & GHI ÂM TỐI GIẢN (CHỈ getUserMedia + MediaRecorder)
     // ========================================================================
-    let selectedFileBlob = null;
+    let micStream = null;
     let mediaRecorder = null;
     let recordedChunks = [];
     let isRecording = false;
-    let activeAudioContext = null;
-    let combinedStreamTracks = [];
+    let selectedFileBlob = null;
 
     const modal = document.getElementById('recorderModal');
     const openBtn = document.getElementById('openRecorderBtn');
@@ -1754,7 +1753,10 @@
             mediaRecorder.stop();
             isRecording = false;
         }
-        stopAllTracks();
+        if (micStream) {
+            micStream.getTracks().forEach(t => t.stop());
+            micStream = null;
+        }
         selectedFileBlob = null;
         audioPlayback.classList.add('hidden');
         uploadBtn.disabled = true;
@@ -1777,15 +1779,6 @@
         document.getElementById('sourceLangDisplay').value = 'Ngôn ngữ gốc';
     }
 
-    function stopAllTracks() {
-        combinedStreamTracks.forEach(track => track.stop());
-        combinedStreamTracks = [];
-        if (activeAudioContext && activeAudioContext.state !== 'closed') {
-            activeAudioContext.close();
-            activeAudioContext = null;
-        }
-    }
-
     fileInput.addEventListener('change', e => {
         if (e.target.files.length > 0) {
             const file = e.target.files[0];
@@ -1795,80 +1788,38 @@
         }
     });
 
-    // ======== XỬ LÝ NÚT GHI ÂM (TỐI ƯU CHO IOS) ========
+    // ======== XỬ LÝ NÚT GHI ÂM (TỐI GIẢN, KHÔNG AudioContext) ========
     recordBtn.addEventListener('click', async function() {
         if (isRecording) {
+            // Dừng ghi
             if (mediaRecorder) mediaRecorder.stop();
             isRecording = false;
             this.classList.remove('recording');
             recordLabel.textContent = t('record_btn');
             this.querySelector('i').className = 'fa-solid fa-microphone';
             recordStatusDiv.innerHTML = '';
-            stopAllTracks();
             return;
         }
 
         try {
-            // Kiểm tra HTTPS (bắt buộc trên iOS)
+            // Kiểm tra HTTPS
             if (window.location.protocol !== 'https:' && !window.location.hostname.includes('localhost')) {
                 recordStatusDiv.innerHTML = `<span style="color:var(--danger)">🔒 Vui lòng truy cập bằng HTTPS để sử dụng Microphone.</span>`;
                 return;
             }
 
-            // Tạo AudioContext ngay trong sự kiện click (quan trọng trên iOS)
-            activeAudioContext = new (window.AudioContext || window.webkitAudioContext)();
+            // Chỉ xin quyền micro – đơn giản nhất
+            micStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
 
-            // 1. Lấy microphone – thực hiện ngay, không chờ đợi gì khác
-            const micStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
-            const destination = activeAudioContext.createMediaStreamDestination();
-            const micSource = activeAudioContext.createMediaStreamSource(micStream);
-            micSource.connect(destination);
-            combinedStreamTracks.push(...micStream.getTracks());
-
-            // Resume AudioContext (cần thiết trên iOS)
-            if (activeAudioContext.state === 'suspended') {
-                await activeAudioContext.resume();
-            }
-
-            let displayStream = null;
-            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-            let recordingMode = 'Microphone only';
-
-            if (!isIOS) {
-                try {
-                    displayStream = await navigator.mediaDevices.getDisplayMedia({
-                        video: true,
-                        audio: { suppressLocalAudioPlayback: false }
-                    });
-                    if (displayStream && displayStream.getAudioTracks().length > 0) {
-                        recordingMode = 'Microphone + Tab Audio';
-                        const displaySource = activeAudioContext.createMediaStreamSource(displayStream);
-                        displaySource.connect(destination);
-                        combinedStreamTracks.push(...displayStream.getTracks());
-                        const videoTrack = displayStream.getVideoTracks()[0];
-                        if (videoTrack) {
-                            videoTrack.onended = () => {
-                                if (isRecording && mediaRecorder) recordBtn.click();
-                            };
-                        }
-                    } else {
-                        recordingMode = 'Microphone only (no tab audio)';
-                    }
-                } catch (tabErr) {
-                    console.warn('Không hỗ trợ chia sẻ màn hình:', tabErr);
-                }
-            } else {
-                recordingMode = 'Microphone only (iOS)';
-                console.log('📱 iOS detected, skipping getDisplayMedia');
-            }
-
-            // 2. Tạo MediaRecorder
+            // Khởi tạo MediaRecorder (không cần AudioContext)
             recordedChunks = [];
             const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus' : 'audio/webm';
-            mediaRecorder = new MediaRecorder(destination.stream, { mimeType });
+            mediaRecorder = new MediaRecorder(micStream, { mimeType });
 
             mediaRecorder.ondataavailable = (event) => {
-                if (event.data.size > 0) recordedChunks.push(event.data);
+                if (event.data.size > 0) {
+                    recordedChunks.push(event.data);
+                }
             };
 
             mediaRecorder.onstop = () => {
@@ -1877,7 +1828,11 @@
                 const audioFile = new File([audioBlob], fileName, { type: 'audio/webm' });
                 handleFileSelected(audioFile);
                 recordStatusDiv.innerHTML = `<span style="color:var(--success)">${t('recording_saved')}</span>`;
-                stopAllTracks();
+                // Giải phóng stream
+                if (micStream) {
+                    micStream.getTracks().forEach(t => t.stop());
+                    micStream = null;
+                }
                 recordLabel.textContent = t('record_btn');
                 recordBtn.querySelector('i').className = 'fa-solid fa-microphone';
                 recordBtn.classList.remove('recording');
@@ -1888,13 +1843,13 @@
             this.classList.add('recording');
             recordLabel.textContent = t('stop_record_btn');
             this.querySelector('i').className = 'fa-solid fa-stop';
-            recordStatusDiv.innerHTML = `<span class="status-loading"><i class="fa-solid fa-spinner fa-spin"></i> 🎙️ ${t('recording_status')} (${recordingMode})</span>`;
+            recordStatusDiv.innerHTML = `<span class="status-loading"><i class="fa-solid fa-spinner fa-spin"></i> 🎙️ ${t('recording_status')} (Micro only)</span>`;
 
         } catch (err) {
             console.error('Lỗi khi khởi chạy Microphone:', err);
             let errorMsg = t('err_mic_permission');
             if (err.name === 'NotAllowedError') {
-                errorMsg = '🔴 Bạn chưa cho phép Microphone. Vui lòng kiểm tra Cài đặt → Quyền riêng tư → Microphone và bật cho Safari/Chrome.';
+                errorMsg = '🔴 Microphone bị từ chối. Vui lòng vào Cài đặt → Quyền riêng tư → Microphone và bật cho trình duyệt.';
             } else if (err.name === 'NotFoundError') {
                 errorMsg = '🔴 Không tìm thấy Microphone. Vui lòng kết nối mic và thử lại.';
             } else if (err.name === 'NotReadableError') {
@@ -1905,7 +1860,10 @@
                 errorMsg = '🔴 Lỗi bảo mật. Vui lòng truy cập bằng HTTPS.';
             }
             recordStatusDiv.innerHTML = `<span style="color:var(--danger)">${errorMsg}</span>`;
-            stopAllTracks();
+            if (micStream) {
+                micStream.getTracks().forEach(t => t.stop());
+                micStream = null;
+            }
             this.classList.remove('recording');
             recordLabel.textContent = t('record_btn');
             this.querySelector('i').className = 'fa-solid fa-microphone';
