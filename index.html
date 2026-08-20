@@ -21,7 +21,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
 
     <style>
-        /* ========== TOÀN BỘ STYLE (GIỮ NGUYÊN) ========== */
+        /* ========== TOÀN BỘ STYLE ========== */
         *,
         *::before,
         *::after {
@@ -1164,7 +1164,7 @@
 
 <script>
     // ========================================================================
-    //  I18N – ĐA NGÔN NGỮ GIAO DIỆN (RÚT GỌN)
+    //  I18N – ĐA NGÔN NGỮ GIAO DIỆN
     // ========================================================================
     const translations = {
         vi: {
@@ -1209,7 +1209,7 @@
             change_file_btn: 'Đổi tệp khác',
             record_btn: 'Ghi âm',
             stop_record_btn: 'Dừng ghi',
-            recording_status: 'Đang ghi âm...',
+            recording_status: 'Đang ghi âm (Micro + Âm thanh Tab)...',
             file_tip: 'Hỗ trợ: <strong>mp3, m4a, wav, webm...</strong>',
             consent_text: 'Bằng việc tải lên, bạn xác nhận có quyền hợp pháp và đã được sự đồng ý của những người tham gia để xử lý dữ liệu cuộc họp này.',
             start_btn: 'Bắt đầu',
@@ -1231,7 +1231,7 @@
             err_upload_init: 'Không thể lấy Signed URL',
             err_upload_fail: 'Tải file lên Cloud Storage thất bại',
             err_process_fail: 'Tải lên thất bại! AI đang lập biên bản.',
-            err_mic_permission: 'Không thể truy cập Microphone. Vui lòng kiểm tra quyền.',
+            err_mic_permission: 'Không thể truy cập Microphone hoặc Âm thanh Tab. Vui lòng cấp quyền.',
             status_connecting: 'Đang khởi tạo kết nối...',
             status_uploading: 'Đang tải file lên Cloud...',
             status_processing: 'AI đang tiến hành phân tích cuộc họp...',
@@ -1307,7 +1307,7 @@
             change_file_btn: 'Change file',
             record_btn: 'Record',
             stop_record_btn: 'Stop recording',
-            recording_status: 'Recording...',
+            recording_status: 'Recording (Microphone + Tab Audio)...',
             file_tip: 'Supports: <strong>mp3, m4a, wav, webm...</strong>',
             consent_text: 'By uploading, you confirm that you have the legal right and have obtained consent from participants to process this meeting data.',
             start_btn: 'Start',
@@ -1329,7 +1329,7 @@
             err_upload_init: 'Cannot get Signed URL',
             err_upload_fail: 'Upload to Cloud Storage failed',
             err_process_fail: 'Upload failed! AI is processing minutes.',
-            err_mic_permission: 'Cannot access Microphone. Please check permissions.',
+            err_mic_permission: 'Cannot access Microphone or Tab Audio. Please grant permission.',
             status_connecting: 'Initializing connection...',
             status_uploading: 'Uploading file to Cloud...',
             status_processing: 'AI is analyzing the meeting...',
@@ -1373,7 +1373,7 @@
     }
 
     // ========================================================================
-    //  QUẢN LÝ NGÔN NGỮ GIAO DIỆN (RÚT GỌN)
+    //  QUẢN LÝ NGÔN NGỮ GIAO DIỆN
     // ========================================================================
     const loginToggle = document.getElementById('loginLangToggleBtn');
     const loginMenu = document.getElementById('loginLangMenu');
@@ -1551,6 +1551,7 @@
             errorMsg.textContent = t(lastErrorKey);
         }
 
+        // Cập nhật nội dung các dropdown ngôn ngữ
         const targetLangSelect = document.getElementById('outputTargetLang');
         if (targetLangSelect) {
             const options = targetLangSelect.options;
@@ -1592,7 +1593,9 @@
         });
         updateFlagIcons(currentLang);
         updateLangTooltip(currentLang);
+        // Khởi tạo trạng thái language target
         toggleLanguageTarget();
+        // Khôi phục lựa chọn ngôn ngữ đã lưu
         const savedLang = localStorage.getItem('popminutes_output_target') || 'vi';
         document.getElementById('outputTargetLang').value = savedLang;
         const savedMode = localStorage.getItem('popminutes_output_mode') || 'auto';
@@ -1689,13 +1692,14 @@
     }
 
     // ========================================================================
-    //  LOGIC UPLOAD & GHI ÂM TỐI GIẢN (CHO MÁY CŨ)
+    //  LOGIC UPLOAD & GHI ÂM TỔNG HỢP (ĐÃ SỬA LỖI - BỔ SUNG resume)
     // ========================================================================
     let selectedFileBlob = null;
     let mediaRecorder = null;
     let recordedChunks = [];
     let isRecording = false;
-    let micStream = null; // Đơn giản hóa: chỉ giữ stream
+    let activeAudioContext = null;
+    let combinedStreamTracks = [];
 
     const modal = document.getElementById('recorderModal');
     const openBtn = document.getElementById('openRecorderBtn');
@@ -1708,6 +1712,7 @@
     const recordBtn = document.getElementById('recordBtn');
     const recordLabel = document.getElementById('recordLabel');
 
+    // ===== HÀM HIỂN THỊ/ẨN CÁC TRƯỜNG NGÔN NGỮ =====
     function toggleLanguageTarget() {
         const mode = document.getElementById('outputMode').value;
         const targetDiv = document.getElementById('targetLangDiv');
@@ -1749,10 +1754,7 @@
             mediaRecorder.stop();
             isRecording = false;
         }
-        if (micStream) {
-            micStream.getTracks().forEach(t => t.stop());
-            micStream = null;
-        }
+        stopAllTracks();
         selectedFileBlob = null;
         audioPlayback.classList.add('hidden');
         uploadBtn.disabled = true;
@@ -1772,7 +1774,18 @@
         recordBtn.classList.remove('recording');
         recordLabel.textContent = t('record_btn');
         recordBtn.querySelector('i').className = 'fa-solid fa-microphone';
+        // Reset source language display to default
         document.getElementById('sourceLangDisplay').value = 'Ngôn ngữ gốc';
+    }
+
+    // Hàm dừng tất cả track và đóng AudioContext
+    function stopAllTracks() {
+        combinedStreamTracks.forEach(track => track.stop());
+        combinedStreamTracks = [];
+        if (activeAudioContext && activeAudioContext.state !== 'closed') {
+            activeAudioContext.close();
+            activeAudioContext = null;
+        }
     }
 
     fileInput.addEventListener('change', e => {
@@ -1784,32 +1797,72 @@
         }
     });
 
-    // ======== NÚT GHI ÂM TỐI GIẢN (KHÔNG AudioContext) ========
+    // ======== XỬ LÝ NÚT GHI ÂM (ĐÃ SỬA - CÓ resume VÀ THÔNG BÁO) ========
     recordBtn.addEventListener('click', async function() {
+        // Nếu đang ghi -> dừng
         if (isRecording) {
-            if (mediaRecorder) mediaRecorder.stop();
+            if (mediaRecorder) {
+                mediaRecorder.stop();
+            }
             isRecording = false;
             this.classList.remove('recording');
             recordLabel.textContent = t('record_btn');
             this.querySelector('i').className = 'fa-solid fa-microphone';
             recordStatusDiv.innerHTML = '';
+            // Đóng AudioContext ngay lập tức
+            stopAllTracks();
             return;
         }
 
         try {
-            // Kiểm tra HTTPS
-            if (window.location.protocol !== 'https:' && !window.location.hostname.includes('localhost')) {
-                recordStatusDiv.innerHTML = `<span style="color:var(--danger)">🔒 Vui lòng truy cập bằng HTTPS để sử dụng Microphone.</span>`;
-                return;
+            // 1. Lấy micro
+            const micStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+            let displayStream = null;
+            try {
+                displayStream = await navigator.mediaDevices.getDisplayMedia({
+                    video: true,
+                    audio: { suppressLocalAudioPlayback: false }
+                });
+            } catch (tabErr) {
+                console.warn("Không hỗ trợ chia sẻ màn hình/tab. Chỉ ghi âm Micro.", tabErr);
+                recordStatusDiv.innerHTML = `<span style="color:var(--muted)">⚠️ Chỉ ghi âm micro (không có âm thanh tab)</span>`;
+                // Vẫn tiếp tục với micro
             }
 
-            // Xin quyền microphone
-            micStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+            // 2. Tạo AudioContext và kết nối
+            activeAudioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const destination = activeAudioContext.createMediaStreamDestination();
 
-            // Khởi tạo MediaRecorder (không cần AudioContext)
+            const micSource = activeAudioContext.createMediaStreamSource(micStream);
+            micSource.connect(destination);
+            combinedStreamTracks.push(...micStream.getTracks());
+
+            if (displayStream) {
+                combinedStreamTracks.push(...displayStream.getTracks());
+                if (displayStream.getAudioTracks().length > 0) {
+                    const displaySource = activeAudioContext.createMediaStreamSource(displayStream);
+                    displaySource.connect(destination);
+                } else {
+                    recordStatusDiv.innerHTML = `<span style="color:var(--muted)">ℹ️ Tab được chọn không có âm thanh</span>`;
+                }
+                // Nếu video track kết thúc (người dùng tắt tab), tự động dừng ghi
+                const videoTrack = displayStream.getVideoTracks()[0];
+                if (videoTrack) {
+                    videoTrack.onended = () => {
+                        if (isRecording && mediaRecorder) {
+                            recordBtn.click(); // tự động dừng
+                        }
+                    };
+                }
+            }
+
+            // *** QUAN TRỌNG: resume AudioContext ***
+            await activeAudioContext.resume();
+
+            // 3. Tạo MediaRecorder
             recordedChunks = [];
             const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus' : 'audio/webm';
-            mediaRecorder = new MediaRecorder(micStream, { mimeType });
+            mediaRecorder = new MediaRecorder(destination.stream, { mimeType });
 
             mediaRecorder.ondataavailable = (event) => {
                 if (event.data.size > 0) {
@@ -1823,11 +1876,8 @@
                 const audioFile = new File([audioBlob], fileName, { type: 'audio/webm' });
                 handleFileSelected(audioFile);
                 recordStatusDiv.innerHTML = `<span style="color:var(--success)">${t('recording_saved')}</span>`;
-                // Giải phóng stream
-                if (micStream) {
-                    micStream.getTracks().forEach(t => t.stop());
-                    micStream = null;
-                }
+                // Dọn dẹp
+                stopAllTracks();
                 recordLabel.textContent = t('record_btn');
                 recordBtn.querySelector('i').className = 'fa-solid fa-microphone';
                 recordBtn.classList.remove('recording');
@@ -1838,27 +1888,12 @@
             this.classList.add('recording');
             recordLabel.textContent = t('stop_record_btn');
             this.querySelector('i').className = 'fa-solid fa-stop';
-            recordStatusDiv.innerHTML = `<span class="status-loading"><i class="fa-solid fa-spinner fa-spin"></i> 🎙️ ${t('recording_status')}</span>`;
+            recordStatusDiv.innerHTML = `<span class="status-loading"><i class="fa-solid fa-spinner fa-spin"></i> ${t('recording_status')}</span>`;
 
         } catch (err) {
-            console.error('Lỗi khi khởi chạy Microphone:', err);
-            let errorMsg = t('err_mic_permission');
-            if (err.name === 'NotAllowedError') {
-                errorMsg = '🔴 Microphone bị từ chối. Vui lòng vào Cài đặt → Quyền riêng tư → Microphone và bật cho trình duyệt, sau đó tải lại trang.';
-            } else if (err.name === 'NotFoundError') {
-                errorMsg = '🔴 Không tìm thấy Microphone. Vui lòng kết nối mic và thử lại.';
-            } else if (err.name === 'NotReadableError') {
-                errorMsg = '🔴 Không thể truy cập Microphone. Kiểm tra xem mic có đang được ứng dụng khác sử dụng không.';
-            } else if (err.name === 'AbortError') {
-                errorMsg = '🔴 Lỗi khi lấy Microphone. Vui lòng thử lại.';
-            } else if (err.name === 'SecurityError') {
-                errorMsg = '🔴 Lỗi bảo mật. Vui lòng truy cập bằng HTTPS.';
-            }
-            recordStatusDiv.innerHTML = `<span style="color:var(--danger)">${errorMsg}</span>`;
-            if (micStream) {
-                micStream.getTracks().forEach(t => t.stop());
-                micStream = null;
-            }
+            console.error('Lỗi khi khởi chạy Microphone/Tab Audio:', err);
+            recordStatusDiv.innerHTML = `<span style="color:var(--danger)">${t('err_mic_permission')}</span>`;
+            stopAllTracks();
             this.classList.remove('recording');
             recordLabel.textContent = t('record_btn');
             this.querySelector('i').className = 'fa-solid fa-microphone';
@@ -2048,7 +2083,7 @@
     }
 
     // ========================================================================
-    //  LỊCH SỬ (GIỮ NGUYÊN)
+    //  LỊCH SỬ
     // ========================================================================
     function showToast(message, isSuccess = true) {
         let oldToast = document.getElementById('customToast');
@@ -2231,7 +2266,7 @@
     });
 
     // ========================================================================
-    //  KHỞI CHẠY
+    //  KHỞI CHẠY AUTO LOGIN KHI TRANG LOAD
     // ========================================================================
     window.addEventListener('DOMContentLoaded', async () => {
         await tryAutoLogin();
