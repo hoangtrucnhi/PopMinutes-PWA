@@ -21,7 +21,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
 
     <style>
-        /* ========== TOÀN BỘ STYLE ========== */
+        /* ========== TOÀN BỘ STYLE (GIỮ NGUYÊN) ========== */
         *,
         *::before,
         *::after {
@@ -879,6 +879,32 @@
         label.file-pick-btn {
             cursor: pointer;
         }
+
+        /* CSS mới cho progress bar */
+        #uploadProgressWrap {
+            width: 100%;
+            background: #E2E8F0;
+            border-radius: 99px;
+            overflow: hidden;
+            height: 8px;
+            margin-top: 12px;
+            display: none;
+        }
+        #uploadProgressWrap .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--navy-light), var(--navy));
+            width: 0%;
+            border-radius: 99px;
+            transition: width 0.3s;
+        }
+        #uploadProgressText {
+            display: none;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--muted);
+            text-align: center;
+            margin-top: 6px;
+        }
     </style>
 </head>
 <body>
@@ -1132,6 +1158,10 @@
                     <strong data-i18n="consent_text">Bằng việc tải lên, bạn xác nhận có quyền hợp pháp và đã được sự đồng ý của những người tham gia để xử lý dữ liệu cuộc họp này.</strong>
                 </div>
 
+                <!-- Progress bar upload -->
+                <div id="uploadProgressWrap"><div class="progress-fill" id="uploadProgressFill"></div></div>
+                <div id="uploadProgressText">0%</div>
+
                 <button id="uploadRecordBtn" class="btn-primary" style="margin-top:8px; height:56px;" disabled>
                     <i class="fa-solid fa-play"></i> <span data-i18n="start_btn">Bắt đầu</span>
                 </button>
@@ -1209,7 +1239,8 @@
             change_file_btn: 'Đổi tệp khác',
             record_btn: 'Ghi âm',
             stop_record_btn: 'Dừng ghi',
-            recording_status: 'Đang ghi âm (Micro + Âm thanh Tab)...',
+            recording_status: 'Đang ghi âm (Micro)',
+            recording_status_tab: 'Đang ghi âm (Micro + Tab)',
             file_tip: 'Hỗ trợ: <strong>mp3, m4a, wav, webm...</strong>',
             consent_text: 'Bằng việc tải lên, bạn xác nhận có quyền hợp pháp và đã được sự đồng ý của những người tham gia để xử lý dữ liệu cuộc họp này.',
             start_btn: 'Bắt đầu',
@@ -1231,7 +1262,7 @@
             err_upload_init: 'Không thể lấy Signed URL',
             err_upload_fail: 'Tải file lên Cloud Storage thất bại',
             err_process_fail: 'Tải lên thất bại! AI đang lập biên bản.',
-            err_mic_permission: 'Không thể truy cập Microphone hoặc Âm thanh Tab. Vui lòng cấp quyền.',
+            err_mic_permission: 'Không thể truy cập Microphone. Vui lòng cấp quyền và thử lại.',
             status_connecting: 'Đang khởi tạo kết nối...',
             status_uploading: 'Đang tải file lên Cloud...',
             status_processing: 'AI đang tiến hành phân tích cuộc họp...',
@@ -1307,7 +1338,8 @@
             change_file_btn: 'Change file',
             record_btn: 'Record',
             stop_record_btn: 'Stop recording',
-            recording_status: 'Recording (Microphone + Tab Audio)...',
+            recording_status: 'Recording (Microphone)',
+            recording_status_tab: 'Recording (Microphone + Tab)',
             file_tip: 'Supports: <strong>mp3, m4a, wav, webm...</strong>',
             consent_text: 'By uploading, you confirm that you have the legal right and have obtained consent from participants to process this meeting data.',
             start_btn: 'Start',
@@ -1329,7 +1361,7 @@
             err_upload_init: 'Cannot get Signed URL',
             err_upload_fail: 'Upload to Cloud Storage failed',
             err_process_fail: 'Upload failed! AI is processing minutes.',
-            err_mic_permission: 'Cannot access Microphone or Tab Audio. Please grant permission.',
+            err_mic_permission: 'Cannot access Microphone. Please grant permission and try again.',
             status_connecting: 'Initializing connection...',
             status_uploading: 'Uploading file to Cloud...',
             status_processing: 'AI is analyzing the meeting...',
@@ -1692,7 +1724,7 @@
     }
 
     // ========================================================================
-    //  LOGIC UPLOAD & GHI ÂM TỔNG HỢP (ĐÃ SỬA LỖI - BỔ SUNG resume)
+    //  LOGIC UPLOAD & GHI ÂM (TỐI ƯU CHO IOS)
     // ========================================================================
     let selectedFileBlob = null;
     let mediaRecorder = null;
@@ -1711,6 +1743,9 @@
     const fileStatusLabel = document.getElementById('fileStatusLabel');
     const recordBtn = document.getElementById('recordBtn');
     const recordLabel = document.getElementById('recordLabel');
+    const progressWrap = document.getElementById('uploadProgressWrap');
+    const progressFill = document.getElementById('uploadProgressFill');
+    const progressText = document.getElementById('uploadProgressText');
 
     // ===== HÀM HIỂN THỊ/ẨN CÁC TRƯỜNG NGÔN NGỮ =====
     function toggleLanguageTarget() {
@@ -1774,11 +1809,13 @@
         recordBtn.classList.remove('recording');
         recordLabel.textContent = t('record_btn');
         recordBtn.querySelector('i').className = 'fa-solid fa-microphone';
-        // Reset source language display to default
         document.getElementById('sourceLangDisplay').value = 'Ngôn ngữ gốc';
+        // Ẩn progress
+        progressWrap.style.display = 'none';
+        progressText.style.display = 'none';
+        progressFill.style.width = '0%';
     }
 
-    // Hàm dừng tất cả track và đóng AudioContext
     function stopAllTracks() {
         combinedStreamTracks.forEach(track => track.stop());
         combinedStreamTracks = [];
@@ -1797,7 +1834,7 @@
         }
     });
 
-    // ======== XỬ LÝ NÚT GHI ÂM (ĐÃ SỬA - HỖ TRỢ IOS) ========
+    // ======== XỬ LÝ NÚT GHI ÂM (TỐI ƯU IOS) ========
     recordBtn.addEventListener('click', async function() {
         if (isRecording) {
             if (mediaRecorder) {
@@ -1813,23 +1850,21 @@
         }
 
         try {
-            // Khởi tạo AudioContext ngay trong sự kiện click (quan trọng trên iOS)
-            activeAudioContext = new (window.AudioContext || window.webkitAudioContext)();
-
-            // Phát hiện iOS
-            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-
-            // 1. Lấy micro (luôn luôn thực hiện đầu tiên)
+            // **QUAN TRỌNG: Gọi getUserMedia ngay lập tức, không có await trước đó**
             const micStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+            
+            // Tạo AudioContext sau khi đã có stream (tránh lỗi iOS)
+            activeAudioContext = new (window.AudioContext || window.webkitAudioContext)();
             const destination = activeAudioContext.createMediaStreamDestination();
             const micSource = activeAudioContext.createMediaStreamSource(micStream);
             micSource.connect(destination);
             combinedStreamTracks.push(...micStream.getTracks());
 
-            let recordingMode = 'Microphone only';
+            let recordingMode = t('recording_status');
             let displayStream = null;
 
-            // 2. Thử lấy âm thanh tab (chỉ trên không phải iOS)
+            // Phát hiện iOS: bỏ qua getDisplayMedia
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
             if (!isIOS) {
                 try {
                     displayStream = await navigator.mediaDevices.getDisplayMedia({
@@ -1837,11 +1872,10 @@
                         audio: { suppressLocalAudioPlayback: false }
                     });
                     if (displayStream && displayStream.getAudioTracks().length > 0) {
-                        recordingMode = 'Microphone + Tab Audio';
+                        recordingMode = t('recording_status_tab');
                         const displaySource = activeAudioContext.createMediaStreamSource(displayStream);
                         displaySource.connect(destination);
                         combinedStreamTracks.push(...displayStream.getTracks());
-                        // Tự động dừng khi video track kết thúc
                         const videoTrack = displayStream.getVideoTracks()[0];
                         if (videoTrack) {
                             videoTrack.onended = () => {
@@ -1850,21 +1884,18 @@
                                 }
                             };
                         }
-                    } else {
-                        recordingMode = 'Microphone only (no tab audio)';
                     }
                 } catch (tabErr) {
-                    console.warn("Không hỗ trợ chia sẻ màn hình/tab. Chỉ ghi âm Micro.", tabErr);
+                    console.warn("Không hỗ trợ chia sẻ màn hình/tab.", tabErr);
                 }
             } else {
-                recordingMode = 'Microphone only (iOS)';
                 console.log("📱 iOS detected, skipping getDisplayMedia");
             }
 
-            // 3. Resume AudioContext (bắt buộc sau khi có stream)
+            // Resume AudioContext
             await activeAudioContext.resume();
 
-            // 4. Tạo MediaRecorder
+            // Khởi tạo MediaRecorder
             recordedChunks = [];
             const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus' : 'audio/webm';
             mediaRecorder = new MediaRecorder(destination.stream, { mimeType });
@@ -1890,7 +1921,7 @@
             this.classList.add('recording');
             recordLabel.textContent = t('stop_record_btn');
             this.querySelector('i').className = 'fa-solid fa-stop';
-            recordStatusDiv.innerHTML = `<span class="status-loading"><i class="fa-solid fa-spinner fa-spin"></i> 🎙️ ${t('recording_status')} (${recordingMode})</span>`;
+            recordStatusDiv.innerHTML = `<span class="status-loading"><i class="fa-solid fa-spinner fa-spin"></i> 🎙️ ${recordingMode}</span>`;
 
         } catch (err) {
             console.error('Lỗi khi khởi chạy Microphone:', err);
@@ -1935,11 +1966,32 @@
     }
     closeModalBtn.addEventListener('click', closeModal);
 
-    uploadBtn.addEventListener('click', uploadAudio);
+    // ======== UPLOAD VỚI PROGRESS ========
+    uploadBtn.addEventListener('click', uploadAudioWithProgress);
 
     let isUploading = false;
 
-    async function uploadAudio() {
+    function uploadWithProgress(uploadUrl, blob, contentType, onProgress) {
+        return new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            xhr.open('PUT', uploadUrl, true);
+            xhr.setRequestHeader('Content-Type', contentType);
+            xhr.upload.addEventListener('progress', (e) => {
+                if (e.lengthComputable) {
+                    const percent = Math.round((e.loaded / e.total) * 100);
+                    onProgress(percent);
+                }
+            });
+            xhr.addEventListener('load', () => {
+                if (xhr.status === 200) resolve();
+                else reject(new Error(`Upload failed: ${xhr.status}`));
+            });
+            xhr.addEventListener('error', () => reject(new Error('Network error')));
+            xhr.send(blob);
+        });
+    }
+
+    async function uploadAudioWithProgress() {
         if (isUploading) return;
         let blobToUpload = selectedFileBlob;
         if (!blobToUpload) {
@@ -1980,13 +2032,21 @@
 
             const { uploadUrl, filePath } = urlResult;
 
+            // Hiển thị progress
+            progressWrap.style.display = 'block';
+            progressText.style.display = 'block';
+            progressFill.style.width = '0%';
+            progressText.textContent = '0%';
             recordStatusDiv.innerHTML = `<span class="status-loading"><i class="fa-solid fa-spinner fa-spin"></i> ${t('status_uploading')}</span>`;
-            const uploadResponse = await fetch(uploadUrl, {
-                method: 'PUT',
-                headers: { 'Content-Type': blobToUpload.type || 'audio/webm' },
-                body: blobToUpload
+
+            // Upload với progress
+            await uploadWithProgress(uploadUrl, blobToUpload, blobToUpload.type || 'audio/webm', (percent) => {
+                progressFill.style.width = percent + '%';
+                progressText.textContent = percent + '%';
             });
-            if (!uploadResponse.ok) throw new Error(t('err_upload_fail'));
+
+            progressFill.style.width = '100%';
+            progressText.textContent = '100%';
 
             recordStatusDiv.innerHTML = `<span class="status-loading"><i class="fa-solid fa-spinner fa-spin"></i> ${t('status_processing')}</span>`;
 
@@ -2019,6 +2079,8 @@
             console.error('Upload error:', err);
             recordStatusDiv.innerHTML = `<span style="color:var(--danger)">❌ ${err.message}</span>`;
             uploadBtn.disabled = false;
+            progressWrap.style.display = 'none';
+            progressText.style.display = 'none';
         } finally {
             isUploading = false;
         }
