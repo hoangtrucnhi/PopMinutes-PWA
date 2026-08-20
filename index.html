@@ -269,7 +269,7 @@
             box-shadow: 0 0 0 4px rgba(45,63,166,0.1);
         }
         .modal-input:disabled {
-            background: #00000
+            background: #F1F5F9;
             color: #94A3B8;
             cursor: not-allowed;
             border-color: transparent;
@@ -1692,7 +1692,7 @@
     }
 
     // ========================================================================
-    //  LOGIC UPLOAD & GHI ÂM TỔNG HỢP (ĐÃ SỬA LỖI - BỔ SUNG resume + iOS)
+    //  LOGIC UPLOAD & GHI ÂM TỔNG HỢP (ĐÃ SỬA LỖI - BỔ SUNG resume)
     // ========================================================================
     let selectedFileBlob = null;
     let mediaRecorder = null;
@@ -1797,9 +1797,8 @@
         }
     });
 
-    // ======== XỬ LÝ NÚT GHI ÂM (HỖ TRỢ IOS, ANDROID, DESKTOP) ========
+    // ======== XỬ LÝ NÚT GHI ÂM (ĐÃ SỬA - HỖ TRỢ IOS) ========
     recordBtn.addEventListener('click', async function() {
-        // Nếu đang ghi -> dừng
         if (isRecording) {
             if (mediaRecorder) {
                 mediaRecorder.stop();
@@ -1814,16 +1813,23 @@
         }
 
         try {
-            // === PHÁT HIỆN IOS ===
+            // Khởi tạo AudioContext ngay trong sự kiện click (quan trọng trên iOS)
+            activeAudioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+            // Phát hiện iOS
             const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 
-            // 1. Lấy micro (bắt buộc trên mọi nền tảng)
+            // 1. Lấy micro (luôn luôn thực hiện đầu tiên)
             const micStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+            const destination = activeAudioContext.createMediaStreamDestination();
+            const micSource = activeAudioContext.createMediaStreamSource(micStream);
+            micSource.connect(destination);
+            combinedStreamTracks.push(...micStream.getTracks());
 
-            let displayStream = null;
             let recordingMode = 'Microphone only';
+            let displayStream = null;
 
-            // 2. Nếu KHÔNG phải iOS, thử lấy âm thanh tab
+            // 2. Thử lấy âm thanh tab (chỉ trên không phải iOS)
             if (!isIOS) {
                 try {
                     displayStream = await navigator.mediaDevices.getDisplayMedia({
@@ -1832,62 +1838,39 @@
                     });
                     if (displayStream && displayStream.getAudioTracks().length > 0) {
                         recordingMode = 'Microphone + Tab Audio';
+                        const displaySource = activeAudioContext.createMediaStreamSource(displayStream);
+                        displaySource.connect(destination);
+                        combinedStreamTracks.push(...displayStream.getTracks());
+                        // Tự động dừng khi video track kết thúc
+                        const videoTrack = displayStream.getVideoTracks()[0];
+                        if (videoTrack) {
+                            videoTrack.onended = () => {
+                                if (isRecording && mediaRecorder) {
+                                    recordBtn.click();
+                                }
+                            };
+                        }
                     } else {
                         recordingMode = 'Microphone only (no tab audio)';
                     }
                 } catch (tabErr) {
                     console.warn("Không hỗ trợ chia sẻ màn hình/tab. Chỉ ghi âm Micro.", tabErr);
-                    recordingMode = 'Microphone only (tab sharing not available)';
                 }
             } else {
-                console.log("📱 iOS detected, skipping getDisplayMedia");
                 recordingMode = 'Microphone only (iOS)';
+                console.log("📱 iOS detected, skipping getDisplayMedia");
             }
 
-            // Thông báo chế độ ghi
-            recordStatusDiv.innerHTML = `<span class="status-loading"><i class="fa-solid fa-info-circle"></i> ${recordingMode}</span>`;
-
-            // 3. Tạo AudioContext và kết nối
-            activeAudioContext = new (window.AudioContext || window.webkitAudioContext)();
-            const destination = activeAudioContext.createMediaStreamDestination();
-
-            const micSource = activeAudioContext.createMediaStreamSource(micStream);
-            micSource.connect(destination);
-            combinedStreamTracks.push(...micStream.getTracks());
-
-            if (displayStream) {
-                combinedStreamTracks.push(...displayStream.getTracks());
-                if (displayStream.getAudioTracks().length > 0) {
-                    try {
-                        const displaySource = activeAudioContext.createMediaStreamSource(displayStream);
-                        displaySource.connect(destination);
-                    } catch (e) {
-                        console.warn('Could not connect display audio:', e);
-                    }
-                }
-                // Tự động dừng khi video track kết thúc
-                const videoTrack = displayStream.getVideoTracks()[0];
-                if (videoTrack) {
-                    videoTrack.onended = () => {
-                        if (isRecording && mediaRecorder) {
-                            recordBtn.click();
-                        }
-                    };
-                }
-            }
-
-            // 4. Resume AudioContext
+            // 3. Resume AudioContext (bắt buộc sau khi có stream)
             await activeAudioContext.resume();
 
-            // 5. Tạo MediaRecorder
+            // 4. Tạo MediaRecorder
             recordedChunks = [];
             const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus' : 'audio/webm';
             mediaRecorder = new MediaRecorder(destination.stream, { mimeType });
 
             mediaRecorder.ondataavailable = (event) => {
-                if (event.data.size > 0) {
-                    recordedChunks.push(event.data);
-                }
+                if (event.data.size > 0) recordedChunks.push(event.data);
             };
 
             mediaRecorder.onstop = () => {
@@ -1918,6 +1901,8 @@
                 errorMsg = '🔴 Không tìm thấy Microphone. Vui lòng kết nối mic và thử lại.';
             } else if (err.name === 'NotReadableError') {
                 errorMsg = '🔴 Không thể truy cập Microphone. Kiểm tra xem mic có đang được ứng dụng khác sử dụng không.';
+            } else if (err.name === 'AbortError') {
+                errorMsg = '🔴 Lỗi khi lấy Microphone. Vui lòng thử lại.';
             }
             recordStatusDiv.innerHTML = `<span style="color:var(--danger)">${errorMsg}</span>`;
             stopAllTracks();
